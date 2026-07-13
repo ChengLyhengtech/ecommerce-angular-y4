@@ -1,0 +1,86 @@
+<div class="page-header">
+  <div class="header-title">
+    <h1>Users</h1>
+    <p>Manage customer accounts and admin roles</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-primary">+ Invite User</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-toolbar">
+    <div class="search-box">
+      <input type="text" placeholder="Search users...">
+    </div>
+    <div class="filters">
+      <select>
+        <option value="">All Roles</option>
+        <option value="admin">Admin</option>
+        <option value="customer">Customer</option>
+      </select>
+    </div>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Joined Date</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="user-info">
+            <div class="avatar">J</div>
+            <span>John Doe</span>
+          </div>
+        </td>
+        <td>john.doe@example.com</td>
+        <td><span class="badge info">Customer</span></td>
+        <td>Oct 12, 2026</td>
+        <td><span class="badge success">Active</span></td>
+        <td>
+          <button class="btn-icon">Edit</button>
+          <button class="btn-icon text-danger">Ban</button>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="user-info">
+            <div class="avatar admin-avatar">A</div>
+            <span>Alice Admin</span>
+          </div>
+        </td>
+        <td>alice@ecommerce.com</td>
+        <td><span class="badge primary">Admin</span></td>
+        <td>Jan 01, 2026</td>
+        <td><span class="badge success">Active</span></td>
+        <td>
+          <button class="btn-icon">Edit</button>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="user-info">
+            <div class="avatar">B</div>
+            <span>Bob Smith</span>
+          </div>
+        </td>
+        <td>bob.smith@example.com</td>
+        <td><span class="badge info">Customer</span></td>
+        <td>Sep 05, 2026</td>
+        <td><span class="badge danger">Banned</span></td>
+        <td>
+          <button class="btn-icon">Edit</button>
+          <button class="btn-icon">Unban</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

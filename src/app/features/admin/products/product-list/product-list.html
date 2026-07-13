@@ -1,0 +1,76 @@
+<div class="page-header">
+  <div class="header-title">
+    <h1>Products</h1>
+    <p>Manage your store's products</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-primary">+ Add New Product</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-toolbar">
+    <div class="search-box">
+      <input type="text" placeholder="Search products...">
+    </div>
+    <div class="filters">
+      <select>
+        <option value="">All Categories</option>
+        <option value="electronics">Electronics</option>
+        <option value="clothing">Clothing</option>
+      </select>
+    </div>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Product Name</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><div class="prod-thumb"></div></td>
+        <td><strong>Wireless Headphones</strong></td>
+        <td>Electronics</td>
+        <td>$199.99</td>
+        <td>45</td>
+        <td><span class="badge success">Active</span></td>
+        <td>
+          <button class="btn-icon">Edit</button>
+          <button class="btn-icon text-danger">Del</button>
+        </td>
+      </tr>
+      <tr>
+        <td><div class="prod-thumb"></div></td>
+        <td><strong>Cotton T-Shirt</strong></td>
+        <td>Clothing</td>
+        <td>$24.99</td>
+        <td>120</td>
+        <td><span class="badge success">Active</span></td>
+        <td>
+          <button class="btn-icon">Edit</button>
+          <button class="btn-icon text-danger">Del</button>
+        </td>
+      </tr>
+      <tr>
+        <td><div class="prod-thumb"></div></td>
+        <td><strong>Mechanical Keyboard</strong></td>
+        <td>Electronics</td>
+        <td>$149.99</td>
+        <td>0</td>
+        <td><span class="badge warning">Out of Stock</span></td>
+        <td>
+          <button class="btn-icon">Edit</button>
+          <button class="btn-icon text-danger">Del</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

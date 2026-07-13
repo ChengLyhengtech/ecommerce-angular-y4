@@ -1,0 +1,29 @@
+<div class="admin-container">
+  <aside class="sidebar">
+    <div class="logo">Admin Panel</div>
+    <nav class="nav-menu">
+      <a routerLink="dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
+      <a routerLink="products" routerLinkActive="active" class="nav-item">Products</a>
+      <a routerLink="categories" routerLinkActive="active" class="nav-item">Categories</a>
+      <a routerLink="users" routerLinkActive="active" class="nav-item">Users</a>
+      <a routerLink="banners" routerLinkActive="active" class="nav-item">Banners</a>
+      <a routerLink="orders" routerLinkActive="active" class="nav-item">Orders</a>
+    </nav>
+  </aside>
+  
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="search-bar">
+        <input type="text" placeholder="Search..." />
+      </div>
+      <div class="user-profile">
+        <div class="avatar">A</div>
+        <span>Admin User</span>
+      </div>
+    </header>
+    
+    <main class="content-area">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

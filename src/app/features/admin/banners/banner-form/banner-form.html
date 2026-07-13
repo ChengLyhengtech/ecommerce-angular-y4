@@ -1,0 +1,61 @@
+<div class="page-header">
+  <div class="header-title">
+    <h1>Create New Banner</h1>
+    <p>Upload image and set exact overlay text position</p>
+  </div>
+  <div class="header-actions">
+    <a routerLink="/admin/banners" class="btn btn-secondary">Cancel</a>
+    <button class="btn btn-primary" style="margin-left: 8px;">Save Banner</button>
+  </div>
+</div>
+
+<div class="banner-form-container">
+  <div class="card form-section">
+    <h3>Banner Details</h3>
+    
+    <div class="form-group">
+      <label>Banner Title</label>
+      <input type="text" placeholder="e.g. Summer Sale 2026" class="form-control" />
+    </div>
+    
+    <div class="form-group">
+      <label>Banner Image</label>
+      <div class="image-upload-area">
+        <div class="upload-icon">↑</div>
+        <p>Click to upload or drag and drop</p>
+        <p class="text-small">SVG, PNG, JPG or GIF (max. 800x400px)</p>
+      </div>
+    </div>
+    
+    <div class="position-controls">
+      <h4>Overlay Text Position</h4>
+      <div class="control-row">
+        <div class="form-group flex-1">
+          <label>X Position (Left %)</label>
+          <input type="range" min="0" max="100" [value]="xPos" (input)="updateX($event)" />
+          <div class="val-display">{{ xPos }}%</div>
+        </div>
+        <div class="form-group flex-1">
+          <label>Y Position (Top %)</label>
+          <input type="range" min="0" max="100" [value]="yPos" (input)="updateY($event)" />
+          <div class="val-display">{{ yPos }}%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card preview-section">
+    <h3>Live Preview</h3>
+    
+    <div class="preview-canvas">
+      <div class="preview-bg">
+        <div class="preview-overlay" [style.left.%]="xPos" [style.top.%]="yPos">
+          <div class="overlay-text">
+            <h2>Your Banner Title Here</h2>
+            <button class="btn btn-primary">Shop Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

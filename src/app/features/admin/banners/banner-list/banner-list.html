@@ -1,0 +1,49 @@
+<div class="page-header">
+  <div class="header-title">
+    <h1>Banners</h1>
+    <p>Manage homepage banners and promotional images</p>
+  </div>
+  <div class="header-actions">
+    <a routerLink="new" class="btn btn-primary">+ Add New Banner</a>
+  </div>
+</div>
+
+<div class="card">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Preview</th>
+        <th>Title</th>
+        <th>Position (X, Y)</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="banner-preview bg-summer"></div>
+        </td>
+        <td><strong>Summer Sale 2026</strong></td>
+        <td>Left: 10%, Top: 20%</td>
+        <td><span class="badge success">Active</span></td>
+        <td>
+          <button class="btn-icon">Edit</button>
+          <button class="btn-icon text-danger">Del</button>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="banner-preview bg-winter"></div>
+        </td>
+        <td><strong>Winter Collection</strong></td>
+        <td>Left: 50%, Top: 50%</td>
+        <td><span class="badge warning">Inactive</span></td>
+        <td>
+          <button class="btn-icon">Edit</button>
+          <button class="btn-icon text-danger">Del</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

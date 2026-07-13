@@ -1,0 +1,75 @@
+<div class="page-header">
+  <div class="header-title">
+    <h1>Orders & Transactions</h1>
+    <p>Manage customer orders, shipping status, and view transactions</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-secondary">Export CSV</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-toolbar">
+    <div class="search-box">
+      <input type="text" placeholder="Search order ID or customer...">
+    </div>
+    <div class="filters">
+      <select>
+        <option value="">All Statuses</option>
+        <option value="pending">Pending</option>
+        <option value="processing">Processing</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Customer</th>
+        <th>Date</th>
+        <th>Total Amount</th>
+        <th>Payment</th>
+        <th>Fulfillment Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>#ORD-8901</strong></td>
+        <td>Jane Smith</td>
+        <td>Oct 25, 2026</td>
+        <td>$349.99</td>
+        <td><span class="badge success">Paid</span></td>
+        <td><span class="badge warning">Processing</span></td>
+        <td>
+          <button class="btn-icon">View</button>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>#ORD-8900</strong></td>
+        <td>Michael Scott</td>
+        <td>Oct 24, 2026</td>
+        <td>$1,250.00</td>
+        <td><span class="badge success">Paid</span></td>
+        <td><span class="badge success">Shipped</span></td>
+        <td>
+          <button class="btn-icon">View</button>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>#ORD-8899</strong></td>
+        <td>Dwight Schrute</td>
+        <td>Oct 24, 2026</td>
+        <td>$15.50</td>
+        <td><span class="badge danger">Failed</span></td>
+        <td><span class="badge danger">Cancelled</span></td>
+        <td>
+          <button class="btn-icon">View</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
