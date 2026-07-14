@@ -4,20 +4,33 @@
     <p>Manage your store's products</p>
   </div>
   <div class="header-actions">
-    <button class="btn btn-primary">+ Add New Product</button>
+    <button class="btn btn-primary" routerLink="/admin/products/new">+ Add New Product</button>
   </div>
 </div>
 
-<div class="card">
+@if (productsQuery.error()) {
+<div class="alert alert-danger" style="margin-bottom: 20px; padding: 12px 20px; background-color: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; border-radius: 8px;">
+  Failed to load products. Please check your connection and try again.
+</div>
+}
+
+<div class="card" style="position: relative;">
+  @if (productsQuery.isPending() || productsQuery.isFetching() || deleteMutation.isPending()) {
+  <div class="loading-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.7); display: flex; align-items: center; justify-content: center; z-index: 100;">
+    <div class="spinner" style="width: 40px; height: 40px; border: 4px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+  </div>
+  }
+
   <div class="card-toolbar">
     <div class="search-box">
-      <input type="text" placeholder="Search products...">
+      <input type="text" placeholder="Search products..." [value]="searchQuery()" (input)="onSearch($event)">
     </div>
     <div class="filters">
-      <select>
+      <select [value]="selectedCategoryId()" (change)="onCategoryChange($event)" style="background-color: var(--surface-color); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 16px;">
         <option value="">All Categories</option>
-        <option value="electronics">Electronics</option>
-        <option value="clothing">Clothing</option>
+        @for (category of categoriesQuery.data() || []; track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
       </select>
     </div>
   </div>
@@ -27,50 +40,117 @@
       <tr>
         <th>Image</th>
         <th>Product Name</th>
-        <th>Category</th>
+        <th>Category / Brand</th>
         <th>Price</th>
+        <th>Variants</th>
         <th>Stock</th>
         <th>Status</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td><div class="prod-thumb"></div></td>
-        <td><strong>Wireless Headphones</strong></td>
-        <td>Electronics</td>
-        <td>$199.99</td>
-        <td>45</td>
-        <td><span class="badge success">Active</span></td>
+      @for (product of productsQuery.data()?.items || []; track product.id) {
+      <tr (click)="onRowClick(product.id)" style="cursor: pointer;">
         <td>
-          <button class="btn-icon">Edit</button>
-          <button class="btn-icon text-danger">Del</button>
+          <div class="prod-thumb" style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background: #f9fafb;">
+            @if (getPrimaryImageUrl(product)) {
+              <img [src]="apiUrl + getPrimaryImageUrl(product)" alt="{{ product.name }}"
+                style="width: 100%; height: 100%; object-fit: cover;">
+            } @else {
+              <span style="font-size: 0.75rem; color: var(--text-secondary);">No Img</span>
+            }
+          </div>
+        </td>
+        <td>
+          <div style="display: flex; flex-direction: column;">
+            <strong style="color: var(--text-primary);">{{ product.name }}</strong>
+            <span style="font-size: 0.75rem; color: var(--text-secondary); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ product.description }}</span>
+          </div>
+        </td>
+        <td>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <span>{{ product.categoryName }}</span>
+            <span style="font-size: 0.75rem; color: var(--text-secondary);">{{ product.brandName || 'No Brand' }}</span>
+          </div>
+        </td>
+        <td>
+          <div style="display: flex; flex-direction: column;">
+            @if (product.isDiscounted) {
+              <span style="color: #ef4444; font-weight: 600;">${{ product.finalPrice | number:'1.2-2' }}</span>
+              <span style="text-decoration: line-through; font-size: 0.75rem; color: var(--text-secondary);">${{ product.basePrice | number:'1.2-2' }}</span>
+            } @else {
+              <span style="font-weight: 600;">${{ product.basePrice | number:'1.2-2' }}</span>
+            }
+          </div>
+        </td>
+        <td>
+          <span class="badge" style="background: rgba(79, 70, 229, 0.1); color: var(--primary-color);">
+            {{ product.variants ? product.variants.length : 0 }} Variants
+          </span>
+        </td>
+        <td>{{ product.totalAvailableStock }}</td>
+        <td>
+          @if (product.totalAvailableStock > 0) {
+          <span class="badge success">Active</span>
+          } @else {
+          <span class="badge warning">Out of Stock</span>
+          }
+        </td>
+        <td style="white-space: nowrap;" (click)="$event.stopPropagation()">
+          <button class="btn-icon" [routerLink]="['/admin/products/edit', product.id]" title="Edit Product" style="margin-right: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; color: var(--primary-color);">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+          <button class="btn-icon text-danger" (click)="onDeleteProduct(product.id)" title="Delete Product">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; color: #ef4444;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
         </td>
       </tr>
+      } @empty {
       <tr>
-        <td><div class="prod-thumb"></div></td>
-        <td><strong>Cotton T-Shirt</strong></td>
-        <td>Clothing</td>
-        <td>$24.99</td>
-        <td>120</td>
-        <td><span class="badge success">Active</span></td>
-        <td>
-          <button class="btn-icon">Edit</button>
-          <button class="btn-icon text-danger">Del</button>
+        <td colspan="8" style="text-align: center; padding: 48px; color: var(--text-secondary);">
+          No products found.
         </td>
       </tr>
-      <tr>
-        <td><div class="prod-thumb"></div></td>
-        <td><strong>Mechanical Keyboard</strong></td>
-        <td>Electronics</td>
-        <td>$149.99</td>
-        <td>0</td>
-        <td><span class="badge warning">Out of Stock</span></td>
-        <td>
-          <button class="btn-icon">Edit</button>
-          <button class="btn-icon text-danger">Del</button>
-        </td>
-      </tr>
+      }
     </tbody>
   </table>
+
+  <!-- Pagination Controls -->
+  @if (productsQuery.data(); as res) {
+    @if (res.totalPages > 1) {
+      <div class="pagination-container" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-top: 1px solid var(--border-color); background: #fafafa;">
+        <span style="font-size: 0.875rem; color: var(--text-secondary);">
+          Showing Page {{ res.pageNumber }} of {{ res.totalPages }} ({{ res.totalCount }} total items)
+        </span>
+        <div style="display: flex; gap: 8px;">
+          <button 
+            [disabled]="pageNumber() <= 1" 
+            (click)="pageNumber.set(pageNumber() - 1)" 
+            class="btn btn-secondary" 
+            style="padding: 6px 12px; font-size: 0.8125rem;"
+          >
+            &larr; Previous
+          </button>
+          <button 
+            [disabled]="pageNumber() >= res.totalPages" 
+            (click)="pageNumber.set(pageNumber() + 1)" 
+            class="btn btn-secondary" 
+            style="padding: 6px 12px; font-size: 0.8125rem;"
+          >
+            Next &rarr;
+          </button>
+        </div>
+      </div>
+    }
+  }
 </div>
+
+<style>
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>

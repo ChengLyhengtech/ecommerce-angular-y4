@@ -1,0 +1,87 @@
+<div class="page-header">
+  <div class="header-title">
+    <div class="breadcrumbs">
+      <a routerLink="/admin/brands">Brands</a>
+      <span class="separator">/</span>
+      <span>{{ isEditMode() ? 'Edit Brand' : 'New Brand' }}</span>
+    </div>
+    <h1>{{ isEditMode() ? 'Edit Brand' : 'Create Brand' }}</h1>
+    <p>{{ isEditMode() ? 'Modify brand properties and logo image' : 'Add a new brand for product alignment' }}</p>
+  </div>
+  <div class="header-actions">
+    <a routerLink="/admin/brands" class="btn btn-secondary">Cancel</a>
+    <button (click)="onSubmit()" [disabled]="isSaving()" class="btn btn-primary">
+      @if (isSaving()) {
+        Saving...
+      } @else {
+        Save Brand
+      }
+    </button>
+  </div>
+</div>
+
+@if (errorMessage()) {
+  <div class="alert alert-danger">
+    <span class="alert-icon">⚠️</span>
+    <span class="alert-message">{{ errorMessage() }}</span>
+  </div>
+}
+
+@if (successMessage()) {
+  <div class="alert alert-success">
+    <span class="alert-icon">✓</span>
+    <span class="alert-message">{{ successMessage() }}</span>
+  </div>
+}
+
+@if (isLoading()) {
+  <div style="display: flex; flex-direction: column; align-items: center; padding: 48px; gap: 16px;">
+    <div style="width: 40px; height: 40px; border: 3px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <p style="color: var(--text-secondary); margin: 0;">Loading brand details...</p>
+  </div>
+} @else {
+  <form [formGroup]="brandForm" (ngSubmit)="onSubmit()" class="form-card">
+    <div class="form-body">
+      <div class="form-group">
+        <label for="name">Brand Name *</label>
+        <input type="text" id="name" formControlName="name" placeholder="e.g. Nike, Samsung" />
+        @if (brandForm.get('name')?.touched && brandForm.get('name')?.invalid) {
+          <div class="error-text">Brand name is required (max 100 characters)</div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Brand Logo Image *</label>
+        
+        <div class="logo-upload-container">
+          <div class="logo-preview-box">
+            @if (logoPreviewUrl()) {
+              <img [src]="logoPreviewUrl()" alt="New logo preview" />
+            } @else if (existingLogoUrl()) {
+              <img [src]="apiUrl + existingLogoUrl()" alt="Existing logo" />
+            } @else {
+              <div class="no-logo-placeholder">
+                <span class="icon">🏢</span>
+                <span class="text">No Logo Selected</span>
+              </div>
+            }
+          </div>
+
+          <div class="upload-controls">
+            <input type="file" id="logoImage" (change)="onFileSelected($event)" accept="image/*" style="display: none;" #fileInput />
+            <button type="button" class="btn btn-secondary" (click)="fileInput.click()">
+              Choose Logo File
+            </button>
+            <p class="file-info-text">
+              @if (selectedLogoFile()) {
+                Selected: {{ selectedLogoFile()?.name }}
+              } @else {
+                Upload PNG or JPG image. Logo will be scaled dynamically.
+              }
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+}

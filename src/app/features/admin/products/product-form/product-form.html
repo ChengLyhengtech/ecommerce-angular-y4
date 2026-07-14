@@ -1,0 +1,400 @@
+<div class="page-header">
+  <div class="header-title">
+    <div class="breadcrumbs">
+      <a routerLink="/admin/products">Products</a>
+      <span class="separator">/</span>
+      <span>{{ isEditMode() ? 'Edit Product' : 'New Product' }}</span>
+    </div>
+    <h1>{{ isEditMode() ? 'Edit Product' : 'Add New Product' }}</h1>
+    <p>{{ isEditMode() ? 'Modify product details, variants, and update active media' : 'Create a new product with multiple variants and media' }}</p>
+  </div>
+  <div class="header-actions">
+    <a routerLink="/admin/products" class="btn btn-secondary">Cancel</a>
+    <button (click)="onSubmit()" [disabled]="isSaving()" class="btn btn-primary btn-save">
+      @if (isSaving()) {
+        <span class="btn-spinner"></span> Saving...
+      } @else {
+        Save Product
+      }
+    </button>
+  </div>
+</div>
+
+@if (errorMessage()) {
+  <div class="alert alert-danger">
+    <span class="alert-icon">⚠️</span>
+    <span class="alert-message">{{ errorMessage() }}</span>
+  </div>
+}
+
+@if (successMessage()) {
+  <div class="alert alert-success">
+    <span class="alert-icon">✓</span>
+    <span class="alert-message">{{ successMessage() }}</span>
+  </div>
+}
+
+@if (isLoading()) {
+  <div class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading product details...</p>
+  </div>
+} @else {
+  <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="form-layout">
+    <div class="form-main-content">
+      
+      <!-- Basic Details Card -->
+      <div class="form-card">
+        <div class="card-header">
+          <h2>Product Details</h2>
+          <p>Provide general catalog information about the product</p>
+        </div>
+        
+        <div class="card-body">
+          <div class="form-group full-width">
+            <label for="name">Product Name *</label>
+            <input type="text" id="name" formControlName="name" placeholder="e.g. Nike Air Max 270">
+            @if (productForm.get('name')?.touched && productForm.get('name')?.invalid) {
+              <div class="error-text">Product name is required (max 150 characters)</div>
+            }
+          </div>
+
+          <div class="form-group full-width">
+            <label for="description">Description *</label>
+            <textarea id="description" formControlName="description" rows="4" placeholder="Tell customers about the materials, fit, design, and history of this product..."></textarea>
+            @if (productForm.get('description')?.touched && productForm.get('description')?.invalid) {
+              <div class="error-text">Description is required</div>
+            }
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="categoryId">Category *</label>
+              <select id="categoryId" formControlName="categoryId">
+                <option value="">Select Category</option>
+                @for (cat of categoriesQuery.data() || []; track cat.id) {
+                  <option [value]="cat.id">{{ cat.name }}</option>
+                }
+              </select>
+              @if (productForm.get('categoryId')?.touched && productForm.get('categoryId')?.invalid) {
+                <div class="error-text">Please choose a category</div>
+              }
+            </div>
+            
+            <div class="form-group">
+              <label for="brandId">Brand *</label>
+              <select id="brandId" formControlName="brandId">
+                <option value="">Select Brand</option>
+                @for (brand of brandsQuery.data() || []; track brand.id) {
+                  <option [value]="brand.id">{{ brand.name }}</option>
+                }
+              </select>
+              @if (productForm.get('brandId')?.touched && productForm.get('brandId')?.invalid) {
+                <div class="error-text">Please choose a brand</div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing Details Card -->
+      <div class="form-card">
+        <div class="card-header">
+          <h2>Pricing & Inventory</h2>
+          <p>Configure pricing, discounts, and real-time calculation</p>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="basePrice">Base Price ($) *</label>
+              <input type="number" id="basePrice" formControlName="basePrice" step="0.01" min="0.01" placeholder="0.00">
+              @if (productForm.get('basePrice')?.touched && productForm.get('basePrice')?.invalid) {
+                <div class="error-text">Base price must be greater than $0.00</div>
+              }
+            </div>
+            
+            <div class="form-group">
+              <label for="discountPercentage">Discount Percentage (%)</label>
+              <input type="number" id="discountPercentage" formControlName="discountPercentage" min="0" max="100" placeholder="0">
+              @if (productForm.get('discountPercentage')?.touched && productForm.get('discountPercentage')?.invalid) {
+                <div class="error-text">Discount percentage must be between 0 and 100</div>
+              }
+            </div>
+          </div>
+
+          <!-- Dynamic Pricing Calculator -->
+          @if (productForm.get('basePrice')?.value > 0) {
+            <div class="pricing-calc">
+              <div class="calc-label">Calculated Retail Price:</div>
+              <div class="calc-price-wrap">
+                @if (productForm.get('discountPercentage')?.value > 0) {
+                  <span class="final-calculated">${{ (productForm.get('basePrice')?.value * (1 - (productForm.get('discountPercentage')?.value || 0)/100)) | number:'1.2-2' }}</span>
+                  <span class="original-strike">${{ productForm.get('basePrice')?.value | number:'1.2-2' }}</span>
+                  <span class="calc-badge">Save {{ productForm.get('discountPercentage')?.value }}%</span>
+                } @else {
+                  <span class="final-calculated">${{ productForm.get('basePrice')?.value | number:'1.2-2' }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Variants Card -->
+      <div class="form-card">
+        <div class="card-header flex-header">
+          <div>
+            <h2>Product Variants</h2>
+            <p>Manage sizes, colors, stock counts, and SKU combinations</p>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="addVariant()">+ Add Variant</button>
+        </div>
+        
+        <div class="card-body">
+          <div formArrayName="variants" class="variants-list">
+            @for (variant of variants.controls; track $index) {
+              <div [formGroupName]="$index" class="variant-item-box">
+                <div class="variant-row-header">
+                  <h3>Variant #{{ $index + 1 }} {{ variant.get('sku')?.value ? ' - ' + variant.get('sku')?.value : '' }}</h3>
+                  @if (variants.length > 1 || !isEditMode()) {
+                    <button type="button" class="btn-delete-variant" (click)="removeVariant($index)" title="Remove Variant">
+                      🗑️ Delete
+                    </button>
+                  }
+                </div>
+
+                <div class="variant-fields-grid">
+                  <div class="form-group">
+                    <label>Color *</label>
+                    <input type="text" formControlName="color" placeholder="e.g. Red, Black" (blur)="generateSku($index)">
+                    @if (variant.get('color')?.touched && variant.get('color')?.invalid) {
+                      <div class="error-text">Color is required</div>
+                    }
+                  </div>
+
+                  <div class="form-group">
+                    <label>Size *</label>
+                    <input type="text" formControlName="size" placeholder="e.g. 43, M" (blur)="generateSku($index)">
+                    @if (variant.get('size')?.touched && variant.get('size')?.invalid) {
+                      <div class="error-text">Size is required</div>
+                    }
+                  </div>
+
+                  <div class="form-group">
+                    <label>Physical Quantity *</label>
+                    <input type="number" formControlName="physicalQuantity" min="0" placeholder="0">
+                    @if (variant.get('physicalQuantity')?.touched && variant.get('physicalQuantity')?.invalid) {
+                      <div class="error-text">Quantity must be >= 0</div>
+                    }
+                  </div>
+
+                  <div class="form-group sku-group">
+                    <label>SKU Code *</label>
+                    <div class="sku-input-wrapper">
+                      <input type="text" formControlName="sku" placeholder="e.g. nike-red-43">
+                      <button type="button" class="btn-action-sku" (click)="generateSku($index)" title="Generate SKU automatically">⚡</button>
+                    </div>
+                    @if (variant.get('sku')?.touched && variant.get('sku')?.invalid) {
+                      <div class="error-text">SKU is required</div>
+                    }
+                  </div>
+                </div>
+
+                <!-- Media Section for Variant (Supports Create and Edit modes) -->
+                <div class="variant-media-section">
+                  <label class="section-sub-label">Variant Images</label>
+                  <div class="variant-images-grid">
+                    @if (!isEditMode()) {
+                      <!-- Create Mode: Selected files locally -->
+                      @for (imgFile of selectedFiles(); track $index) {
+                        @if (imgFile.variantSku === variant.get('sku')?.value && variant.get('sku')?.value) {
+                          <div class="media-thumb-card" [class.is-primary]="imgFile.isPrimary">
+                            <img [src]="imgFile.previewUrl" alt="Preview">
+                            <div class="media-actions-overlay">
+                              <button type="button" class="btn-media-star" (click)="setPrimaryImage($index)" [title]="imgFile.isPrimary ? 'Primary Catalog Image' : 'Make Primary'">
+                                ★
+                              </button>
+                              <button type="button" class="btn-media-trash" (click)="removeSelectedFile($index)" title="Remove Image">
+                                🗑️
+                              </button>
+                            </div>
+                            @if (imgFile.isPrimary) {
+                              <span class="primary-tag">Primary</span>
+                            }
+                          </div>
+                        }
+                      }
+                      
+                      <!-- Upload Trigger Area (Create Mode) -->
+                      <div class="media-upload-trigger" [class.disabled]="!variant.get('sku')?.value">
+                        <input type="file" multiple accept="image/*" (change)="onFileSelected($event, $index)" [disabled]="!variant.get('sku')?.value">
+                        <div class="trigger-label">
+                          <span class="icon">📷</span>
+                          <span>Upload Images</span>
+                        </div>
+                      </div>
+                    } @else {
+                      <!-- Edit Mode: Server images associated with this variant -->
+                      @for (image of existingImages(); track image.id) {
+                        @if (image.productVariantId === variant.get('id')?.value && variant.get('id')?.value) {
+                          <div class="media-thumb-card" [class.is-primary]="image.isPrimary">
+                            <img [src]="apiUrl + image.imageUrl" alt="Variant Image">
+                            <div class="media-actions-overlay">
+                              <button type="button" class="btn-media-star" (click)="!image.isPrimary && onSetPrimaryImageEdit(image.id)" [title]="image.isPrimary ? 'Primary Catalog Image' : 'Make Primary'" [style.color]="image.isPrimary ? '#eab308' : ''">
+                                ★
+                              </button>
+                            </div>
+                            @if (image.isPrimary) {
+                              <span class="primary-tag">Primary</span>
+                            }
+                          </div>
+                        }
+                      }
+                      
+                      <!-- Upload Trigger Area (Edit Mode) -->
+                      <div class="media-upload-trigger" [class.disabled]="!variant.get('id')?.value">
+                        <input type="file" accept="image/*" (change)="onUploadImageEdit($event, variant.get('id')?.value)" [disabled]="!variant.get('id')?.value">
+                        <div class="trigger-label">
+                          <span class="icon">➕</span>
+                          <span>Upload Image</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                  @if (!isEditMode() && !variant.get('sku')?.value) {
+                    <span class="info-help-text">⚠️ Fill in the SKU above to unlock image uploads for this variant.</span>
+                  }
+                  @if (isEditMode() && !variant.get('id')?.value) {
+                    <span class="info-help-text">⚠️ Save the product first to enable image uploads on this new variant.</span>
+                  }
+                </div>
+              </div>
+            } @empty {
+              <div class="empty-state">
+                <p>No variants configured. Click "+ Add Variant" to build inventory options.</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar Content (For media upload in Edit mode, or Status details) -->
+    <div class="form-sidebar-content">
+      
+      <!-- Catalog Summary Details Card -->
+      <div class="form-card sticky-sidebar-card">
+        <div class="card-header">
+          <h2>Summary</h2>
+          <p>Product listing catalog overview</p>
+        </div>
+        <div class="card-body">
+          <div class="summary-details">
+            <div class="summary-row">
+              <span class="label">Product Name:</span>
+              <span class="value">{{ productForm.get('name')?.value || 'Untitled Product' }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Total Variants:</span>
+              <span class="value">{{ variants.length }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Base Price:</span>
+              <span class="value">${{ (productForm.get('basePrice')?.value || 0) | number:'1.2-2' }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Discount:</span>
+              <span class="value">{{ productForm.get('discountPercentage')?.value || 0 }}%</span>
+            </div>
+            <div class="summary-divider"></div>
+            
+            <!-- Active Catalog Display preview -->
+            <div class="catalog-card-preview">
+              <label class="section-sub-label">Storefront Catalog Preview</label>
+              <div class="preview-product-card">
+                <div class="preview-img-container">
+                  <!-- Create Mode Preview Image -->
+                  @if (!isEditMode()) {
+                    @if (selectedFiles().length > 0) {
+                      <!-- Find primary image or use first image -->
+                      @let activeImg = selectedFiles().find(f => f.isPrimary) || selectedFiles()[0];
+                      <img [src]="activeImg.previewUrl" alt="Storefront Preview">
+                    } @else {
+                      <div class="preview-no-img">No Image Selected</div>
+                    }
+                  }
+                  
+                  <!-- Edit Mode Preview Image -->
+                  @if (isEditMode()) {
+                    @if (existingImages().length > 0) {
+                      @let activeImg = existingImages().find(img => img.isPrimary) || existingImages()[0];
+                      <img [src]="apiUrl + activeImg.imageUrl" alt="Storefront Preview">
+                    } @else {
+                      <div class="preview-no-img">No Image Uploaded</div>
+                    }
+                  }
+                </div>
+                <div class="preview-details">
+                  <div class="preview-name">{{ productForm.get('name')?.value || 'Product Name' }}</div>
+                  <div class="preview-price">
+                    @if (productForm.get('basePrice')?.value > 0) {
+                      @if (productForm.get('discountPercentage')?.value > 0) {
+                        <span class="calc-price">${{ (productForm.get('basePrice')?.value * (1 - (productForm.get('discountPercentage')?.value || 0)/100)) | number:'1.2-2' }}</span>
+                      } @else {
+                        <span class="calc-price">${{ productForm.get('basePrice')?.value | number:'1.2-2' }}</span>
+                      }
+                    } @else {
+                      <span>$0.00</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Mode Only: Real-Time Image Upload Uploader (General Images) -->
+      @if (isEditMode()) {
+        <div class="form-card">
+          <div class="card-header">
+            <h2>General Product Media</h2>
+            <p>Upload general images not specific to any variant</p>
+          </div>
+          <div class="card-body">
+            <div class="media-edit-gallery">
+              @for (image of existingImages(); track image.id) {
+                @if (image.productVariantId === null) {
+                  <div class="media-thumb-card" [class.is-primary]="image.isPrimary">
+                    <img [src]="apiUrl + image.imageUrl" alt="Product Image">
+                    <div class="media-actions-overlay">
+                      <button type="button" class="btn-media-star" (click)="!image.isPrimary && onSetPrimaryImageEdit(image.id)" [title]="image.isPrimary ? 'Primary Catalog Image' : 'Make Primary'" [style.color]="image.isPrimary ? '#eab308' : ''">
+                        ★
+                      </button>
+                    </div>
+                    @if (image.isPrimary) {
+                      <span class="primary-tag">Primary</span>
+                    }
+                  </div>
+                }
+              } @empty {
+                <div class="empty-media-msg">
+                  No general images uploaded.
+                </div>
+              }
+              
+              <div class="media-upload-area-edit">
+                <input type="file" accept="image/*" (change)="onUploadImageEdit($event)">
+                <div class="upload-edit-trigger">
+                  <span class="icon">➕</span>
+                  <span class="label">Upload General Media</span>
+                  <span class="sub-label">Immediate backend sync</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </form>
+}

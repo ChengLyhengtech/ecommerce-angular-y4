@@ -16,8 +16,36 @@ export const routes: Routes = [
         loadComponent: () => import('./products/product-list/product-list').then(m => m.ProductListComponent)
       },
       {
+        path: 'products/new',
+        loadComponent: () => import('./products/product-form/product-form').then(m => m.ProductFormComponent)
+      },
+      {
+        path: 'products/edit/:id',
+        loadComponent: () => import('./products/product-form/product-form').then(m => m.ProductFormComponent)
+      },
+      {
         path: 'categories',
         loadComponent: () => import('./categories/category-list/category-list').then(m => m.CategoryListComponent)
+      },
+      {
+        path: 'categories/new',
+        loadComponent: () => import('./categories/category-form/category-form').then(m => m.CategoryFormComponent)
+      },
+      {
+        path: 'categories/edit/:id',
+        loadComponent: () => import('./categories/category-form/category-form').then(m => m.CategoryFormComponent)
+      },
+      {
+        path: 'brands',
+        loadComponent: () => import('./brands/brand-list/brand-list').then(m => m.BrandListComponent)
+      },
+      {
+        path: 'brands/new',
+        loadComponent: () => import('./brands/brand-form/brand-form').then(m => m.BrandFormComponent)
+      },
+      {
+        path: 'brands/edit/:id',
+        loadComponent: () => import('./brands/brand-form/brand-form').then(m => m.BrandFormComponent)
       },
       {
         path: 'users',

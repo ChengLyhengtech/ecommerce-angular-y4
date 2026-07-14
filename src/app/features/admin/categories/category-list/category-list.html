@@ -4,52 +4,71 @@
     <p>Organize your products into categories</p>
   </div>
   <div class="header-actions">
-    <button class="btn btn-primary">+ Add New Category</button>
+    <a routerLink="/admin/categories/new" class="btn btn-primary">+ Add New Category</a>
   </div>
 </div>
 
-<div class="card">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Category Name</th>
-        <th>Description</th>
-        <th>Product Count</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Electronics</strong></td>
-        <td>Gadgets and devices</td>
-        <td>150</td>
-        <td><span class="badge success">Active</span></td>
-        <td>
-          <button class="btn-icon">Edit</button>
-          <button class="btn-icon text-danger">Del</button>
-        </td>
-      </tr>
-      <tr>
-        <td><strong>Clothing</strong></td>
-        <td>Apparel and fashion items</td>
-        <td>210</td>
-        <td><span class="badge success">Active</span></td>
-        <td>
-          <button class="btn-icon">Edit</button>
-          <button class="btn-icon text-danger">Del</button>
-        </td>
-      </tr>
-      <tr>
-        <td><strong>Furniture</strong></td>
-        <td>Home and office furniture</td>
-        <td>45</td>
-        <td><span class="badge success">Active</span></td>
-        <td>
-          <button class="btn-icon">Edit</button>
-          <button class="btn-icon text-danger">Del</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+@if (error()) {
+  <div class="alert alert-danger">
+    <span class="alert-icon">⚠️</span>
+    <span class="alert-message">{{ error() }}</span>
+  </div>
+}
+
+@if (successMessage()) {
+  <div class="alert alert-success">
+    <span class="alert-icon">✓</span>
+    <span class="alert-message">{{ successMessage() }}</span>
+  </div>
+}
+
+@if (categoriesQuery.isPending() && (categoriesQuery.data() || []).length === 0) {
+  <div style="display: flex; flex-direction: column; align-items: center; padding: 48px; gap: 16px;">
+    <div style="width: 40px; height: 40px; border: 3px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <p style="color: var(--text-secondary); margin: 0;">Loading categories...</p>
+  </div>
+} @else {
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Category Name</th>
+          <th>Product Count</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (category of categoriesQuery.data() || []; track category.id) {
+        <tr>
+          <td>
+            <div class="prod-thumb" style="width: 50px; height: 50px; border-radius: 4px; overflow: hidden; background: #f3f4f6;">
+              @if (category.imageUrl) {
+                <img [src]="apiUrl + category.imageUrl" alt="{{ category.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+              } @else {
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 0.75rem;">No Image</div>
+              }
+            </div>
+          </td>
+          <td><strong>{{ category.name }}</strong></td>
+          <td>{{ category.productCount ?? 0 }}</td>
+          <td>
+            <span class="badge" [class.success]="category.status === 'Active'" [class.warning]="category.status !== 'Active'">
+              {{ category.status || 'Active' }}
+            </span>
+          </td>
+          <td>
+            <a [routerLink]="['/admin/categories/edit', category.id]" class="btn-icon" style="text-decoration: none; display: inline-block; margin-right: 8px;">Edit</a>
+            <button (click)="deleteCategory(category.id)" class="btn-icon text-danger">Delete</button>
+          </td>
+        </tr>
+        } @empty {
+        <tr>
+          <td colspan="5" style="text-align: center;">No categories found.</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

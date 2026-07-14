@@ -1,0 +1,104 @@
+<div class="page-header">
+  <div class="header-title">
+    <div class="breadcrumbs">
+      <a routerLink="/admin/categories">Categories</a>
+      <span class="separator">/</span>
+      <span>{{ isEditMode() ? 'Edit Category' : 'New Category' }}</span>
+    </div>
+    <h1>{{ isEditMode() ? 'Edit Category' : 'Add New Category' }}</h1>
+    <p>{{ isEditMode() ? 'Modify category name and update its display image' : 'Create a new category with a display image' }}</p>
+  </div>
+  <div class="header-actions">
+    <a routerLink="/admin/categories" class="btn btn-secondary">Cancel</a>
+    <button (click)="onSubmit()" [disabled]="isSaving() || isLoading()" class="btn btn-primary btn-save">
+      @if (isSaving()) {
+        <span class="btn-spinner"></span> Saving...
+      } @else {
+        Save Category
+      }
+    </button>
+  </div>
+</div>
+
+@if (errorMessage()) {
+  <div class="alert alert-danger">
+    <span class="alert-icon">⚠️</span>
+    <span class="alert-message">{{ errorMessage() }}</span>
+  </div>
+}
+
+@if (successMessage()) {
+  <div class="alert alert-success">
+    <span class="alert-icon">✓</span>
+    <span class="alert-message">{{ successMessage() }}</span>
+  </div>
+}
+
+@if (isLoading()) {
+  <div class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading category details...</p>
+  </div>
+} @else {
+  <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" class="form-layout">
+    <div class="form-main-content">
+      <div class="form-card">
+        <div class="card-header">
+          <h2>Category Details</h2>
+          <p>Set the public name and thumbnail image for this category</p>
+        </div>
+        
+        <div class="card-body">
+          <div class="form-group full-width">
+            <label for="name">Category Name *</label>
+            <input type="text" id="name" formControlName="name" placeholder="e.g. Running Shoes, Electronics">
+            @if (categoryForm.get('name')?.touched && categoryForm.get('name')?.invalid) {
+              <div class="error-text">Category name is required (max 100 characters)</div>
+            }
+          </div>
+
+          <div class="form-group full-width">
+            <label>Category Image *</label>
+            <div class="image-upload-wrapper">
+              <!-- If there is a new image selected, show its preview -->
+              @if (imagePreviewUrl()) {
+                <div class="image-preview-container">
+                  <img [src]="imagePreviewUrl()" alt="New category preview">
+                  <div class="preview-badge">New Preview</div>
+                </div>
+              }
+              <!-- If no new image is selected, but there is an existing one -->
+              @else if (existingImageUrl()) {
+                <div class="image-preview-container">
+                  <img [src]="apiUrl + existingImageUrl()" alt="Existing category image">
+                  <div class="preview-badge existing">Current Image</div>
+                </div>
+              }
+              <!-- Default blank state -->
+              @else {
+                <div class="image-placeholder">
+                  <span class="placeholder-icon">📸</span>
+                  <p>No image selected yet</p>
+                </div>
+              }
+
+              <div class="upload-controls">
+                <label for="categoryImage" class="btn btn-secondary upload-btn">
+                  {{ (imagePreviewUrl() || existingImageUrl()) ? 'Change Image' : 'Select Image' }}
+                </label>
+                <input type="file" id="categoryImage" (change)="onFileSelected($event)" accept="image/*" class="file-input-hidden">
+                <span class="file-info-text">
+                  @if (selectedImageFile()) {
+                    {{ selectedImageFile()?.name }} ({{ (selectedImageFile()?.size || 0) / 1024 | number:'1.0-0' }} KB)
+                  } @else {
+                    Supports PNG, JPG or WEBP formats.
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+}

@@ -1,0 +1,66 @@
+<div class="page-header">
+  <div class="header-title">
+    <h1>Brands</h1>
+    <p>Manage product manufacturer brands and logos</p>
+  </div>
+  <div class="header-actions">
+    <a routerLink="/admin/brands/new" class="btn btn-primary">+ Add New Brand</a>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert alert-danger">
+    <span class="alert-icon">⚠️</span>
+    <span class="alert-message">{{ error() }}</span>
+  </div>
+}
+
+@if (successMessage()) {
+  <div class="alert alert-success">
+    <span class="alert-icon">✓</span>
+    <span class="alert-message">{{ successMessage() }}</span>
+  </div>
+}
+
+@if (brandsQuery.isPending() && (brandsQuery.data() || []).length === 0) {
+  <div style="display: flex; flex-direction: column; align-items: center; padding: 48px; gap: 16px;">
+    <div style="width: 40px; height: 40px; border: 3px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <p style="color: var(--text-secondary); margin: 0;">Loading brands...</p>
+  </div>
+} @else {
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Logo</th>
+          <th>Brand Name</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (brand of brandsQuery.data() || []; track brand.id) {
+        <tr>
+          <td>
+            <div class="brand-logo-thumb" style="width: 60px; height: 40px; border-radius: 6px; overflow: hidden; background: #fafafa; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center;">
+              @if (brand.logoUrl) {
+                <img [src]="apiUrl + brand.logoUrl" alt="{{ brand.name }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+              } @else {
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 0.7rem;">No Logo</div>
+              }
+            </div>
+          </td>
+          <td><strong>{{ brand.name }}</strong></td>
+          <td>
+            <a [routerLink]="['/admin/brands/edit', brand.id]" class="btn-icon" style="text-decoration: none; display: inline-block; margin-right: 8px;">Edit</a>
+            <button (click)="deleteBrand(brand.id)" class="btn-icon text-danger">Delete</button>
+          </td>
+        </tr>
+        } @empty {
+        <tr>
+          <td colspan="3" style="text-align: center;">No brands found.</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
