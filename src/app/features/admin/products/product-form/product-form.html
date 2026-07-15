@@ -5,7 +5,15 @@
       <span class="separator">/</span>
       <span>{{ isEditMode() ? 'Edit Product' : 'New Product' }}</span>
     </div>
-    <h1>{{ isEditMode() ? 'Edit Product' : 'Add New Product' }}</h1>
+    <div class="title-with-back">
+      <a routerLink="/admin/products" class="btn-back" title="Back to Products">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </a>
+      <h1>{{ isEditMode() ? 'Edit Product' : 'Add New Product' }}</h1>
+    </div>
     <p>{{ isEditMode() ? 'Modify product details, variants, and update active media' : 'Create a new product with multiple variants and media' }}</p>
   </div>
   <div class="header-actions">
@@ -22,14 +30,20 @@
 
 @if (errorMessage()) {
   <div class="alert alert-danger">
-    <span class="alert-icon">⚠️</span>
+    <svg class="icon-svg alert-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+      <line x1="12" y1="9" x2="12" y2="13"></line>
+      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+    </svg>
     <span class="alert-message">{{ errorMessage() }}</span>
   </div>
 }
 
 @if (successMessage()) {
   <div class="alert alert-success">
-    <span class="alert-icon">✓</span>
+    <svg class="icon-svg alert-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
     <span class="alert-message">{{ successMessage() }}</span>
   </div>
 }
@@ -147,7 +161,12 @@
             <h2>Product Variants</h2>
             <p>Manage sizes, colors, stock counts, and SKU combinations</p>
           </div>
-          <button type="button" class="btn btn-secondary btn-sm" (click)="addVariant()">+ Add Variant</button>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="addVariant()">
+            <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg> Add Variant
+          </button>
         </div>
         
         <div class="card-body">
@@ -158,7 +177,12 @@
                   <h3>Variant #{{ $index + 1 }} {{ variant.get('sku')?.value ? ' - ' + variant.get('sku')?.value : '' }}</h3>
                   @if (variants.length > 1 || !isEditMode()) {
                     <button type="button" class="btn-delete-variant" (click)="removeVariant($index)" title="Remove Variant">
-                      🗑️ Delete
+                      <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                      </svg> Delete
                     </button>
                   }
                 </div>
@@ -192,7 +216,11 @@
                     <label>SKU Code *</label>
                     <div class="sku-input-wrapper">
                       <input type="text" formControlName="sku" placeholder="e.g. nike-red-43">
-                      <button type="button" class="btn-action-sku" (click)="generateSku($index)" title="Generate SKU automatically">⚡</button>
+                      <button type="button" class="btn-action-sku" (click)="generateSku($index)" title="Generate SKU automatically">
+                        <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                      </button>
                     </div>
                     @if (variant.get('sku')?.touched && variant.get('sku')?.invalid) {
                       <div class="error-text">SKU is required</div>
@@ -200,22 +228,27 @@
                   </div>
                 </div>
 
-                <!-- Media Section for Variant (Supports Create and Edit modes) -->
+                <!-- Media Section for Variant (Supports Local Queuing for Unsaved Variants) -->
                 <div class="variant-media-section">
                   <label class="section-sub-label">Variant Images</label>
                   <div class="variant-images-grid">
-                    @if (!isEditMode()) {
-                      <!-- Create Mode: Selected files locally -->
+                    @if (!variant.get('id')?.value) {
+                      <!-- Create Mode / New Unsaved Variant in Edit Mode: Selected files locally -->
                       @for (imgFile of selectedFiles(); track $index) {
                         @if (imgFile.variantSku === variant.get('sku')?.value && variant.get('sku')?.value) {
                           <div class="media-thumb-card" [class.is-primary]="imgFile.isPrimary">
                             <img [src]="imgFile.previewUrl" alt="Preview">
                             <div class="media-actions-overlay">
                               <button type="button" class="btn-media-star" (click)="setPrimaryImage($index)" [title]="imgFile.isPrimary ? 'Primary Catalog Image' : 'Make Primary'">
-                                ★
+                                <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" [attr.fill]="imgFile.isPrimary ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                </svg>
                               </button>
                               <button type="button" class="btn-media-trash" (click)="removeSelectedFile($index)" title="Remove Image">
-                                🗑️
+                                <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <polyline points="3 6 5 6 21 6"></polyline>
+                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
                               </button>
                             </div>
                             @if (imgFile.isPrimary) {
@@ -225,23 +258,28 @@
                         }
                       }
                       
-                      <!-- Upload Trigger Area (Create Mode) -->
+                      <!-- Upload Trigger Area (Local Queue) -->
                       <div class="media-upload-trigger" [class.disabled]="!variant.get('sku')?.value">
                         <input type="file" multiple accept="image/*" (change)="onFileSelected($event, $index)" [disabled]="!variant.get('sku')?.value">
                         <div class="trigger-label">
-                          <span class="icon">📷</span>
+                          <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                          </svg>
                           <span>Upload Images</span>
                         </div>
                       </div>
                     } @else {
-                      <!-- Edit Mode: Server images associated with this variant -->
+                      <!-- Saved Variant: Server images associated with this variant -->
                       @for (image of existingImages(); track image.id) {
-                        @if (image.productVariantId === variant.get('id')?.value && variant.get('id')?.value) {
+                        @if (image.productVariantId === variant.get('id')?.value) {
                           <div class="media-thumb-card" [class.is-primary]="image.isPrimary">
                             <img [src]="apiUrl + image.imageUrl" alt="Variant Image">
                             <div class="media-actions-overlay">
-                              <button type="button" class="btn-media-star" (click)="!image.isPrimary && onSetPrimaryImageEdit(image.id)" [title]="image.isPrimary ? 'Primary Catalog Image' : 'Make Primary'" [style.color]="image.isPrimary ? '#eab308' : ''">
-                                ★
+                              <button type="button" class="btn-media-star" (click)="!image.isPrimary && onSetPrimaryImageEdit(image.id)" [title]="image.isPrimary ? 'Primary Catalog Image' : 'Make Primary'">
+                                <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" [attr.fill]="image.isPrimary ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                </svg>
                               </button>
                             </div>
                             @if (image.isPrimary) {
@@ -251,21 +289,27 @@
                         }
                       }
                       
-                      <!-- Upload Trigger Area (Edit Mode) -->
-                      <div class="media-upload-trigger" [class.disabled]="!variant.get('id')?.value">
-                        <input type="file" accept="image/*" (change)="onUploadImageEdit($event, variant.get('id')?.value)" [disabled]="!variant.get('id')?.value">
+                      <!-- Upload Trigger Area (Immediate Upload) -->
+                      <div class="media-upload-trigger">
+                        <input type="file" accept="image/*" (change)="onUploadImageEdit($event, variant.get('id')?.value)">
                         <div class="trigger-label">
-                          <span class="icon">➕</span>
+                          <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                          </svg>
                           <span>Upload Image</span>
                         </div>
                       </div>
                     }
                   </div>
-                  @if (!isEditMode() && !variant.get('sku')?.value) {
-                    <span class="info-help-text">⚠️ Fill in the SKU above to unlock image uploads for this variant.</span>
-                  }
-                  @if (isEditMode() && !variant.get('id')?.value) {
-                    <span class="info-help-text">⚠️ Save the product first to enable image uploads on this new variant.</span>
+                  @if (!variant.get('sku')?.value) {
+                    <span class="info-help-text">
+                      <svg class="icon-svg info-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                      </svg> Fill in the SKU above to unlock image uploads for this variant.
+                    </span>
                   }
                 </div>
               </div>
@@ -279,7 +323,7 @@
       </div>
     </div>
 
-    <!-- Sidebar Content (For media upload in Edit mode, or Status details) -->
+    <!-- Sidebar Content -->
     <div class="form-sidebar-content">
       
       <!-- Catalog Summary Details Card -->
@@ -368,8 +412,10 @@
                   <div class="media-thumb-card" [class.is-primary]="image.isPrimary">
                     <img [src]="apiUrl + image.imageUrl" alt="Product Image">
                     <div class="media-actions-overlay">
-                      <button type="button" class="btn-media-star" (click)="!image.isPrimary && onSetPrimaryImageEdit(image.id)" [title]="image.isPrimary ? 'Primary Catalog Image' : 'Make Primary'" [style.color]="image.isPrimary ? '#eab308' : ''">
-                        ★
+                      <button type="button" class="btn-media-star" (click)="!image.isPrimary && onSetPrimaryImageEdit(image.id)" [title]="image.isPrimary ? 'Primary Catalog Image' : 'Make Primary'">
+                        <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" [attr.fill]="image.isPrimary ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
                       </button>
                     </div>
                     @if (image.isPrimary) {
@@ -386,7 +432,10 @@
               <div class="media-upload-area-edit">
                 <input type="file" accept="image/*" (change)="onUploadImageEdit($event)">
                 <div class="upload-edit-trigger">
-                  <span class="icon">➕</span>
+                  <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
                   <span class="label">Upload General Media</span>
                   <span class="sub-label">Immediate backend sync</span>
                 </div>
@@ -398,3 +447,4 @@
     </div>
   </form>
 }
+

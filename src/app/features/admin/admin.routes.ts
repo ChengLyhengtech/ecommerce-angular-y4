@@ -60,6 +60,10 @@ export const routes: Routes = [
         loadComponent: () => import('./banners/banner-form/banner-form').then(m => m.BannerFormComponent)
       },
       {
+        path: 'banners/edit/:id',
+        loadComponent: () => import('./banners/banner-form/banner-form').then(m => m.BannerFormComponent)
+      },
+      {
         path: 'orders',
         loadComponent: () => import('./orders/order-list/order-list').then(m => m.OrderListComponent)
       }

@@ -1,49 +1,101 @@
 <div class="page-header">
   <div class="header-title">
     <h1>Banners</h1>
-    <p>Manage homepage banners and promotional images</p>
+    <p>Manage store layout banners, product listing headers, and promotional popup screens</p>
   </div>
   <div class="header-actions">
-    <a routerLink="new" class="btn btn-primary">+ Add New Banner</a>
+    <a routerLink="new" class="btn btn-primary">
+      <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg> Add New Banner
+    </a>
   </div>
 </div>
 
-<div class="card">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Preview</th>
-        <th>Title</th>
-        <th>Position (X, Y)</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <div class="banner-preview bg-summer"></div>
-        </td>
-        <td><strong>Summer Sale 2026</strong></td>
-        <td>Left: 10%, Top: 20%</td>
-        <td><span class="badge success">Active</span></td>
-        <td>
-          <button class="btn-icon">Edit</button>
-          <button class="btn-icon text-danger">Del</button>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <div class="banner-preview bg-winter"></div>
-        </td>
-        <td><strong>Winter Collection</strong></td>
-        <td>Left: 50%, Top: 50%</td>
-        <td><span class="badge warning">Inactive</span></td>
-        <td>
-          <button class="btn-icon">Edit</button>
-          <button class="btn-icon text-danger">Del</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+<div class="card filter-card">
+  <div class="filter-group">
+    <div class="filter-item">
+      <label for="posFilter">Banner Position</label>
+      <select id="posFilter" [value]="positionFilter()" (change)="onPositionFilterChange($event)">
+        <option value="all">All Positions</option>
+        <option value="1">Homepage Hero Carousel</option>
+        <option value="2">Product List Top Header</option>
+        <option value="3">Cart Page Footer Ad</option>
+        <option value="4">Promotion Popup Modal</option>
+      </select>
+    </div>
+    
+    <div class="filter-item">
+      <label for="statusFilter">Status</label>
+      <select id="statusFilter" [value]="isActiveFilter()" (change)="onActiveFilterChange($event)">
+        <option value="all">All Statuses</option>
+        <option value="true">Active Only</option>
+        <option value="false">Inactive Only</option>
+      </select>
+    </div>
+  </div>
 </div>
+
+<div class="banners-container" style="position: relative; min-height: 200px;">
+  @if (bannersQuery.isPending() || bannersQuery.isFetching() || deleteMutation.isPending()) {
+    <div class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Loading banners...</p>
+    </div>
+  }
+
+  @if (bannersQuery.data() && bannersQuery.data()!.length > 0) {
+    <div class="banners-grid">
+      @for (banner of bannersQuery.data(); track banner.id) {
+        <div class="banner-card" [class.inactive]="!banner.isActive" (click)="onCardClick(banner.id)">
+          <div class="banner-img-wrap">
+            <img [src]="apiUrl + banner.imageUrl" alt="{{ banner.name }}">
+            <button class="banner-badge-toggle" [class.success]="banner.isActive" (click)="onToggleActive(banner.id, $event)" title="Click to Toggle Active Status">
+              {{ banner.isActive ? 'Active' : 'Inactive' }}
+            </button>
+            <span class="position-tag">{{ getPositionName(banner.position) }}</span>
+          </div>
+          
+          <div class="banner-content">
+            <div class="banner-meta">
+              <h3 class="banner-title" [title]="banner.name">{{ banner.name }}</h3>
+              <span class="sort-order-badge" title="Sort Order">Index: {{ banner.sortOrder }}</span>
+            </div>
+            
+            <p class="banner-link" [title]="banner.linkUrl">
+              <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg>
+              {{ banner.linkUrl || 'No Link URL' }}
+            </p>
+            
+            <div class="banner-actions-footer">
+              <button class="btn-delete" (click)="onDeleteBanner(banner.id, $event)" title="Delete Banner">
+                <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg> Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (!bannersQuery.isPending()) {
+    <div class="empty-state">
+      <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+        <polyline points="21 15 16 10 5 21"></polyline>
+      </svg>
+      <h2>No Banners Found</h2>
+      <p>There are no banners matching your select criteria. Create a new banner to customize storefront aesthetics.</p>
+      <a routerLink="new" class="btn btn-primary" style="margin-top: 12px;">+ Add New Banner</a>
+    </div>
+  }
+</div>
+

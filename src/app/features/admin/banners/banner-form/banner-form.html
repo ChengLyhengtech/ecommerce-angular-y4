@@ -1,61 +1,223 @@
 <div class="page-header">
   <div class="header-title">
-    <h1>Create New Banner</h1>
-    <p>Upload image and set exact overlay text position</p>
+    <div class="breadcrumbs">
+      <a routerLink="/admin/banners">Banners</a>
+      <span class="separator">/</span>
+      <span>{{ isEditMode() ? 'Edit Banner' : 'New Banner' }}</span>
+    </div>
+    <div class="title-with-back">
+      <a routerLink="/admin/banners" class="btn-back" title="Back to Banners">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </a>
+      <h1>{{ isEditMode() ? 'Edit Banner Campaign' : 'Create New Banner' }}</h1>
+    </div>
+    <p>Upload a promotional image, link destination, and layout position for storefront display</p>
   </div>
   <div class="header-actions">
     <a routerLink="/admin/banners" class="btn btn-secondary">Cancel</a>
-    <button class="btn btn-primary" style="margin-left: 8px;">Save Banner</button>
+    <button (click)="onSubmit()" [disabled]="isLoading()" class="btn btn-primary btn-save">
+      @if (isLoading()) {
+        <span class="btn-spinner"></span> Saving...
+      } @else {
+        {{ isEditMode() ? 'Update Banner' : 'Create Banner' }}
+      }
+    </button>
   </div>
 </div>
 
-<div class="banner-form-container">
-  <div class="card form-section">
-    <h3>Banner Details</h3>
+@if (errorMessage()) {
+  <div class="alert alert-danger">
+    <svg class="icon-svg alert-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+      <line x1="12" y1="9" x2="12" y2="13"></line>
+      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+    </svg>
+    <span class="alert-message">{{ errorMessage() }}</span>
+  </div>
+}
+
+@if (successMessage()) {
+  <div class="alert alert-success">
+    <svg class="icon-svg alert-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <span class="alert-message">{{ successMessage() }}</span>
+  </div>
+}
+
+<form [formGroup]="bannerForm" (ngSubmit)="onSubmit()" class="form-layout">
+  <div class="form-main-content">
     
-    <div class="form-group">
-      <label>Banner Title</label>
-      <input type="text" placeholder="e.g. Summer Sale 2026" class="form-control" />
-    </div>
-    
-    <div class="form-group">
-      <label>Banner Image</label>
-      <div class="image-upload-area">
-        <div class="upload-icon">↑</div>
-        <p>Click to upload or drag and drop</p>
-        <p class="text-small">SVG, PNG, JPG or GIF (max. 800x400px)</p>
+    <!-- General Details Card -->
+    <div class="form-card">
+      <div class="card-header">
+        <h2>Banner Configuration</h2>
+        <p>Set position mapping and navigation options</p>
+      </div>
+      
+      <div class="card-body">
+        <div class="form-group">
+          <label for="name">Banner Campaign Name *</label>
+          <input type="text" id="name" formControlName="name" placeholder="e.g. Summer Collection Launch">
+          @if (bannerForm.get('name')?.touched && bannerForm.get('name')?.invalid) {
+            <div class="error-text">Campaign name is required (max 150 characters)</div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="linkUrl">Redirect Link URL *</label>
+          <input type="text" id="linkUrl" formControlName="linkUrl" placeholder="e.g. /products?category=shoes">
+          @if (bannerForm.get('linkUrl')?.touched && bannerForm.get('linkUrl')?.invalid) {
+            <div class="error-text">Link URL is required</div>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="position">Target Layout Position *</label>
+            <select id="position" formControlName="position">
+              <option value="1">Homepage Hero Carousel</option>
+              <option value="2">Product List Top Header</option>
+              <option value="3">Cart Page Footer Ad</option>
+              <option value="4">Promotion Popup Modal</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="sortOrder">Sort Priority Index *</label>
+            <input type="number" id="sortOrder" formControlName="sortOrder" min="0" placeholder="0">
+            @if (bannerForm.get('sortOrder')?.touched && bannerForm.get('sortOrder')?.invalid) {
+              <div class="error-text">Sort index must be positive</div>
+            }
+          </div>
+        </div>
+
+        <!-- Active Switch toggle for edit/create mode -->
+        <div class="form-group active-status-row">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="isActive">
+            Banner Display Status (Active Campaign)
+          </label>
+          <p class="checkbox-description">Toggle this to make the banner visible on the store front. Note: Only active banners will show up.</p>
+        </div>
       </div>
     </div>
-    
-    <div class="position-controls">
-      <h4>Overlay Text Position</h4>
-      <div class="control-row">
-        <div class="form-group flex-1">
-          <label>X Position (Left %)</label>
-          <input type="range" min="0" max="100" [value]="xPos" (input)="updateX($event)" />
-          <div class="val-display">{{ xPos }}%</div>
-        </div>
-        <div class="form-group flex-1">
-          <label>Y Position (Top %)</label>
-          <input type="range" min="0" max="100" [value]="yPos" (input)="updateY($event)" />
-          <div class="val-display">{{ yPos }}%</div>
-        </div>
+
+    <!-- Media Files Card -->
+    <div class="form-card">
+      <div class="card-header">
+        <h2>Banner Image Asset</h2>
+        <p>Choose a promotional picture for store rendering</p>
+      </div>
+      
+      <div class="card-body">
+        @if (previewUrl()) {
+          <!-- Preview selected new local file -->
+          <div class="uploaded-preview-container">
+            <div class="preview-img-card">
+              <img [src]="previewUrl()" alt="Local Preview">
+            </div>
+            <div class="preview-file-details">
+              <div class="file-info-meta">
+                <span class="file-name">{{ selectedFile()?.name }}</span>
+                <span class="file-size">{{ (selectedFile()?.size || 0) / 1024 | number:'1.0-1' }} KB</span>
+              </div>
+              <button type="button" class="btn-remove-image" (click)="removeSelectedFile()">
+                <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg> Remove Selection
+              </button>
+            </div>
+          </div>
+        } @else if (existingImageUrl()) {
+          <!-- Display current server image and replacement dropzone -->
+          <div class="uploaded-preview-container">
+            <div class="preview-img-card">
+              <img [src]="apiUrl + existingImageUrl()" alt="Server Image">
+            </div>
+            <div class="upload-dropzone compact-dropzone">
+              <input type="file" accept="image/*" (change)="onFileSelected($event)">
+              <div class="dropzone-label">
+                <svg class="icon-svg upload-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <h3>Choose Different Image</h3>
+                <p>Click to replace the current display graphic</p>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <!-- Empty Uploader Drop-zone -->
+          <div class="upload-dropzone">
+            <input type="file" accept="image/*" (change)="onFileSelected($event)">
+            <div class="dropzone-label">
+              <svg class="icon-svg upload-icon" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <h3>Upload Image File</h3>
+              <p>Click to browse files or drag images here</p>
+              <span class="sub-label">Supports PNG, JPG, WEBP formats</span>
+            </div>
+          </div>
+        }
       </div>
     </div>
   </div>
-  
-  <div class="card preview-section">
-    <h3>Live Preview</h3>
-    
-    <div class="preview-canvas">
-      <div class="preview-bg">
-        <div class="preview-overlay" [style.left.%]="xPos" [style.top.%]="yPos">
-          <div class="overlay-text">
-            <h2>Your Banner Title Here</h2>
-            <button class="btn btn-primary">Shop Now</button>
+
+  <!-- Live Simulation Preview Sidebar -->
+  <div class="form-sidebar-content">
+    <div class="form-card sticky-sidebar-card">
+      <div class="card-header">
+        <h2>Live Preview Layout</h2>
+        <p>Visual simulation of storefront integration</p>
+      </div>
+      
+      <div class="card-body">
+        <div class="preview-layout-card">
+          <div class="simulated-image-frame">
+            @if (previewUrl()) {
+              <img [src]="previewUrl()" alt="Simulated Banner">
+            } @else if (existingImageUrl()) {
+              <img [src]="apiUrl + existingImageUrl()" alt="Simulated Server Banner">
+            } @else {
+              <div class="simulated-placeholder">
+                <svg class="icon-svg placeholder-icon" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <span>No Asset Selected</span>
+              </div>
+            }
+            <div class="position-overlay-badge">
+              Position: {{ bannerForm.get('position')?.value == 1 ? 'Hero Carousel' : bannerForm.get('position')?.value == 2 ? 'List Top Header' : bannerForm.get('position')?.value == 3 ? 'Cart Footer' : 'Promo Popup' }}
+            </div>
+            
+            <div class="status-indicator-dot" [class.active]="bannerForm.get('isActive')?.value" title="Active Campaign status"></div>
+          </div>
+          
+          <div class="simulated-content-frame">
+            <h4 class="simulated-title">{{ bannerForm.get('name')?.value || 'Campaign Title' }}</h4>
+            <div class="simulated-link-row">
+              <span class="link-label">Redirect link:</span>
+              <span class="link-val">{{ bannerForm.get('linkUrl')?.value || 'Not Configured' }}</span>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm simulated-action-btn" [disabled]="!bannerForm.get('linkUrl')?.value">
+              Test Action Trigger
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+</form>

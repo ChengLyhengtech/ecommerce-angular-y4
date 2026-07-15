@@ -90,12 +90,46 @@ export class ProductFormComponent implements OnInit {
 
   // Update Product Mutation
   updateProductMutation = injectMutation(() => ({
-    mutationFn: ({ id, coreUpdateDto, variantOperations }: { id: string; coreUpdateDto: any; variantOperations: Observable<any>[] }) => {
-      const coreUpdate$ = this.productService.updateProductCore(id, coreUpdateDto);
-      const allOps$: Observable<any> = variantOperations.length > 0 ? forkJoin([coreUpdate$, ...variantOperations]) : coreUpdate$;
-      return lastValueFrom(allOps$);
+    mutationFn: async ({ id, coreUpdateDto, variantsWithNewInfo, selectedFilesToUpload }: { id: string; coreUpdateDto: any; variantsWithNewInfo: any[]; selectedFilesToUpload: SelectedImageFile[] }) => {
+      // 1. Update product core details
+      await lastValueFrom(this.productService.updateProductCore(id, coreUpdateDto));
+
+      // 2. Perform variant updates and creations
+      const variantOpsPromises = variantsWithNewInfo.map(async (v) => {
+        if (v.id) {
+          // Update existing variant
+          const variantUpdateDto = {
+            color: v.color,
+            size: v.size,
+            physicalQuantity: Number(v.physicalQuantity),
+            sku: v.sku
+          };
+          return lastValueFrom(this.productService.updateProductVariant(v.id, variantUpdateDto));
+        } else {
+          // Create new variant and get its database ID to upload the queued files
+          const variantCreateDto: VariantCreateDto = {
+            color: v.color,
+            size: v.size,
+            initialPhysicalQuantity: Number(v.physicalQuantity),
+            sku: v.sku
+          };
+          const res = await lastValueFrom(this.productService.createProductVariant(id, variantCreateDto));
+          const newVariantId = res.id;
+          if (newVariantId && selectedFilesToUpload.length > 0) {
+            const filesForThisVariant = selectedFilesToUpload.filter(f => f.variantSku === v.sku);
+            const uploadPromises = filesForThisVariant.map(f =>
+              lastValueFrom(this.productService.uploadProductImage(id, f.file, f.isPrimary, newVariantId))
+            );
+            await Promise.all(uploadPromises);
+          }
+          return res;
+        }
+      });
+
+      await Promise.all(variantOpsPromises);
     },
     onSuccess: () => {
+      this.selectedFiles.set([]); // Clear selected files
       this.showSuccess('Product updated successfully!');
       this.queryClient.invalidateQueries({ queryKey: ['products'] });
       this.queryClient.invalidateQueries({ queryKey: ['product', this.productId()] });
@@ -111,12 +145,13 @@ export class ProductFormComponent implements OnInit {
 
   // Delete Variant Mutation
   deleteVariantMutation = injectMutation(() => ({
-    mutationFn: ({ variantId }: { variantId: string; index: number }) => 
+    mutationFn: ({ variantId }: { variantId: string; index: number }) =>
       lastValueFrom(this.productService.deleteProductVariant(variantId)),
     onSuccess: (res, variables) => {
       this.variants.removeAt(variables.index);
       this.showSuccess('Variant deleted successfully.');
       this.queryClient.invalidateQueries({ queryKey: ['product', this.productId()] });
+      this.queryClient.invalidateQueries({ queryKey: ['products'] }); // Invalidate product list query cache
     },
     onError: (err) => {
       console.error('Failed to delete variant:', err);
@@ -126,7 +161,7 @@ export class ProductFormComponent implements OnInit {
 
   // Image Upload Mutation
   uploadImageMutation = injectMutation(() => ({
-    mutationFn: ({ productId, file, isPrimary, variantId }: { productId: string; file: File; isPrimary: boolean; variantId?: string }) => 
+    mutationFn: ({ productId, file, isPrimary, variantId }: { productId: string; file: File; isPrimary: boolean; variantId?: string }) =>
       lastValueFrom(this.productService.uploadProductImage(productId, file, isPrimary, variantId)),
     onSuccess: () => {
       this.showSuccess('Image uploaded and linked successfully.');
@@ -152,11 +187,11 @@ export class ProductFormComponent implements OnInit {
   }));
 
   // Derived saving state
-  isSaving = () => 
-    this.createProductMutation.isPending() || 
-    this.updateProductMutation.isPending() || 
-    this.deleteVariantMutation.isPending() || 
-    this.uploadImageMutation.isPending() || 
+  isSaving = () =>
+    this.createProductMutation.isPending() ||
+    this.updateProductMutation.isPending() ||
+    this.deleteVariantMutation.isPending() ||
+    this.uploadImageMutation.isPending() ||
     this.setPrimaryImageMutation.isPending();
 
   constructor() {
@@ -430,32 +465,11 @@ export class ProductFormComponent implements OnInit {
       brandId: formValues.brandId
     };
 
-    const variantOperations: Observable<any>[] = [];
-
-    formValues.variants.forEach((v: any) => {
-      if (v.id) {
-        const variantUpdateDto = {
-          color: v.color,
-          size: v.size,
-          physicalQuantity: Number(v.physicalQuantity),
-          sku: v.sku
-        };
-        variantOperations.push(this.productService.updateProductVariant(v.id, variantUpdateDto));
-      } else {
-        const variantCreateDto: VariantCreateDto = {
-          color: v.color,
-          size: v.size,
-          initialPhysicalQuantity: Number(v.physicalQuantity),
-          sku: v.sku
-        };
-        variantOperations.push(this.productService.createProductVariant(productId, variantCreateDto));
-      }
-    });
-
     this.updateProductMutation.mutate({
       id: productId,
       coreUpdateDto,
-      variantOperations
+      variantsWithNewInfo: formValues.variants,
+      selectedFilesToUpload: this.selectedFiles()
     });
   }
 

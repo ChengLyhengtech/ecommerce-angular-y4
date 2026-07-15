@@ -745,3 +745,80 @@ select.ng-touched.ng-invalid:focus {
     transform: translateY(0);
   }
 }
+
+/* Enhanced Header with Back Navigation */
+.title-with-back {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.title-with-back h1 {
+  margin: 0 !important;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background-color: white;
+  color: var(--text-primary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.btn-back:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  color: var(--primary-color);
+  transform: translateX(-2px);
+}
+
+/* Inline SVG Alignments */
+.icon-svg {
+  display: inline-block;
+  vertical-align: middle;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.btn-secondary .icon-svg,
+.btn-primary .icon-svg,
+.btn-delete-variant .icon-svg,
+.trigger-label .icon-svg,
+.upload-edit-trigger .icon-svg {
+  margin-right: 6px;
+}
+
+.btn-sm .icon-svg {
+  margin-right: 4px;
+}
+
+.btn-action-sku .icon-svg,
+.media-actions-overlay .icon-svg {
+  margin-right: 0;
+}
+
+.info-help-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.info-help-text .icon-svg {
+  color: #d97706; /* amber-600 */
+}
+
+.alert .icon-svg {
+  margin-right: 0;
+}
+

@@ -9,66 +9,86 @@
 </div>
 
 @if (error()) {
-  <div class="alert alert-danger">
-    <span class="alert-icon">⚠️</span>
-    <span class="alert-message">{{ error() }}</span>
-  </div>
+<div class="alert alert-danger">
+  <span class="alert-icon">⚠️</span>
+  <span class="alert-message">{{ error() }}</span>
+</div>
 }
 
 @if (successMessage()) {
-  <div class="alert alert-success">
-    <span class="alert-icon">✓</span>
-    <span class="alert-message">{{ successMessage() }}</span>
-  </div>
+<div class="alert alert-success">
+  <span class="alert-icon">✓</span>
+  <span class="alert-message">{{ successMessage() }}</span>
+</div>
 }
 
 @if (categoriesQuery.isPending() && (categoriesQuery.data() || []).length === 0) {
-  <div style="display: flex; flex-direction: column; align-items: center; padding: 48px; gap: 16px;">
-    <div style="width: 40px; height: 40px; border: 3px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite;"></div>
-    <p style="color: var(--text-secondary); margin: 0;">Loading categories...</p>
+<div style="display: flex; flex-direction: column; align-items: center; padding: 48px; gap: 16px;">
+  <div
+    style="width: 40px; height: 40px; border: 3px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite;">
   </div>
+  <p style="color: var(--text-secondary); margin: 0;">Loading categories...</p>
+</div>
 } @else {
-  <div class="card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Image</th>
-          <th>Category Name</th>
-          <th>Product Count</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (category of categoriesQuery.data() || []; track category.id) {
-        <tr>
-          <td>
-            <div class="prod-thumb" style="width: 50px; height: 50px; border-radius: 4px; overflow: hidden; background: #f3f4f6;">
-              @if (category.imageUrl) {
-                <img [src]="apiUrl + category.imageUrl" alt="{{ category.name }}" style="width: 100%; height: 100%; object-fit: cover;">
-              } @else {
-                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 0.75rem;">No Image</div>
-              }
-            </div>
-          </td>
-          <td><strong>{{ category.name }}</strong></td>
-          <td>{{ category.productCount ?? 0 }}</td>
-          <td>
-            <span class="badge" [class.success]="category.status === 'Active'" [class.warning]="category.status !== 'Active'">
-              {{ category.status || 'Active' }}
-            </span>
-          </td>
-          <td>
-            <a [routerLink]="['/admin/categories/edit', category.id]" class="btn-icon" style="text-decoration: none; display: inline-block; margin-right: 8px;">Edit</a>
-            <button (click)="deleteCategory(category.id)" class="btn-icon text-danger">Delete</button>
-          </td>
-        </tr>
-        } @empty {
-        <tr>
-          <td colspan="5" style="text-align: center;">No categories found.</td>
-        </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+<div class="card">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Category Name</th>
+        <th>Product Count</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (category of categoriesQuery.data() || []; track category.id) {
+      <tr>
+        <td>
+          <div class="prod-thumb"
+            style="width: 50px; height: 50px; border-radius: 4px; overflow: hidden; background: #f3f4f6;">
+            @if (category.imageUrl) {
+            <img [src]="apiUrl + category.imageUrl" alt="{{ category.name }}"
+              style="width: 100%; height: 100%; object-fit: cover;">
+            } @else {
+            <div
+              style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 0.75rem;">
+              No Image</div>
+            }
+          </div>
+        </td>
+        <td><strong>{{ category.name }}</strong></td>
+        <td>{{ category.productCount ?? 0 }}</td>
+        <td>
+          <span class="badge" [class.success]="category.status === 'Active'"
+            [class.warning]="category.status !== 'Active'">
+            {{ category.status || 'Active' }}
+          </span>
+        </td>
+        <td>
+          <a [routerLink]="['/admin/categories/edit', category.id]" class="btn-icon" title="Edit Category"
+            style="text-decoration: none; display: inline-block; margin-right: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon-svg" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; color: var(--primary-color);">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </a>
+          <button (click)="deleteCategory(category.id)" class="btn-icon text-danger" title="Delete Category">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon-svg" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; color: #ef4444;">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </td>
+      </tr>
+      } @empty {
+      <tr>
+        <td colspan="5" style="text-align: center;">No categories found.</td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
 }
