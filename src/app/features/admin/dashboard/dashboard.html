@@ -1,112 +1,186 @@
 <div class="dashboard-header">
-  <h1>Dashboard Overview</h1>
-  <p>Welcome back, Admin! Here is what's happening with your store today.</p>
+  <div class="header-title-block">
+    <h1>Dashboard Overview</h1>
+    <p>Real-time analytics, stock alerts, and order logistics map.</p>
+  </div>
+
+  <!-- Date Range Filter Toolbar -->
+  <div class="date-filter-bar">
+    <div class="input-group">
+      <label for="startDate">Start Date</label>
+      <input type="date" id="startDate" [(ngModel)]="startDate" (change)="onFilterChange()">
+    </div>
+    <div class="input-group">
+      <label for="endDate">End Date</label>
+      <input type="date" id="endDate" [(ngModel)]="endDate" (change)="onFilterChange()">
+    </div>
+    @if (startDate() || endDate()) {
+      <button class="btn btn-secondary btn-sm" (click)="clearFilters()">Clear Filters</button>
+    }
+  </div>
 </div>
 
-<div class="stats-grid">
+@if (dashboardQuery.error()) {
+  <div class="alert alert-danger">
+    Failed to load dashboard metrics. Please check your network or try again.
+  </div>
+}
+
+<div class="stats-grid" style="position: relative;">
+  @if (dashboardQuery.isPending() || dashboardQuery.isFetching()) {
+    <div class="loading-overlay-absolute">
+      <div class="spinner"></div>
+    </div>
+  }
+
+  <!-- Gross Revenue Card -->
   <div class="stat-card">
-    <div class="stat-icon sales">S</div>
+    <div class="stat-icon sales">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+    </div>
     <div class="stat-info">
-      <h3>Total Sales</h3>
-      <p class="value">$24,500.00</p>
-      <span class="trend positive">+15% from last month</span>
+      <h3>Gross Revenue</h3>
+      <p class="value">${{ (dashboardQuery.data()?.financials?.grossRevenue || 0) | number:'1.2-2' }}</p>
+      <span class="trend positive">All transactions within filters</span>
     </div>
   </div>
 
+  <!-- Total Orders Card -->
   <div class="stat-card">
-    <div class="stat-icon orders">O</div>
+    <div class="stat-icon orders">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+    </div>
     <div class="stat-info">
       <h3>Total Orders</h3>
-      <p class="value">1,254</p>
-      <span class="trend positive">+8% from last month</span>
+      <p class="value">{{ dashboardQuery.data()?.financials?.totalOrders || 0 }}</p>
+      <span class="trend positive">Placed checkouts</span>
     </div>
   </div>
 
+  <!-- Avg Order Value Card -->
   <div class="stat-card">
-    <div class="stat-icon users">U</div>
-    <div class="stat-info">
-      <h3>Active Users</h3>
-      <p class="value">8,432</p>
-      <span class="trend negative">-2% from last month</span>
+    <div class="stat-icon average">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
     </div>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-icon products">P</div>
     <div class="stat-info">
-      <h3>Total Products</h3>
-      <p class="value">432</p>
-      <span class="trend neutral">0% from last month</span>
+      <h3>Average Order Value</h3>
+      <p class="value">${{ (dashboardQuery.data()?.financials?.averageOrderValue || 0) | number:'1.2-2' }}</p>
+      <span class="trend positive">AOV per checkout</span>
     </div>
   </div>
 </div>
 
 <div class="dashboard-content">
+  <!-- Low Stock Inventory Alerts -->
   <div class="recent-orders">
-    <h2>Recent Orders</h2>
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Order ID</th>
-          <th>Customer</th>
-          <th>Date</th>
-          <th>Amount</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>#ORD-7352</td>
-          <td>John Doe</td>
-          <td>Oct 24, 2026</td>
-          <td>$125.00</td>
-          <td><span class="badge success">Completed</span></td>
-        </tr>
-        <tr>
-          <td>#ORD-7351</td>
-          <td>Jane Smith</td>
-          <td>Oct 24, 2026</td>
-          <td>$45.50</td>
-          <td><span class="badge warning">Processing</span></td>
-        </tr>
-        <tr>
-          <td>#ORD-7350</td>
-          <td>Robert Johnson</td>
-          <td>Oct 23, 2026</td>
-          <td>$320.00</td>
-          <td><span class="badge success">Completed</span></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="content-header-row">
+      <h2>Inventory Low Stock Alerts</h2>
+      <span class="badge badge-error">{{ dashboardQuery.data()?.inventoryAlerts?.length || 0 }} Alert items</span>
+    </div>
+
+    @if (dashboardQuery.data()?.inventoryAlerts?.length === 0) {
+      <div class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        <p>No low stock warnings. All variant stocks are in solid range!</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Product / SKU</th>
+              <th>Color / Size</th>
+              <th>Physical</th>
+              <th>Reserved</th>
+              <th>Available</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (alert of dashboardQuery.data()?.inventoryAlerts || []; track alert.variantId) {
+              <tr>
+                <td>
+                  <div class="product-alert-meta">
+                    <strong>{{ alert.productName }}</strong>
+                    <span class="sku-text">{{ alert.sku }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="variant-capsule">{{ alert.color || 'N/A' }} / {{ alert.size || 'N/A' }}</span>
+                </td>
+                <td>{{ alert.physicalQuantity }}</td>
+                <td>{{ alert.reservedQuantity }}</td>
+                <td>
+                  <span class="stock-indicator" [class.out-of-stock]="alert.availableStock <= 0" [class.low-stock]="alert.availableStock > 0">
+                    {{ alert.availableStock }} {{ alert.availableStock <= 0 ? '(Out)' : '(Low)' }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn-table-action" (click)="openRestockAlertModal(alert.variantId)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    Restock
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   </div>
 
+  <!-- Delivery Maps and Logistics -->
   <div class="top-products">
-    <h2>Top Products</h2>
-    <ul class="product-list">
-      <li>
-        <div class="prod-img"></div>
-        <div class="prod-details">
-          <h4>Premium Wireless Headphones</h4>
-          <p>Electronics</p>
-        </div>
-        <div class="prod-sales">124 sold</div>
-      </li>
-      <li>
-        <div class="prod-img"></div>
-        <div class="prod-details">
-          <h4>Mechanical Keyboard</h4>
-          <p>Electronics</p>
-        </div>
-        <div class="prod-sales">98 sold</div>
-      </li>
-      <li>
-        <div class="prod-img"></div>
-        <div class="prod-details">
-          <h4>Ergonomic Office Chair</h4>
-          <p>Furniture</p>
-        </div>
-        <div class="prod-sales">45 sold</div>
-      </li>
-    </ul>
+    <h2>Geospatial Logistics</h2>
+    <p class="map-sub">Active order delivery spots across locations.</p>
+    
+    <div class="map-wrapper">
+      <div id="delivery-map" class="logistics-map">
+        @if (dashboardQuery.isPending()) {
+          <div class="map-placeholder">
+            <span class="spinner"></span>
+            <p>Setting up logistics coordinates...</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Active Deliveries Stats -->
+    <div class="map-stats">
+      <div class="map-stat-item">
+        <span class="lbl">Plotted Markers</span>
+        <span class="val">{{ dashboardQuery.data()?.geospatialLogistics?.length || 0 }} Order(s)</span>
+      </div>
+    </div>
   </div>
 </div>
+
+<!-- Restock Dialog Modal Overlay -->
+@if (activeRestockAlertId()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Replenish Variant Stock</h3>
+        <button class="close-btn" (click)="closeRestockModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p>Restock quantity is logged straight into the audit log for reporting.</p>
+        
+        <div class="form-group">
+          <label for="restockQtyInput">Adjustment Quantity</label>
+          <input type="number" id="restockQtyInput" [(ngModel)]="restockQuantity" min="1" step="1">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-link" (click)="closeRestockModal()" [disabled]="restockMutation.isPending()">Cancel</button>
+        <button class="btn btn-primary" (click)="submitRestock()" [disabled]="restockMutation.isPending() || restockQuantity() <= 0">
+          @if (restockMutation.isPending()) {
+            <span class="spinner spinner-white"></span> Adding...
+          } @else {
+            replenish
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
