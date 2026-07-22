@@ -1,0 +1,215 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  
+  <!-- Breadcrumb & Title -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+    <div>
+      <nav class="flex items-center space-x-2 text-xs font-medium text-slate-400 mb-2">
+        <a routerLink="/" class="hover:text-indigo-600 transition">Home</a>
+        <span>/</span>
+        <span class="text-slate-800 dark:text-slate-200">Catalog</span>
+      </nav>
+      <h1 class="text-3xl font-black text-slate-900 dark:text-white">Shop Catalog</h1>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Explore our complete collection of products with real-time stock & instant checkout.</p>
+    </div>
+
+    <!-- Sorting selector -->
+    <div class="flex items-center space-x-3">
+      <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Sort By:</span>
+      <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium px-3.5 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="name">Product Name (A-Z)</option>
+        <option value="priceAsc">Price: Low to High</option>
+        <option value="priceDesc">Price: High to Low</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    
+    <!-- LEFT SIDEBAR FILTERS -->
+    <aside class="space-y-6 lg:col-span-1">
+      <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
+        
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+          <h3 class="font-bold text-slate-900 dark:text-white text-base flex items-center space-x-2">
+            <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+            <span>Filters</span>
+          </h3>
+          <button (click)="resetFilters()" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+            Reset All
+          </button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Search</label>
+          <div class="relative">
+            <input 
+              type="text" 
+              [ngModel]="searchQuery()" 
+              (ngModelChange)="searchQuery.set($event); onFilterChange()" 
+              placeholder="Product name..." 
+              class="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+            <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          </div>
+        </div>
+
+        <!-- On Sale Toggle -->
+        <div class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950/30 border border-red-200/50 dark:border-red-900/30 rounded-xl">
+          <div class="flex items-center space-x-2">
+            <span class="text-base">🔥</span>
+            <span class="text-xs font-bold text-slate-800 dark:text-slate-200">On Sale Only</span>
+          </div>
+          <input 
+            type="checkbox" 
+            [ngModel]="hasDiscountOnly()" 
+            (ngModelChange)="hasDiscountOnly.set($event); onFilterChange()" 
+            class="w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500"
+          >
+        </div>
+
+        <!-- Categories Filter -->
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Category</label>
+          <div class="space-y-1 max-h-48 overflow-y-auto pr-1">
+            <button 
+              (click)="selectedCategoryId.set(''); onFilterChange()" 
+              [class.bg-indigo-50]="!selectedCategoryId()" 
+              [class.text-indigo-600]="!selectedCategoryId()"
+              class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex justify-between items-center"
+            >
+              <span>All Categories</span>
+            </button>
+            <button 
+              *ngFor="let cat of categoriesQuery.data()" 
+              (click)="selectedCategoryId.set(cat.id); onFilterChange()" 
+              [class.bg-indigo-50]="selectedCategoryId() === cat.id"
+              [class.dark:bg-indigo-950/40]="selectedCategoryId() === cat.id"
+              [class.text-indigo-600]="selectedCategoryId() === cat.id"
+              [class.dark:text-indigo-400]="selectedCategoryId() === cat.id"
+              class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex justify-between items-center"
+            >
+              <span class="truncate pr-2">{{ cat.name }}</span>
+              <span class="text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">{{ cat.productCount || 0 }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Brands Filter -->
+        <div *ngIf="brandsQuery.data() && brandsQuery.data()!.length > 0" class="space-y-2">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Brand</label>
+          <div class="space-y-1 max-h-48 overflow-y-auto pr-1">
+            <button 
+              (click)="selectedBrandId.set(''); onFilterChange()" 
+              [class.bg-indigo-50]="!selectedBrandId()" 
+              [class.text-indigo-600]="!selectedBrandId()"
+              class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            >
+              All Brands
+            </button>
+            <button 
+              *ngFor="let b of brandsQuery.data()" 
+              (click)="selectedBrandId.set(b.id); onFilterChange()" 
+              [class.bg-indigo-50]="selectedBrandId() === b.id"
+              [class.dark:bg-indigo-950/40]="selectedBrandId() === b.id"
+              [class.text-indigo-600]="selectedBrandId() === b.id"
+              [class.dark:text-indigo-400]="selectedBrandId() === b.id"
+              class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            >
+              {{ b.name }}
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- RIGHT PRODUCTS LIST AREA -->
+    <main class="space-y-6 lg:col-span-3">
+      
+      <!-- Loading State -->
+      <div *ngIf="productsQuery.isLoading()" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div *ngFor="let i of [1,2,3,4,5,6]" class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 animate-pulse space-y-4">
+          <div class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl"></div>
+          <div class="h-4 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
+          <div class="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/2"></div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!productsQuery.isLoading() && filteredProducts.length === 0" class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-12 text-center">
+        <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mx-auto mb-4">
+          <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">No products found</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">We couldn't find any products matching your current filters or search terms.</p>
+        <button (click)="resetFilters()" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md transition">
+          Clear Filters
+        </button>
+      </div>
+
+      <!-- Products Grid -->
+      <div *ngIf="!productsQuery.isLoading() && filteredProducts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div *ngFor="let p of filteredProducts" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition group flex flex-col justify-between">
+          
+          <div class="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
+            <img [src]="getProductPrimaryImage(p)" [alt]="p.name" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+            <span *ngIf="p.isDiscounted" class="absolute top-3 left-3 px-2.5 py-1 bg-red-600 text-white text-xs font-black rounded-lg shadow">
+              -{{ p.discountPercentage }}%
+            </span>
+            <span *ngIf="p.totalAvailableStock <= 0" class="absolute top-3 right-3 px-2.5 py-1 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold uppercase rounded-lg">
+              Out of Stock
+            </span>
+          </div>
+
+          <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
+            <div>
+              <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <span>{{ p.brandName || 'Brand' }}</span>
+                <span>{{ p.categoryName || 'Category' }}</span>
+              </div>
+              <a [routerLink]="['/products', p.id]" class="block font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition text-base mt-1 line-clamp-1">
+                {{ p.name }}
+              </a>
+              <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">{{ p.description }}</p>
+            </div>
+
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div>
+                <span class="text-lg font-black text-slate-900 dark:text-white">${{ p.finalPrice | number:'1.2-2' }}</span>
+                <span *ngIf="p.isDiscounted" class="text-xs text-slate-400 line-through ml-1.5">${{ p.basePrice | number:'1.2-2' }}</span>
+              </div>
+              <button (click)="quickAddToCart(p, $event)" [disabled]="p.totalAvailableStock <= 0" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:cursor-not-allowed text-white rounded-xl font-bold text-xs shadow-md transition flex items-center space-x-1">
+                <span>Add</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="productsQuery.data() && productsQuery.data()!.totalPages > 1" class="flex items-center justify-center space-x-2 pt-6 border-t border-slate-200 dark:border-slate-800">
+        <button 
+          (click)="goToPage(pageNumber() - 1)" 
+          [disabled]="pageNumber() <= 1"
+          class="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold disabled:opacity-40 transition"
+        >
+          Previous
+        </button>
+        <span class="text-sm font-medium text-slate-600 dark:text-slate-400 px-3">
+          Page {{ pageNumber() }} of {{ productsQuery.data()!.totalPages }}
+        </span>
+        <button 
+          (click)="goToPage(pageNumber() + 1)" 
+          [disabled]="pageNumber() >= productsQuery.data()!.totalPages"
+          class="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold disabled:opacity-40 transition"
+        >
+          Next
+        </button>
+      </div>
+
+    </main>
+  </div>
+
+</div>

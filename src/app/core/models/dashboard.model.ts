@@ -23,8 +23,33 @@ export interface GeospatialLogistic {
   totalAmount: number;
 }
 
+export interface TopProduct {
+  id: string;
+  name: string;
+  totalQuantitySold: number;
+  totalRevenue: number;
+}
+
+export interface TopBrand {
+  id: string;
+  name: string;
+  totalQuantitySold: number;
+  totalRevenue: number;
+}
+
+export interface TopCategory {
+  id: string;
+  name: string;
+  totalQuantitySold: number;
+  totalRevenue: number;
+}
+
 export interface DashboardSummary {
   financials: FinancialsSummary;
+  totalUserCount: number;
   inventoryAlerts: InventoryAlert[];
   geospatialLogistics: GeospatialLogistic[];
+  topProducts: TopProduct[];
+  topBrands: TopBrand[];
+  topCategories: TopCategory[];
 }

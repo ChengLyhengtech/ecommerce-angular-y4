@@ -5,7 +5,8 @@
   </div>
   <div class="header-actions">
     <button class="btn btn-primary" (click)="openCreateModal()">
-      <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
         <circle cx="8.5" cy="7" r="4"></circle>
         <line x1="20" y1="8" x2="20" y2="14"></line>
@@ -18,19 +19,21 @@
 <div class="card" style="position: relative;">
   <!-- Loading spinner indicator overlay -->
   @if (isLoading()) {
-    <div class="loading-overlay">
-      <div class="spinner"></div>
-      <p>Updating database data...</p>
-    </div>
+  <div class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Updating database data...</p>
+  </div>
   }
 
   <div class="card-toolbar">
     <div class="search-box">
-      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
-      <input type="text" placeholder="Search by name, email, or role..." [value]="searchQuery()" (input)="onSearch($event)">
+      <input type="text" placeholder="Search by name, email, or role..." [value]="searchQuery()"
+        (input)="onSearch($event)">
     </div>
   </div>
 
@@ -48,68 +51,73 @@
       </thead>
       <tbody>
         @for (user of filteredUsers(); track user.id) {
-          <tr>
-            <td>
-              <div class="user-cell">
-                <div class="avatar-circle" [class.admin-avatar]="user.roles.includes('Admin')">
-                  {{ user.fullName.substring(0, 1).toUpperCase() }}
-                </div>
-                <div class="user-meta-details">
-                  <span class="user-full-name">{{ user.fullName }}</span>
-                  <span class="user-id-sub">ID: {{ user.id.substring(0, 8) }}...</span>
-                </div>
+        <tr>
+          <td>
+            <div class="user-cell">
+              <div class="avatar-circle" [class.admin-avatar]="user.roles.includes('Admin')">
+                {{ user.fullName.substring(0, 1).toUpperCase() }}
               </div>
-            </td>
-            <td>
-              <span class="email-text">{{ user.email }}</span>
-            </td>
-            <td>
-              <div class="roles-wrapper">
-                @for (role of user.roles; track role) {
-                  <span class="badge-pill" [class.badge-primary]="role === 'Admin'" [class.badge-warning]="role === 'Manager'" [class.badge-secondary]="role === 'Customer'">
-                    {{ role }}
-                  </span>
-                }
+              <div class="user-meta-details">
+                <span class="user-full-name">{{ user.fullName }}</span>
+                <span class="user-id-sub">ID: {{ user.id.substring(0, 8) }}...</span>
               </div>
-            </td>
-            <td>
-              <span class="date-text">{{ user.createdAt | date:'mediumDate' }}</span>
-            </td>
-            <td>
-              <span class="status-badge" [class.banned]="user.isBanned">
-                {{ user.isBanned ? 'Banned' : 'Active' }}
+            </div>
+          </td>
+          <td>
+            <span class="email-text">{{ user.email }}</span>
+          </td>
+          <td>
+            <div class="roles-wrapper">
+              @for (role of user.roles; track role) {
+              <span class="badge-pill" [class.badge-primary]="role === 'Admin'"
+                [class.badge-warning]="role === 'Manager'" [class.badge-secondary]="role === 'Customer'">
+                {{ role }}
               </span>
-            </td>
-            <td>
-              <div class="table-actions">
-                <button class="btn-action-outline edit" (click)="openRoleModal(user)" title="Change Access Role">
-                  <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                  </svg> Edit Role
-                </button>
-                <button class="btn-action-outline ban" [class.active-ban]="user.isBanned" (click)="openBanModal(user)" title="Ban / Unban Account">
-                  <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
-                  </svg>
-                  {{ user.isBanned ? 'Lift Ban' : 'Ban' }}
-                </button>
-              </div>
-            </td>
-          </tr>
+              }
+            </div>
+          </td>
+          <td>
+            <span class="date-text">{{ user.createdAt | date:'mediumDate' }}</span>
+          </td>
+          <td>
+            <span class="status-badge" [class.banned]="user.isBanned">
+              {{ user.isBanned ? 'Banned' : 'Active' }}
+            </span>
+          </td>
+          <td>
+            <div class="table-actions">
+              <button class="btn-action-outline edit" (click)="openRoleModal(user)" title="Change Access Role">
+                <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg> Edit Role
+              </button>
+              <button class="btn-action-outline ban" [class.active-ban]="user.isBanned" (click)="openBanModal(user)"
+                title="Ban / Unban Account">
+                <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                </svg>
+                {{ user.isBanned ? 'Lift Ban' : 'Ban' }}
+              </button>
+            </div>
+          </td>
+        </tr>
         } @empty {
-          <tr>
-            <td colspan="6" class="empty-table-cell">
-              <svg class="empty-table-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-              </svg>
-              <h3>No Accounts Found</h3>
-              <p>No user registered accounts matched your search filter parameters.</p>
-            </td>
-          </tr>
+        <tr>
+          <td colspan="6" class="empty-table-cell">
+            <svg class="empty-table-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <h3>No Accounts Found</h3>
+            <p>No user registered accounts matched your search filter parameters.</p>
+          </td>
+        </tr>
         }
       </tbody>
     </table>
@@ -119,10 +127,12 @@
   <div class="table-pagination">
     <span class="pagination-meta">Showing page {{ pageNumber() }}</span>
     <div class="pagination-buttons">
-      <button class="btn btn-secondary btn-sm" [disabled]="pageNumber() <= 1" (click)="pageNumber.set(pageNumber() - 1)">
+      <button class="btn btn-secondary btn-sm" [disabled]="pageNumber() <= 1"
+        (click)="pageNumber.set(pageNumber() - 1)">
         &larr; Prev
       </button>
-      <button class="btn btn-secondary btn-sm" [disabled]="filteredUsers().length < pageSize()" (click)="pageNumber.set(pageNumber() + 1)">
+      <button class="btn btn-secondary btn-sm" [disabled]="filteredUsers().length < pageSize()"
+        (click)="pageNumber.set(pageNumber() + 1)">
         Next &rarr;
       </button>
     </div>
@@ -135,129 +145,129 @@
 
 <!-- 1. CREATE USER MODAL -->
 @if (showCreateModal()) {
-  <div class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>Create Admin / Manager Account</h3>
-        <button class="close-modal-btn" (click)="closeCreateModal()">&times;</button>
-      </div>
-      
-      <form [formGroup]="createUserForm" (ngSubmit)="submitCreateUser()" class="modal-form">
-        <div class="form-group">
-          <label for="c_name">Full Name *</label>
-          <input type="text" id="c_name" formControlName="fullName" placeholder="e.g. John Doe">
-          @if (createUserForm.get('fullName')?.touched && createUserForm.get('fullName')?.invalid) {
-            <div class="error-text">Name is required (max 100 characters)</div>
-          }
-        </div>
-
-        <div class="form-group">
-          <label for="c_email">Email Address *</label>
-          <input type="email" id="c_email" formControlName="email" placeholder="e.g. john@company.com">
-          @if (createUserForm.get('email')?.touched && createUserForm.get('email')?.invalid) {
-            <div class="error-text">Please type a valid email address</div>
-          }
-        </div>
-
-        <div class="form-group">
-          <label for="c_pass">Secure Password *</label>
-          <input type="password" id="c_pass" formControlName="password" placeholder="At least 6 characters">
-          @if (createUserForm.get('password')?.touched && createUserForm.get('password')?.invalid) {
-            <div class="error-text">Password is required (min 6 characters)</div>
-          }
-        </div>
-
-        <div class="form-group">
-          <label for="c_role">System Access Role *</label>
-          <select id="c_role" formControlName="role">
-            <option value="Customer">Customer</option>
-            <option value="Manager">Manager</option>
-            <option value="Admin">Admin</option>
-          </select>
-        </div>
-
-        <div class="modal-actions-footer">
-          <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Create Account</button>
-        </div>
-      </form>
+<div class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Create Admin / Manager Account</h3>
+      <button class="close-modal-btn" (click)="closeCreateModal()">&times;</button>
     </div>
+
+    <form [formGroup]="createUserForm" (ngSubmit)="submitCreateUser()" class="modal-form">
+      <div class="form-group">
+        <label for="c_name">Full Name *</label>
+        <input type="text" id="c_name" formControlName="fullName" placeholder="e.g. John Doe">
+        @if (createUserForm.get('fullName')?.touched && createUserForm.get('fullName')?.invalid) {
+        <div class="error-text">Name is required (max 100 characters)</div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="c_email">Email Address *</label>
+        <input type="email" id="c_email" formControlName="email" placeholder="e.g. john@company.com">
+        @if (createUserForm.get('email')?.touched && createUserForm.get('email')?.invalid) {
+        <div class="error-text">Please type a valid email address</div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="c_pass">Secure Password *</label>
+        <input type="password" id="c_pass" formControlName="password" placeholder="At least 6 characters">
+        @if (createUserForm.get('password')?.touched && createUserForm.get('password')?.invalid) {
+        <div class="error-text">Password is required (min 6 characters)</div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="c_role">System Access Role *</label>
+        <select id="c_role" formControlName="role">
+          <option value="Customer">Customer</option>
+          <option value="Manager">Manager</option>
+          <option value="Admin">Admin</option>
+        </select>
+      </div>
+
+      <div class="modal-actions-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Account</button>
+      </div>
+    </form>
   </div>
+</div>
 }
 
 <!-- 2. EDIT ROLE MODAL -->
 @if (showRoleModal() && selectedUser()) {
-  <div class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>Update User Access Role</h3>
-        <button class="close-modal-btn" (click)="closeRoleModal()">&times;</button>
-      </div>
-      
-      <div class="user-context-banner">
-        <strong>Changing role for:</strong>
-        <span class="user-email-meta">{{ selectedUser()?.fullName }} ({{ selectedUser()?.email }})</span>
-      </div>
-
-      <form [formGroup]="roleForm" (ngSubmit)="submitRoleUpdate()" class="modal-form">
-        <div class="form-group">
-          <label for="u_role">Choose Access Level</label>
-          <select id="u_role" formControlName="role">
-            <option value="Customer">Customer (Standard buyer account)</option>
-            <option value="Manager">Manager (Catalog and sales access)</option>
-            <option value="Admin">Admin (Full administrative console)</option>
-          </select>
-        </div>
-
-        <div class="modal-actions-footer">
-          <button type="button" class="btn btn-secondary" (click)="closeRoleModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Update Role</button>
-        </div>
-      </form>
+<div class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Update User Access Role</h3>
+      <button class="close-modal-btn" (click)="closeRoleModal()">&times;</button>
     </div>
+
+    <div class="user-context-banner">
+      <strong>Changing role for:</strong>
+      <span class="user-email-meta">{{ selectedUser()?.fullName }} ({{ selectedUser()?.email }})</span>
+    </div>
+
+    <form [formGroup]="roleForm" (ngSubmit)="submitRoleUpdate()" class="modal-form">
+      <div class="form-group">
+        <label for="u_role">Choose Access Level</label>
+        <select id="u_role" formControlName="role">
+          <option value="Customer">Customer (Standard buyer account)</option>
+          <option value="Manager">Manager (Catalog and sales access)</option>
+          <option value="Admin">Admin (Full administrative console)</option>
+        </select>
+      </div>
+
+      <div class="modal-actions-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeRoleModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Update Role</button>
+      </div>
+    </form>
   </div>
+</div>
 }
 
 <!-- 3. BAN / UNBAN USER MODAL -->
 @if (showBanModal() && selectedUser()) {
-  <div class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>Account Suspension Actions</h3>
-        <button class="close-modal-btn" (click)="closeBanModal()">&times;</button>
-      </div>
-
-      <div class="user-context-banner">
-        <strong>Target Account:</strong>
-        <span class="user-email-meta">{{ selectedUser()?.fullName }} ({{ selectedUser()?.email }})</span>
-      </div>
-
-      <form [formGroup]="banForm" (ngSubmit)="submitBanUpdate()" class="modal-form">
-        <div class="form-group ban-toggle-group">
-          <label class="checkbox-label">
-            <input type="checkbox" formControlName="isBanned">
-            Suspend Account Access (Ban User)
-          </label>
-        </div>
-
-        @if (banForm.get('isBanned')?.value) {
-          <div class="form-group animate-slide">
-            <label for="banReason">Reason for Suspension *</label>
-            <textarea id="banReason" formControlName="banReason" rows="3" placeholder="Provide description for terms violation..."></textarea>
-            @if (banForm.get('banReason')?.touched && banForm.get('banReason')?.invalid) {
-              <div class="error-text">Reason is required when banning an account</div>
-            }
-          </div>
-        }
-
-        <div class="modal-actions-footer">
-          <button type="button" class="btn btn-secondary" (click)="closeBanModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary" [class.btn-danger]="banForm.get('isBanned')?.value">
-            {{ banForm.get('isBanned')?.value ? 'Confirm Suspension' : 'Confirm Active Status' }}
-          </button>
-        </div>
-      </form>
+<div class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Account Suspension Actions</h3>
+      <button class="close-modal-btn" (click)="closeBanModal()">&times;</button>
     </div>
-  </div>
-}
 
+    <div class="user-context-banner">
+      <strong>Target Account:</strong>
+      <span class="user-email-meta">{{ selectedUser()?.fullName }} ({{ selectedUser()?.email }})</span>
+    </div>
+
+    <form [formGroup]="banForm" (ngSubmit)="submitBanUpdate()" class="modal-form">
+      <div class="form-group ban-toggle-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="isBanned">
+          Suspend Account Access (Ban User)
+        </label>
+      </div>
+
+      @if (banForm.get('isBanned')?.value) {
+      <div class="form-group animate-slide">
+        <label for="banReason">Reason for Suspension *</label>
+        <textarea id="banReason" formControlName="banReason" rows="3"
+          placeholder="Provide description for terms violation..."></textarea>
+        @if (banForm.get('banReason')?.touched && banForm.get('banReason')?.invalid) {
+        <div class="error-text">Reason is required when banning an account</div>
+        }
+      </div>
+      }
+
+      <div class="modal-actions-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeBanModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [class.btn-danger]="banForm.get('isBanned')?.value">
+          {{ banForm.get('isBanned')?.value ? 'Confirm Suspension' : 'Confirm Active Status' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}

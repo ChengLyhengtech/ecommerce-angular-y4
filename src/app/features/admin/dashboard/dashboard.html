@@ -81,6 +81,123 @@
       <span class="trend positive">AOV per checkout</span>
     </div>
   </div>
+
+  <!-- Total Registered Users Card -->
+  <div class="stat-card">
+    <div class="stat-icon users">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+    </div>
+    <div class="stat-info">
+      <h3>Registered Users</h3>
+      <p class="value">{{ (dashboardQuery.data()?.totalUserCount || 0) | number }}</p>
+      <span class="trend positive">Customer accounts</span>
+    </div>
+  </div>
+</div>
+
+<!-- Top Rankings Grid (Products, Brands, Categories) -->
+<div class="top-rankings-section">
+  <!-- Top 5 Products -->
+  <div class="ranking-card">
+    <div class="ranking-header">
+      <div class="ranking-title">
+        <div class="rank-icon-wrapper products">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+        </div>
+        <div>
+          <h3>Top Products</h3>
+          <span class="ranking-sub">By quantity sold</span>
+        </div>
+      </div>
+      <span class="rank-badge">Top 5</span>
+    </div>
+    @if (!dashboardQuery.data()?.topProducts?.length) {
+      <div class="ranking-empty">No product sales recorded</div>
+    } @else {
+      <ul class="ranking-list">
+        @for (prod of dashboardQuery.data()?.topProducts || []; track prod.id; let idx = $index) {
+          <li class="ranking-item">
+            <span class="rank-number" [class.gold]="idx === 0" [class.silver]="idx === 1" [class.bronze]="idx === 2">#{{ idx + 1 }}</span>
+            <div class="item-info">
+              <span class="item-name">{{ prod.name }}</span>
+              <span class="item-sub">{{ prod.totalQuantitySold }} sold</span>
+            </div>
+            <span class="item-revenue">${{ prod.totalRevenue | number:'1.2-2' }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <!-- Top 5 Brands -->
+  <div class="ranking-card">
+    <div class="ranking-header">
+      <div class="ranking-title">
+        <div class="rank-icon-wrapper brands">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        </div>
+        <div>
+          <h3>Top Brands</h3>
+          <span class="ranking-sub">By total revenue</span>
+        </div>
+      </div>
+      <span class="rank-badge">Top 5</span>
+    </div>
+    @if (!dashboardQuery.data()?.topBrands?.length) {
+      <div class="ranking-empty">No brand performance recorded</div>
+    } @else {
+      <ul class="ranking-list">
+        @for (brand of dashboardQuery.data()?.topBrands || []; track brand.id; let idx = $index) {
+          <li class="ranking-item">
+            <span class="rank-number" [class.gold]="idx === 0" [class.silver]="idx === 1" [class.bronze]="idx === 2">#{{ idx + 1 }}</span>
+            <div class="item-info">
+              <span class="item-name">{{ brand.name }}</span>
+              <span class="item-sub">{{ brand.totalQuantitySold }} units</span>
+            </div>
+            <span class="item-revenue">${{ brand.totalRevenue | number:'1.2-2' }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <!-- Top 5 Categories -->
+  <div class="ranking-card">
+    <div class="ranking-header">
+      <div class="ranking-title">
+        <div class="rank-icon-wrapper categories">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        </div>
+        <div>
+          <h3>Top Categories</h3>
+          <span class="ranking-sub">By total revenue</span>
+        </div>
+      </div>
+      <span class="rank-badge">Top 5</span>
+    </div>
+    @if (!dashboardQuery.data()?.topCategories?.length) {
+      <div class="ranking-empty">No category revenue recorded</div>
+    } @else {
+      <ul class="ranking-list">
+        @for (cat of dashboardQuery.data()?.topCategories || []; track cat.id; let idx = $index) {
+          <li class="ranking-item">
+            <span class="rank-number" [class.gold]="idx === 0" [class.silver]="idx === 1" [class.bronze]="idx === 2">#{{ idx + 1 }}</span>
+            <div class="item-info">
+              <span class="item-name">{{ cat.name }}</span>
+              <span class="item-sub">{{ cat.totalQuantitySold }} items</span>
+            </div>
+            <span class="item-revenue">${{ cat.totalRevenue | number:'1.2-2' }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </div>
 </div>
 
 <div class="dashboard-content">

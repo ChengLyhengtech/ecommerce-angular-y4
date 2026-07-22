@@ -1,0 +1,163 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  
+  <nav class="flex items-center space-x-2 text-xs font-medium text-slate-400">
+    <a routerLink="/" class="hover:text-indigo-600 transition">Home</a>
+    <span>/</span>
+    <a routerLink="/orders" class="hover:text-indigo-600 transition">My Orders</a>
+    <span>/</span>
+    <span class="text-slate-800 dark:text-slate-200 font-mono">#{{ orderId().slice(0, 8) }}</span>
+  </nav>
+
+  <!-- Loading State -->
+  <div *ngIf="orderDetailsQuery.isLoading()" class="py-16 text-center text-slate-400">
+    <svg class="animate-spin w-8 h-8 text-indigo-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+    <p class="text-sm font-medium">Loading order details...</p>
+  </div>
+
+  <!-- Order Content -->
+  <div *ngIf="!orderDetailsQuery.isLoading() && orderDetailsQuery.data() as order" class="space-y-8">
+    
+    <!-- Title & Top Info Header -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center space-x-3">
+          <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">Order Details</h1>
+          <span [class]="getStatusBadgeClass(order.status)" class="px-3.5 py-1 rounded-full text-xs font-bold border uppercase tracking-wider">
+            {{ order.status }}
+          </span>
+        </div>
+        <p class="text-xs text-slate-400 font-mono mt-1">ID: {{ order.id }}</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Placed on: {{ order.orderDate | date:'medium' }}</p>
+      </div>
+
+      <div class="text-left md:text-right">
+        <span class="text-xs text-slate-400 block">Total Amount Paid / Payable</span>
+        <span class="text-3xl font-black text-indigo-600 dark:text-indigo-400">${{ order.totalAmount | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <!-- Status Timeline Progress Bar -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+      <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Order Progress Tracker</h3>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-2">
+        <div [class.opacity-40]="!isStepActive(order.status, 'placed')" class="flex items-center space-x-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs">1</div>
+          <div>
+            <h4 class="text-xs font-bold text-slate-900 dark:text-white">Order Placed</h4>
+            <span class="text-[10px] text-slate-400">Received</span>
+          </div>
+        </div>
+
+        <div [class.opacity-40]="!isStepActive(order.status, 'pending')" class="flex items-center space-x-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div [class.bg-amber-500]="isStepActive(order.status, 'pending')" class="w-8 h-8 rounded-full bg-slate-400 text-white flex items-center justify-center font-bold text-xs">2</div>
+          <div>
+            <h4 class="text-xs font-bold text-slate-900 dark:text-white">KHQR Verification</h4>
+            <span class="text-[10px] text-slate-400">Bakong Gateway</span>
+          </div>
+        </div>
+
+        <div [class.opacity-40]="!isStepActive(order.status, 'processing')" class="flex items-center space-x-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div [class.bg-indigo-600]="isStepActive(order.status, 'processing')" class="w-8 h-8 rounded-full bg-slate-400 text-white flex items-center justify-center font-bold text-xs">3</div>
+          <div>
+            <h4 class="text-xs font-bold text-slate-900 dark:text-white">Processing & Packing</h4>
+            <span class="text-[10px] text-slate-400">Warehouse</span>
+          </div>
+        </div>
+
+        <div [class.opacity-40]="!isStepActive(order.status, 'completed')" class="flex items-center space-x-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div [class.bg-emerald-600]="isStepActive(order.status, 'completed')" class="w-8 h-8 rounded-full bg-slate-400 text-white flex items-center justify-center font-bold text-xs">4</div>
+          <div>
+            <h4 class="text-xs font-bold text-slate-900 dark:text-white">Delivered / Completed</h4>
+            <span class="text-[10px] text-slate-400">Fulfilled</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Purchased Items List -->
+      <div class="lg:col-span-2 space-y-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
+          <h3 class="font-bold text-slate-900 dark:text-white text-base border-b border-slate-100 dark:border-slate-800 pb-4">
+            Items in this Order ({{ order.items ? order.items.length : 0 }})
+          </h3>
+
+          <div *ngIf="order.items && order.items.length > 0" class="divide-y divide-slate-100 dark:divide-slate-800">
+            <div *ngFor="let item of order.items" class="py-4 flex items-center justify-between gap-4">
+              <div>
+                <h4 class="font-bold text-slate-900 dark:text-white text-sm">{{ item.productName }}</h4>
+                <div class="flex items-center space-x-2 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <span *ngIf="item.color" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">Color: {{ item.color }}</span>
+                  <span *ngIf="item.size" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">Size: {{ item.size }}</span>
+                  <span *ngIf="item.sku">SKU: {{ item.sku }}</span>
+                </div>
+              </div>
+
+              <div class="text-right shrink-0">
+                <span class="text-xs text-slate-400 block">{{ item.quantity }} × ${{ item.priceAtPurchase | number:'1.2-2' }}</span>
+                <span class="font-black text-slate-900 dark:text-white text-base">${{ (item.quantity * item.priceAtPurchase) | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping & Payment Sidebar Details -->
+      <div class="lg:col-span-1 space-y-6">
+        
+        <!-- Shipping details -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
+          <h3 class="font-bold text-slate-900 dark:text-white text-base border-b border-slate-100 dark:border-slate-800 pb-3">Delivery Information</h3>
+          
+          <div class="space-y-3 text-xs text-slate-600 dark:text-slate-300">
+            <div>
+              <span class="text-slate-400 block font-bold">Contact Phone:</span>
+              <span class="font-medium text-slate-900 dark:text-white text-sm">{{ order.contactPhone }}</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block font-bold">Shipping Address:</span>
+              <span class="font-medium text-slate-900 dark:text-white text-sm">{{ order.shippingAddress }}</span>
+            </div>
+            <div *ngIf="order.latitude || order.longitude" class="p-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 font-mono">
+              <span class="text-[10px] text-slate-400 block">GPS Coordinates:</span>
+              <span>Lat: {{ order.latitude }}, Long: {{ order.longitude }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bakong Payment Details -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
+          <h3 class="font-bold text-slate-900 dark:text-white text-base border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
+            <span>Payment Method</span>
+            <span class="px-2 py-0.5 bg-red-600 text-white rounded text-[10px] font-black uppercase">KHQR</span>
+          </h3>
+
+          <div class="space-y-3 text-xs">
+            <div class="flex justify-between text-slate-600 dark:text-slate-400">
+              <span>Payment Gateway:</span>
+              <span class="font-bold text-slate-900 dark:text-white">Bakong KHQR</span>
+            </div>
+            <div *ngIf="order.paymentDetails?.bakongTransactionRef" class="flex justify-between text-slate-600 dark:text-slate-400">
+              <span>Transaction Ref:</span>
+              <span class="font-mono font-bold text-slate-900 dark:text-white truncate max-w-[150px]">{{ order.paymentDetails?.bakongTransactionRef }}</span>
+            </div>
+            <div *ngIf="order.paymentDetails?.status" class="flex justify-between text-slate-600 dark:text-slate-400">
+              <span>Payment Status:</span>
+              <span class="font-bold text-emerald-600">{{ order.paymentDetails?.status }}</span>
+            </div>
+            <div *ngIf="order.paymentDetails?.paidAt" class="flex justify-between text-slate-600 dark:text-slate-400">
+              <span>Paid At:</span>
+              <span class="font-bold text-slate-900 dark:text-white">{{ order.paymentDetails?.paidAt | date:'short' }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

@@ -5,7 +5,9 @@ import {
   OrderQueryDto, 
   OrderHistoryResponseDto, 
   OrderDetailsResponseDto, 
-  PaginatedList
+  PaginatedList,
+  PlaceOrderDto,
+  PlaceOrderResponseDto
 } from '../models/order.model';
 import { environment } from '../../../environments/environment';
 
@@ -15,6 +17,10 @@ import { environment } from '../../../environments/environment';
 export class OrderService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/api/orders`;
+
+  placeOrder(data: PlaceOrderDto): Observable<PlaceOrderResponseDto> {
+    return this.http.post<PlaceOrderResponseDto>(this.apiUrl, data);
+  }
 
   getOrders(query: OrderQueryDto): Observable<PaginatedList<OrderHistoryResponseDto>> {
     let params = new HttpParams();
@@ -49,3 +55,4 @@ export class OrderService {
     return this.http.put<{ message: string }>(`${this.apiUrl}/${id}/status`, { status });
   }
 }
+

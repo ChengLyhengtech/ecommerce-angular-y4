@@ -7,7 +7,6 @@ export const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'admin',
-    pathMatch: 'full'
+    loadChildren: () => import('./features/customer/customer.routes').then(m => m.routes)
   }
 ];

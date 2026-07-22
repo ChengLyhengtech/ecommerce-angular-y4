@@ -1,0 +1,133 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  
+  <div class="border-b border-slate-200 dark:border-slate-800 pb-6">
+    <h1 class="text-3xl font-black text-slate-900 dark:text-white">My Orders</h1>
+    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">View your order history, payment details, and shipping status.</p>
+  </div>
+
+  <!-- Status Filters Tabs -->
+  <div class="flex items-center space-x-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-800">
+    <button 
+      (click)="setStatusFilter('')" 
+      [class.bg-indigo-600]="!selectedStatus()"
+      [class.text-white]="!selectedStatus()"
+      [class.bg-slate-100]="selectedStatus()"
+      [class.dark:bg-slate-800]="selectedStatus()"
+      [class.text-slate-700]="selectedStatus()"
+      [class.dark:text-slate-300]="selectedStatus()"
+      class="px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap"
+    >
+      All Orders
+    </button>
+    <button 
+      (click)="setStatusFilter('Pending')" 
+      [class.bg-amber-500]="selectedStatus() === 'Pending'"
+      [class.text-white]="selectedStatus() === 'Pending'"
+      [class.bg-slate-100]="selectedStatus() !== 'Pending'"
+      [class.dark:bg-slate-800]="selectedStatus() !== 'Pending'"
+      [class.text-slate-700]="selectedStatus() !== 'Pending'"
+      [class.dark:text-slate-300]="selectedStatus() !== 'Pending'"
+      class="px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap"
+    >
+      Pending Verification
+    </button>
+    <button 
+      (click)="setStatusFilter('Processing')" 
+      [class.bg-indigo-600]="selectedStatus() === 'Processing'"
+      [class.text-white]="selectedStatus() === 'Processing'"
+      [class.bg-slate-100]="selectedStatus() !== 'Processing'"
+      [class.dark:bg-slate-800]="selectedStatus() !== 'Processing'"
+      [class.text-slate-700]="selectedStatus() !== 'Processing'"
+      [class.dark:text-slate-300]="selectedStatus() !== 'Processing'"
+      class="px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap"
+    >
+      Processing
+    </button>
+    <button 
+      (click)="setStatusFilter('Completed')" 
+      [class.bg-emerald-600]="selectedStatus() === 'Completed'"
+      [class.text-white]="selectedStatus() === 'Completed'"
+      [class.bg-slate-100]="selectedStatus() !== 'Completed'"
+      [class.dark:bg-slate-800]="selectedStatus() !== 'Completed'"
+      [class.text-slate-700]="selectedStatus() !== 'Completed'"
+      [class.dark:text-slate-300]="selectedStatus() !== 'Completed'"
+      class="px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap"
+    >
+      Completed
+    </button>
+    <button 
+      (click)="setStatusFilter('Cancelled')" 
+      [class.bg-red-600]="selectedStatus() === 'Cancelled'"
+      [class.text-white]="selectedStatus() === 'Cancelled'"
+      [class.bg-slate-100]="selectedStatus() !== 'Cancelled'"
+      [class.dark:bg-slate-800]="selectedStatus() !== 'Cancelled'"
+      [class.text-slate-700]="selectedStatus() !== 'Cancelled'"
+      [class.dark:text-slate-300]="selectedStatus() !== 'Cancelled'"
+      class="px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap"
+    >
+      Cancelled
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="ordersQuery.isLoading()" class="py-16 text-center text-slate-400">
+    <svg class="animate-spin w-8 h-8 text-indigo-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+    <p class="text-sm font-medium">Fetching orders...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!ordersQuery.isLoading() && (!ordersQuery.data()?.items || ordersQuery.data()!.items.length === 0)" class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-12 text-center">
+    <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mx-auto mb-4">
+      <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+    </div>
+    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">No orders found</h3>
+    <p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">You haven't placed any orders matching this filter yet.</p>
+    <a routerLink="/products" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg transition">
+      Start Shopping
+    </a>
+  </div>
+
+  <!-- Orders Grid / List -->
+  <div *ngIf="!ordersQuery.isLoading() && ordersQuery.data()?.items && ordersQuery.data()!.items.length > 0" class="space-y-4">
+    <div *ngFor="let order of ordersQuery.data()!.items" class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-md transition space-y-4">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 gap-2">
+        <div>
+          <div class="flex items-center space-x-3">
+            <span class="text-xs font-bold text-slate-400 font-mono">ORDER #{{ order.id.slice(0, 8) }}...</span>
+            <span [class]="getStatusBadgeClass(order.status)" class="px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider">
+              {{ order.status }}
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Placed on: {{ order.orderDate | date:'medium' }}</p>
+        </div>
+
+        <div class="text-left sm:text-right">
+          <span class="text-xs text-slate-400 block">Total Amount</span>
+          <span class="text-xl font-black text-indigo-600 dark:text-indigo-400">${{ order.totalAmount | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
+        <div class="space-y-1">
+          <p><strong class="text-slate-700 dark:text-slate-300">Contact:</strong> {{ order.contactPhone }}</p>
+          <p><strong class="text-slate-700 dark:text-slate-300">Address:</strong> {{ order.shippingAddress }}</p>
+        </div>
+
+        <a [routerLink]="['/orders', order.id]" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl font-bold text-xs transition self-start sm:self-auto flex items-center space-x-1">
+          <span>View Details & Track</span>
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="ordersQuery.data() && ordersQuery.data()!.totalPages > 1" class="flex items-center justify-center space-x-2 pt-6 border-t border-slate-200 dark:border-slate-800">
+    <button (click)="goToPage(pageNumber() - 1)" [disabled]="pageNumber() <= 1" class="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold disabled:opacity-40 transition">Previous</button>
+    <span class="text-sm font-medium text-slate-600 dark:text-slate-400 px-3">Page {{ pageNumber() }} of {{ ordersQuery.data()!.totalPages }}</span>
+    <button (click)="goToPage(pageNumber() + 1)" [disabled]="pageNumber() >= ordersQuery.data()!.totalPages" class="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold disabled:opacity-40 transition">Next</button>
+  </div>
+
+</div>

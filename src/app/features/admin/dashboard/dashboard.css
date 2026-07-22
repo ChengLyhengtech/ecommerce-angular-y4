@@ -100,6 +100,7 @@
 .stat-icon.sales { background: #e0e7ff; color: #4f46e5; }
 .stat-icon.orders { background: #dcfce7; color: #16a34a; }
 .stat-icon.average { background: #fae8ff; color: #d946ef; }
+.stat-icon.users { background: #e0f2fe; color: #0284c7; }
 
 .stat-info h3 {
   font-size: 0.875rem;
@@ -120,6 +121,161 @@
   font-weight: 500;
 }
 .trend.positive { color: #10b981; }
+
+/* Top Rankings Section (Top Products, Top Brands, Top Categories) */
+.top-rankings-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.ranking-card {
+  background: var(--surface-color);
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.ranking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.ranking-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rank-icon-wrapper {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rank-icon-wrapper.products { background: #e0e7ff; color: #4f46e5; }
+.rank-icon-wrapper.brands { background: #fef3c7; color: #d97706; }
+.rank-icon-wrapper.categories { background: #dcfce7; color: #16a34a; }
+
+.ranking-title h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.ranking-sub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.rank-badge {
+  background: var(--bg-color);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+}
+
+.ranking-empty {
+  padding: 30px 16px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.ranking-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bg-color, #f8fafc);
+  transition: transform 0.15s ease;
+}
+
+.ranking-item:hover {
+  transform: translateX(4px);
+}
+
+.rank-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rank-number.gold {
+  background: linear-gradient(135deg, #fef08a 0%, #eab308 100%);
+  color: #713f12;
+}
+
+.rank-number.silver {
+  background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
+  color: #1e293b;
+}
+
+.rank-number.bronze {
+  background: linear-gradient(135deg, #ffedd5 0%, #c2410c 100%);
+  color: #ffffff;
+}
+
+.item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.item-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-sub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.item-revenue {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
 
 /* Grid Dashboard Content */
 .dashboard-content {

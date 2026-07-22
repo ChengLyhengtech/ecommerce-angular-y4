@@ -67,3 +67,33 @@ export interface OrderDetailsResponseDto {
 export interface UpdateOrderStatusDto {
   status: string;
 }
+
+export interface PlaceOrderItemDto {
+  variantId: string;
+  quantity: number;
+}
+
+export interface PlaceOrderDto {
+  contactPhone: string;
+  shippingAddress: string;
+  deliveryLatitude?: number;
+  deliveryLongitude?: number;
+  items: PlaceOrderItemDto[];
+}
+
+export interface PlaceOrderResponseData {
+  orderId: string;
+  merchant_name: string;
+  qr_code: string;
+  qr_md5: string;
+  amount: number;
+  currency: string;
+  qr_expiration: string;
+}
+
+export interface PlaceOrderResponseDto {
+  success: boolean;
+  message: string;
+  data: PlaceOrderResponseData;
+}
+
