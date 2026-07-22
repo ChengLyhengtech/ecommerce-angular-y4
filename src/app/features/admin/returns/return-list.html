@@ -1,0 +1,174 @@
+<div class="page-header">
+  <div class="header-title">
+    <h1>Return Requests</h1>
+    <p>Manage customer return tickets, inspect reasons, and restock variants.</p>
+  </div>
+</div>
+
+@if (returnsQuery.error()) {
+  <div class="alert alert-danger" style="margin-bottom: 20px; padding: 12px 20px; background-color: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; border-radius: 8px;">
+    Failed to load return tickets. Please try again.
+  </div>
+}
+
+<div class="card" style="position: relative;">
+  <!-- Loading overlay -->
+  @if (returnsQuery.isPending() || returnsQuery.isFetching() || reviewMutation.isPending()) {
+    <div class="loading-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.7); display: flex; align-items: center; justify-content: center; z-index: 100;">
+      <div class="spinner" style="width: 40px; height: 40px; border: 4px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    </div>
+  }
+
+  <!-- Tab Filter Header -->
+  <div class="tabs-container">
+    <button class="tab-btn" [class.active]="statusFilter() === 'PendingReview'" (click)="setStatusFilter('PendingReview')">
+      Pending Review
+    </button>
+    <button class="tab-btn" [class.active]="statusFilter() === 'Approved'" (click)="setStatusFilter('Approved')">
+      Approved
+    </button>
+    <button class="tab-btn" [class.active]="statusFilter() === 'Rejected'" (click)="setStatusFilter('Rejected')">
+      Rejected
+    </button>
+    <button class="tab-btn" [class.active]="statusFilter() === ''" (click)="setStatusFilter('')">
+      All Tickets
+    </button>
+  </div>
+
+  <!-- Tickets list -->
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Order Reference</th>
+          <th>Product Name / SKU</th>
+          <th>Qty</th>
+          <th>Customer Reason</th>
+          <th>Customer Notes</th>
+          <th>Created Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (ticket of returnsQuery.data() || []; track ticket.id) {
+          <tr>
+            <td>
+              <span class="ref-code">{{ ticket.orderId.substring(0, 8) }}...</span>
+            </td>
+            <td>
+              <div style="display: flex; flex-direction: column;">
+                <strong>{{ getVariantDetails(ticket.productVariantId).name }}</strong>
+                <span class="sku-label">{{ getVariantDetails(ticket.productVariantId).sku }}</span>
+              </div>
+            </td>
+            <td><strong>{{ ticket.quantity }}</strong></td>
+            <td>
+              <span class="reason-badge">{{ ticket.customerReason }}</span>
+            </td>
+            <td>
+              <span class="notes-txt" [title]="ticket.customerNotes || ''">
+                {{ ticket.customerNotes || 'No customer comments.' }}
+              </span>
+            </td>
+            <td>{{ ticket.createdAt | date:'short' }}</td>
+            <td>
+              <span class="badge" [class]="getStatusBadgeClass(ticket.status)">
+                {{ ticket.status }}
+              </span>
+            </td>
+            <td>
+              @if (ticket.status === 'PendingReview') {
+                <button class="btn btn-primary btn-sm" (click)="openReview(ticket)">
+                  Review
+                </button>
+              } @else {
+                <button class="btn btn-secondary btn-sm" disabled>
+                  Resolved
+                </button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 48px; color: var(--text-secondary);">
+              No return requests tickets found matching status filters.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Resolution Modal dialog overlay -->
+@if (selectedTicket()) {
+  <div class="modal-backdrop">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>Resolve Return Ticket</h3>
+        <button class="close-btn" (click)="closeReview()">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 0.875rem;">
+          <div style="margin-bottom: 6px;">
+            Order Reference: <strong style="font-family: monospace;">{{ selectedTicket()?.orderId }}</strong>
+          </div>
+          <div style="margin-bottom: 6px;">
+            Product: <strong>{{ getVariantDetails(selectedTicket()!.productVariantId).name }}</strong> 
+            (<span style="font-family: monospace;">{{ getVariantDetails(selectedTicket()!.productVariantId).sku }}</span>)
+          </div>
+          <div>Quantity: <strong>{{ selectedTicket()?.quantity }}</strong></div>
+          <div style="margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 8px; color: var(--text-secondary);">
+            <strong>Reason:</strong> {{ selectedTicket()?.customerReason }}<br>
+            <strong>Customer Notes:</strong> "{{ selectedTicket()?.customerNotes || 'No notes.' }}"
+          </div>
+        </div>
+
+        <form (ngSubmit)="submitReview()">
+          <!-- Resolution Status Selector -->
+          <div class="form-group">
+            <label>Review Resolution Status</label>
+            <div style="display: flex; gap: 20px; margin-top: 6px;">
+              <label style="display: flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer;">
+                <input type="radio" name="reviewStatus" value="Approved" [(ngModel)]="reviewStatus">
+                <span style="color: #16a34a; font-weight: 600;">Approve & Close</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer;">
+                <input type="radio" name="reviewStatus" value="Rejected" [(ngModel)]="reviewStatus">
+                <span style="color: #ef4444; font-weight: 600;">Reject Claim</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Restocking toggle check (Only visible on Approve) -->
+          @if (reviewStatus() === 'Approved') {
+            <div class="form-group" style="margin-top: 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px;">
+              <label style="display: flex; align-items: flex-start; gap: 10px; font-weight: normal; cursor: pointer;">
+                <input type="checkbox" name="isRestockable" [(ngModel)]="isRestockable" style="margin-top: 3px;">
+                <div>
+                  <strong>Restock Item Inventory</strong>
+                  <span style="display: block; font-size: 0.75rem; color: #166534; margin-top: 2px;">
+                    Check this option to increment variant physical stock levels by {{ selectedTicket()?.quantity }} and log a 'CustomerReturn' entry in audit movements log.
+                  </span>
+                </div>
+              </label>
+            </div>
+          }
+
+          <!-- Admin Notes -->
+          <div class="form-group" style="margin-top: 16px;">
+            <label for="adminReviewNotes">Resolution & Review Notes *</label>
+            <textarea id="adminReviewNotes" name="adminNotes" [(ngModel)]="adminNotes" rows="3" placeholder="Input details explaining resolution outcome..." required style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); outline: none; background: var(--surface-color); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; resize: vertical;"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeReview()">Cancel</button>
+        <button class="btn btn-primary" (click)="submitReview()" [disabled]="!adminNotes() || adminNotes().trim() === ''">
+          Resolve Claim
+        </button>
+      </div>
+    </div>
+  </div>
+}

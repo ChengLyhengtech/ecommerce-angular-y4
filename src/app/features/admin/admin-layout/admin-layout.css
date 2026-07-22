@@ -5,6 +5,7 @@
 
   /* Color Palette - Premium Slate & Indigo */
   --primary-color: #4f46e5;
+  --primary-hover: #4338ca;
   --primary-glow: rgba(79, 70, 229, 0.15);
   --sidebar-bg: #0f172a;
   --sidebar-border: #1e293b;
@@ -13,11 +14,17 @@
   --sidebar-active-bg: #1e293b;
   --sidebar-active-text: #ffffff;
 
-  --topbar-bg: rgba(255, 255, 255, 0.85);
+  --topbar-bg: #ffffff;
   --topbar-border: #e2e8f0;
   --main-bg: #f8fafc;
+
+  --surface-color: #ffffff;
+  --border-color: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
   --text-main: #0f172a;
   --text-muted: #64748b;
+  --bg-color: #f1f5f9;
 
   display: block;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -25,10 +32,34 @@
 
 .admin-container {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   background-color: var(--main-bg);
-  overflow-x: hidden;
+  overflow: hidden;
   position: relative;
+  width: 100%;
+}
+
+/* Dark Mode Overrides */
+.admin-container.dark-theme {
+  --topbar-bg: #0f172a;
+  --topbar-border: #1e293b;
+  --main-bg: #090d16;
+
+  --surface-color: #111827;
+  --border-color: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --bg-color: #0f172a;
+
+  --sidebar-bg: #090d16;
+  --sidebar-border: #1e293b;
+  --sidebar-text: #94a3b8;
+  --sidebar-text-hover: #f8fafc;
+  --sidebar-active-bg: #1e293b;
+  --sidebar-active-text: #ffffff;
 }
 
 /* SIDEBAR LAYOUT */
@@ -284,8 +315,11 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  height: 100vh;
+  max-height: 100vh;
   margin-left: var(--sidebar-width-expanded);
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
 .topbar {

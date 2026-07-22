@@ -27,6 +27,7 @@ export class DashboardComponent implements OnDestroy {
   // Restock overlay state
   activeRestockAlertId = signal<string | null>(null);
   restockQuantity = signal<number>(50);
+  restockReason = signal<string>('Low Stock Alert Replenish');
 
   // Map variables
   private map: any;
@@ -44,12 +45,13 @@ export class DashboardComponent implements OnDestroy {
 
   // Restock mutation
   restockMutation = injectMutation(() => ({
-    mutationFn: (data: { variantId: string; quantity: number }) => 
+    mutationFn: (data: { variantId: string; quantity: number; reasonCode: string }) =>
       lastValueFrom(this.inventoryService.restock(data)),
     onSuccess: () => {
       this.queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] });
       this.activeRestockAlertId.set(null);
       this.restockQuantity.set(50);
+      this.restockReason.set('Low Stock Alert Replenish');
       alert('Alerted Variant successfully restocked!');
     },
     onError: (err) => {
@@ -91,8 +93,9 @@ export class DashboardComponent implements OnDestroy {
   submitRestock(): void {
     const variantId = this.activeRestockAlertId();
     const qty = this.restockQuantity();
-    if (variantId && qty > 0) {
-      this.restockMutation.mutate({ variantId, quantity: qty });
+    const reason = this.restockReason();
+    if (variantId && qty > 0 && reason) {
+      this.restockMutation.mutate({ variantId, quantity: qty, reasonCode: reason });
     }
   }
 
@@ -143,7 +146,7 @@ export class DashboardComponent implements OnDestroy {
         this.map = L.map('delivery-map').setView(center, 12);
 
         // CartoDB Dark Matter tile layer for an beautiful administrative dark theme map
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
           subdomains: 'abcd',
           maxZoom: 20

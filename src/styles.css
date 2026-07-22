@@ -1,3 +1,385 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+/* Global Dark Mode overrides for child features */
+.dark-theme h1,
+.dark-theme h2,
+.dark-theme h3 {
+    color: var(--text-primary) !important;
+}
+
+.dark-theme p,
+.dark-theme span:not(.badge):not(.badge-dot) {
+    color: var(--text-secondary);
+}
+
+.dark-theme .card,
+.dark-theme .modal-card,
+.dark-theme .node-card {
+    background-color: var(--surface-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .data-table {
+    color: var(--text-primary) !important;
+}
+
+.dark-theme .data-table th {
+    background-color: #1e293b !important;
+    color: var(--text-secondary) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .data-table td {
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.dark-theme .data-table tr:hover td {
+    background-color: var(--bg-color) !important;
+}
+
+.dark-theme select,
+.dark-theme input:not([type="checkbox"]):not([type="radio"]),
+.dark-theme textarea {
+    background-color: #0f172a !important;
+    background: #0f172a !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme input:focus,
+.dark-theme select:focus,
+.dark-theme textarea:focus {
+    border-color: var(--primary-color) !important;
+}
+
+.dark-theme .btn-secondary,
+.dark-theme .btn-icon-toggle {
+    background-color: #1e293b !important;
+    background: #1e293b !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .btn-secondary:hover,
+.dark-theme .btn-icon-toggle:hover {
+    background-color: #334155 !important;
+    background: #334155 !important;
+}
+
+.dark-theme .modal-header,
+.dark-theme .modal-footer {
+    border-color: var(--border-color) !important;
+    background-color: #0f172a !important;
+}
+
+.dark-theme .tabs-container {
+    background-color: #0f172a !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .tab-btn.active {
+    background-color: var(--surface-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.dark-theme .empty-state p {
+    color: var(--text-secondary) !important;
+}
+
+.dark-theme .empty-state svg {
+    stroke: var(--text-secondary) !important;
+}
+
+/* Card toolbar and table blocks */
+.dark-theme .card-toolbar {
+    background-color: #111827 !important;
+    background: #111827 !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .data-table th,
+.dark-theme table th {
+    background-color: #1e293b !important;
+    background: #1e293b !important;
+    color: var(--text-secondary) !important;
+    border-bottom: 2px solid var(--border-color) !important;
+}
+
+.dark-theme .data-table td,
+.dark-theme table td {
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.dark-theme .data-table tr:hover td {
+    background-color: #1e293b !important;
+}
+
+/* Product Form Specific Dark Tones */
+.dark-theme .card-header {
+    background-color: #0f172a !important;
+    background: #0f172a !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .variant-item-box {
+    background-color: #1e293b !important;
+    background: #1e293b !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .sku-input-wrapper {
+    background-color: #0f172a !important;
+    background: #0f172a !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .sku-input-wrapper input {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+.dark-theme .btn-action-sku {
+    background-color: #1e293b !important;
+    background: #1e293b !important;
+    border-left: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .btn-action-sku:hover {
+    background-color: #334155 !important;
+    background: #334155 !important;
+}
+
+.dark-theme .media-thumb-card {
+    background-color: #0f172a !important;
+    background: #0f172a !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .media-upload-trigger {
+    background-color: #1e293b !important;
+    background: #1e293b !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-secondary) !important;
+}
+
+.dark-theme .media-upload-trigger:hover {
+    background-color: #334155 !important;
+    background: #334155 !important;
+}
+
+.dark-theme .pricing-calc {
+    background-color: rgba(79, 70, 229, 0.15) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* Row Hover Overrides to prevent white flash in Dark Mode */
+.dark-theme .inventory-row-hover:hover,
+.dark-theme .clickable-row:hover td,
+.dark-theme .data-table tr:hover td {
+    background-color: #1e293b !important;
+    background: #1e293b !important;
+}
+
+/* User List Action Buttons & Pagination Overrides */
+.dark-theme .btn-action-outline {
+    background-color: #0f172a !important;
+    background: #0f172a !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .btn-action-outline.edit:hover {
+    border-color: var(--primary-color) !important;
+    background-color: rgba(79, 70, 229, 0.15) !important;
+    color: var(--primary-color) !important;
+}
+
+.dark-theme .btn-action-outline.ban {
+    color: #ef4444 !important;
+    border-color: #581c1c !important;
+}
+
+.dark-theme .btn-action-outline.ban:hover,
+.dark-theme .btn-action-outline.ban.active-ban {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+    border-color: #ef4444 !important;
+    color: #ef4444 !important;
+}
+
+.dark-theme .table-pagination {
+    background-color: #0f172a !important;
+    background: #0f172a !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .pagination-meta {
+    color: var(--text-secondary) !important;
+}
+
+/* Row Hover state stability to prevent flash on mouse-leave */
+.dark-theme .inventory-row-hover,
+.dark-theme .clickable-row,
+.dark-theme .data-table tr,
+.dark-theme table tr {
+    background-color: var(--surface-color) !important;
+    background: var(--surface-color) !important;
+    color: var(--text-primary) !important;
+}
+
+/* User profile dropdown hover background */
+.dark-theme .user-profile:hover {
+    background-color: #1e293b !important;
+    background: #1e293b !important;
+}
+
+/* User suspension context banner & modal overlays */
+.dark-theme .modal-overlay {
+    background-color: rgba(15, 23, 42, 0.65) !important;
+    background: rgba(15, 23, 42, 0.65) !important;
+}
+
+.dark-theme .user-context-banner {
+    background-color: #1e293b !important;
+    background: #1e293b !important;
+    color: #93c5fd !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .modal-form input[type="text"],
+.dark-theme .modal-form input[type="email"],
+.dark-theme .modal-form input[type="password"],
+.dark-theme .modal-form select,
+.dark-theme .modal-form textarea {
+    background-color: #0f172a !important;
+    background: #0f172a !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Bright role capsules & suspension status badge overrides */
+.dark-theme .badge-pill {
+    background-color: #1e293b !important;
+    background: #1e293b !important;
+    color: #94a3b8 !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .badge-pill.badge-primary {
+    background-color: rgba(79, 70, 229, 0.2) !important;
+    background: rgba(79, 70, 229, 0.2) !important;
+    color: #a5b4fc !important;
+    border-color: rgba(79, 70, 229, 0.4) !important;
+}
+
+.dark-theme .badge-pill.badge-warning {
+    background-color: rgba(217, 119, 6, 0.2) !important;
+    background: rgba(217, 119, 6, 0.2) !important;
+    color: #fcd34d !important;
+    border-color: rgba(217, 119, 6, 0.4) !important;
+}
+
+.dark-theme .badge-pill.badge-secondary {
+    background-color: rgba(16, 185, 129, 0.2) !important;
+    background: rgba(16, 185, 129, 0.2) !important;
+    color: #6ee7b7 !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+.dark-theme .status-badge {
+    background-color: rgba(16, 185, 129, 0.2) !important;
+    background: rgba(16, 185, 129, 0.2) !important;
+    color: #34d399 !important;
+}
+
+.dark-theme .status-badge.banned {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+    background: rgba(239, 68, 68, 0.2) !important;
+    color: #fca5a5 !important;
+}
+
+/* Banner Form Specific Dark Tones */
+.dark-theme .btn-back {
+    background-color: #1e293b !important;
+    background: #1e293b !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .btn-back:hover {
+    background-color: #334155 !important;
+    background: #334155 !important;
+}
+
+.dark-theme .upload-dropzone {
+    background-color: #0f172a !important;
+    background: #0f172a !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .upload-dropzone:hover {
+    background-color: #1e293b !important;
+    background: #1e293b !important;
+}
+
+.dark-theme .preview-img-card,
+.dark-theme .preview-file-details {
+    background-color: #1e293b !important;
+    background: #1e293b !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .btn-remove-image {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: #fca5a5 !important;
+    color: #fca5a5 !important;
+}
+
+.dark-theme .btn-remove-image:hover {
+    background-color: rgba(239, 68, 68, 0.3) !important;
+    background: rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Banner Form Simulated Preview Overrides */
+.dark-theme .preview-layout-card {
+    background-color: var(--surface-color) !important;
+    background: var(--surface-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .simulated-image-frame {
+    background-color: #0f172a !important;
+    background: #0f172a !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .simulated-content-frame {
+    background-color: var(--surface-color) !important;
+    background: var(--surface-color) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Table empty-state alignment and centering */
+.empty-state {
+    text-align: center !important;
+}
+
+.empty-state svg,
+.empty-state .empty-icon,
+.empty-state .empty-table-icon {
+    display: block !important;
+    margin: 0 auto 16px auto !important;
+}
+
+/* Base TD dark colors to prevent hover exit flashing */
+.dark-theme .data-table td,
+.dark-theme table td {
+    background-color: var(--surface-color) !important;
+    background: var(--surface-color) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}

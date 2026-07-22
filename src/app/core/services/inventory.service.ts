@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { InventoryAdjustmentDto, InventoryCorrectionDto } from '../models/inventory.model';
+import { StockAdjustmentRequestDto, VariantHistoryDto } from '../models/inventory.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -11,19 +11,23 @@ export class InventoryService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/api/Inventory`;
 
-  restock(data: InventoryAdjustmentDto): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.apiUrl}/restock`, data);
+  restock(data: StockAdjustmentRequestDto): Observable<{ message: string, newPhysicalQuantity: number }> {
+    return this.http.post<{ message: string, newPhysicalQuantity: number }>(`${this.apiUrl}/restock`, data);
   }
 
-  discard(data: InventoryAdjustmentDto): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.apiUrl}/discard`, data);
+  discard(data: StockAdjustmentRequestDto): Observable<{ message: string, newPhysicalQuantity: number }> {
+    return this.http.post<{ message: string, newPhysicalQuantity: number }>(`${this.apiUrl}/discard`, data);
   }
 
-  returnStock(data: InventoryAdjustmentDto): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.apiUrl}/return`, data);
+  returnStock(data: StockAdjustmentRequestDto): Observable<{ message: string, newPhysicalQuantity: number }> {
+    return this.http.post<{ message: string, newPhysicalQuantity: number }>(`${this.apiUrl}/return`, data);
   }
 
-  correct(data: InventoryCorrectionDto): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.apiUrl}/correct`, data);
+  correct(data: StockAdjustmentRequestDto): Observable<{ message: string, newPhysicalQuantity: number }> {
+    return this.http.post<{ message: string, newPhysicalQuantity: number }>(`${this.apiUrl}/correct`, data);
+  }
+
+  getVariantHistory(variantId: string): Observable<VariantHistoryDto[]> {
+    return this.http.get<VariantHistoryDto[]>(`${this.apiUrl}/variants/${variantId}/history`);
   }
 }

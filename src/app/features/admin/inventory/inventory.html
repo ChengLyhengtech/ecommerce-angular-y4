@@ -6,17 +6,22 @@
 </div>
 
 @if (productsQuery.error()) {
-  <div class="alert alert-danger" style="margin-bottom: 20px; padding: 12px 20px; background-color: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; border-radius: 8px;">
-    Failed to load inventory catalog. Please try again.
-  </div>
+<div class="alert alert-danger"
+  style="margin-bottom: 20px; padding: 12px 20px; background-color: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; border-radius: 8px;">
+  Failed to load inventory catalog. Please try again.
+</div>
 }
 
 <div class="card" style="position: relative;">
   <!-- Loading indicator -->
-  @if (productsQuery.isPending() || productsQuery.isFetching() || restockMutation.isPending() || discardMutation.isPending() || returnMutation.isPending() || correctMutation.isPending()) {
-    <div class="loading-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.7); display: flex; align-items: center; justify-content: center; z-index: 100;">
-      <div class="spinner" style="width: 40px; height: 40px; border: 4px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+  @if (productsQuery.isPending() || productsQuery.isFetching() || restockMutation.isPending() ||
+  discardMutation.isPending() || returnMutation.isPending() || correctMutation.isPending()) {
+  <div class="loading-overlay"
+    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.7); display: flex; align-items: center; justify-content: center; z-index: 100;">
+    <div class="spinner"
+      style="width: 40px; height: 40px; border: 4px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite;">
     </div>
+  </div>
   }
 
   <!-- Filters Toolbar -->
@@ -25,10 +30,11 @@
       <input type="text" placeholder="Search products or SKU..." [value]="searchQuery()" (input)="onSearch($event)">
     </div>
     <div class="filters">
-      <select [value]="selectedCategoryId()" (change)="onCategoryChange($event)" style="background-color: var(--surface-color); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 16px;">
+      <select [value]="selectedCategoryId()" (change)="onCategoryChange($event)"
+        style="background-color: var(--surface-color); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 16px;">
         <option value="">All Categories</option>
         @for (category of categoriesQuery.data() || []; track category.id) {
-          <option [value]="category.id">{{ category.name }}</option>
+        <option [value]="category.id">{{ category.name }}</option>
         }
       </select>
     </div>
@@ -51,69 +57,79 @@
       </thead>
       <tbody>
         @for (product of productsQuery.data()?.items || []; track product.id) {
-          @for (variant of product.variants || []; track variant.id) {
-            <tr>
-              <td>
-                <div class="prod-thumb" style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background: #f9fafb;">
-                  @if (getPrimaryImageUrl(product)) {
-                    <img [src]="apiUrl + getPrimaryImageUrl(product)" alt="{{ product.name }}"
-                      style="width: 100%; height: 100%; object-fit: cover;">
-                  } @else {
-                    <span style="font-size: 0.75rem; color: var(--text-secondary);">No Img</span>
-                  }
-                </div>
-              </td>
-              <td>
-                <div style="display: flex; flex-direction: column;">
-                  <strong style="color: var(--text-primary);">{{ product.name }}</strong>
-                  <span style="font-family: monospace; font-size: 0.75rem; color: var(--text-secondary);">{{ variant.sku }}</span>
-                </div>
-              </td>
-              <td>
-                <span class="variant-info-capsule">{{ variant.color }} / {{ variant.size }}</span>
-              </td>
-              <td>
-                <span class="badge" [class.success]="getAvailableStockStatus(variant.availableStock) === 'In Stock'"
-                  [class.warning]="getAvailableStockStatus(variant.availableStock) === 'Low Stock'"
-                  [class.danger]="getAvailableStockStatus(variant.availableStock) === 'Out of Stock'">
-                  {{ getAvailableStockStatus(variant.availableStock) }}
-                </span>
-              </td>
-              <td>{{ ($any(variant).physicalQuantity !== undefined) ? $any(variant).physicalQuantity : variant.availableStock }}</td>
-              <td>{{ ($any(variant).reservedQuantity !== undefined) ? $any(variant).reservedQuantity : 0 }}</td>
-              <td><strong>{{ variant.availableStock }}</strong></td>
-              <td style="position: relative;" (click)="$event.stopPropagation()">
-                <div class="dropdown-wrapper">
-                  <button class="btn-dropdown-trigger" (click)="toggleDropdown(variant.id, $event)">
-                    <span>Actions</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                  </button>
-                  @if (activeDropdownVariantId() === variant.id) {
-                    <div class="dropdown-menu">
-                      <button class="dropdown-item restock" (click)="openAdjustment(product.name, variant, 'restock')">
-                        <span class="icon">+</span> Restock
-                      </button>
-                      <button class="dropdown-item discard" (click)="openAdjustment(product.name, variant, 'discard')">
-                        <span class="icon">-</span> Discard
-                      </button>
-                      <button class="dropdown-item return" (click)="openAdjustment(product.name, variant, 'return')">
-                        <span class="icon">↺</span> Return
-                      </button>
-                      <button class="dropdown-item correct" (click)="openAdjustment(product.name, variant, 'correct')">
-                        <span class="icon">⚙</span> Correct
-                      </button>
-                    </div>
-                  }
-                </div>
-              </td>
-            </tr>
-          }
+        @for (variant of product.variants || []; track variant.id) {
+        <tr (click)="openHistory(product.name, variant)" style="cursor: pointer;">
+          <td>
+            <div class="prod-thumb"
+              style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background: #f9fafb;">
+              @if (getPrimaryImageUrl(product)) {
+              <img [src]="apiUrl + getPrimaryImageUrl(product)" alt="{{ product.name }}"
+                style="width: 100%; height: 100%; object-fit: cover;">
+              } @else {
+              <span style="font-size: 0.75rem; color: var(--text-secondary);">No Img</span>
+              }
+            </div>
+          </td>
+          <td>
+            <div style="display: flex; flex-direction: column;">
+              <strong style="color: var(--text-primary);">{{ product.name }}</strong>
+              <span style="font-family: monospace; font-size: 0.75rem; color: var(--text-secondary);">{{ variant.sku
+                }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="variant-info-capsule">{{ variant.color }} / {{ variant.size }}</span>
+          </td>
+          <td>
+            <span class="badge" [class.success]="getAvailableStockStatus(variant.availableStock) === 'In Stock'"
+              [class.warning]="getAvailableStockStatus(variant.availableStock) === 'Low Stock'"
+              [class.danger]="getAvailableStockStatus(variant.availableStock) === 'Out of Stock'">
+              {{ getAvailableStockStatus(variant.availableStock) }}
+            </span>
+          </td>
+          <td>{{ ($any(variant).physicalQuantity !== undefined) ? $any(variant).physicalQuantity :
+            variant.availableStock }}</td>
+          <td>{{ ($any(variant).reservedQuantity !== undefined) ? $any(variant).reservedQuantity : 0 }}</td>
+          <td><strong>{{ variant.availableStock }}</strong></td>
+          <td style="position: relative;" (click)="$event.stopPropagation()">
+            <div class="dropdown-wrapper">
+              <button class="btn-dropdown-trigger" (click)="toggleDropdown(variant.id, $event)">
+                <span>Actions</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              @if (activeDropdownVariantId() === variant.id) {
+              <div class="dropdown-menu">
+                <button class="dropdown-item restock" (click)="openAdjustment(product.name, variant, 'restock')">
+                  <span class="icon">+</span> Restock
+                </button>
+                <button class="dropdown-item discard" (click)="openAdjustment(product.name, variant, 'discard')">
+                  <span class="icon">-</span> Discard
+                </button>
+                <button class="dropdown-item return" (click)="openAdjustment(product.name, variant, 'return')">
+                  <span class="icon">↺</span> Return
+                </button>
+                <button class="dropdown-item correct" (click)="openAdjustment(product.name, variant, 'correct')">
+                  <span class="icon">⚙</span> Correct
+                </button>
+                <button class="dropdown-item history" (click)="openHistory(product.name, variant)"
+                  style="border-top: 1px solid var(--border-color); color: var(--text-secondary);">
+                  <span class="icon">📋</span> History Log
+                </button>
+              </div>
+              }
+            </div>
+          </td>
+        </tr>
+        }
         } @empty {
-          <tr>
-            <td colspan="8" style="text-align: center; padding: 32px; color: var(--text-secondary);">
-              No products found matching filters.
-            </td>
-          </tr>
+        <tr>
+          <td colspan="8" style="text-align: center; padding: 32px; color: var(--text-secondary);">
+            No products found matching filters.
+          </td>
+        </tr>
         }
       </tbody>
     </table>
@@ -121,67 +137,196 @@
 
   <!-- Pagination footer -->
   @if (productsQuery.data() && productsQuery.data()!.totalPages > 1) {
-    <div class="card-footer" style="padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-size: 0.875rem; color: var(--text-secondary);">
-        Page {{ pageNumber() }} of {{ productsQuery.data()?.totalPages }}
-      </span>
-      <div style="display: flex; gap: 8px;">
-        <button class="btn btn-secondary btn-sm" (click)="prevPage()" [disabled]="pageNumber() <= 1">Previous</button>
-        <button class="btn btn-secondary btn-sm" (click)="nextPage()" [disabled]="pageNumber() >= productsQuery.data()!.totalPages">Next</button>
-      </div>
+  <div class="card-footer"
+    style="padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+    <span style="font-size: 0.875rem; color: var(--text-secondary);">
+      Page {{ pageNumber() }} of {{ productsQuery.data()?.totalPages }}
+    </span>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn btn-secondary btn-sm" (click)="prevPage()" [disabled]="pageNumber() <= 1">Previous</button>
+      <button class="btn btn-secondary btn-sm" (click)="nextPage()"
+        [disabled]="pageNumber() >= productsQuery.data()!.totalPages">Next</button>
     </div>
+  </div>
   }
 </div>
 
 <!-- Stock adjustment modal popup dialog -->
 @if (activeAction()) {
-  <div class="modal-backdrop">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>
-          @if (activeAction() === 'restock') { Replenish Stock }
-          @if (activeAction() === 'discard') { Discard/Write-off Stock }
-          @if (activeAction() === 'return') { Return Customer Order }
-          @if (activeAction() === 'correct') { Audit Correction }
-        </h3>
-        <button class="close-btn" (click)="closeAdjustment()">×</button>
-      </div>
-      <div class="modal-body">
-        <p style="margin-bottom: 12px;">
-          Product: <strong>{{ selectedProductName() }}</strong>
-        </p>
-        <p style="margin-bottom: 20px;">
-          Variant SKU: <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">{{ selectedVariant()?.sku }}</code>
-          ({{ selectedVariant()?.color }} / {{ selectedVariant()?.size }})
-        </p>
+<div class="modal-backdrop">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>
+        @if (activeAction() === 'restock') { Replenish Stock }
+        @if (activeAction() === 'discard') { Discard/Write-off Stock }
+        @if (activeAction() === 'return') { Return Customer Order }
+        @if (activeAction() === 'correct') { Audit Correction }
+      </h3>
+      <button class="close-btn" (click)="closeAdjustment()">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom: 12px;">
+        Product: <strong>{{ selectedProductName() }}</strong>
+      </p>
+      <p style="margin-bottom: 20px;">
+        Variant SKU: <code
+          style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">{{ selectedVariant()?.sku }}</code>
+        ({{ selectedVariant()?.color }} / {{ selectedVariant()?.size }})
+      </p>
 
-        <!-- Dynamic Action Form -->
-        @if (activeAction() === 'correct') {
-          <div class="form-group">
-            <label for="corrInput">New Physical Count Quantity</label>
-            <input type="number" id="corrInput" [(ngModel)]="correctionQuantity" min="0" step="1">
-            <span style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">
-              This updates the actual physical count of this variant directly in stock audit logs.
-            </span>
-          </div>
-        } @else {
-          <div class="form-group">
-            <label for="qtyInput">Quantity</label>
-            <input type="number" id="qtyInput" [(ngModel)]="adjustmentQuantity" min="1" step="1">
-            <span style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">
-              @if (activeAction() === 'restock') { Stock levels will be increased by this quantity. }
-              @if (activeAction() === 'discard') { Stock levels will be decreased by this quantity. }
-              @if (activeAction() === 'return') { Returned item stock will be added back into inventory availability. }
-            </span>
-          </div>
-        }
+      <!-- Dynamic Action Form -->
+      @if (activeAction() === 'correct') {
+      <div class="form-group">
+        <label for="corrInput">New Physical Count Quantity *</label>
+        <input type="number" id="corrInput" [(ngModel)]="correctionQuantity" min="0" step="1">
+        <span style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">
+          This updates the actual physical count of this variant directly in stock audit logs.
+        </span>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeAdjustment()">Cancel</button>
-        <button class="btn btn-primary" (click)="submitAdjustment()">
-          Submit Adjustment
-        </button>
+      } @else {
+      <div class="form-group">
+        <label for="qtyInput">Quantity *</label>
+        <input type="number" id="qtyInput" [(ngModel)]="adjustmentQuantity" min="1" step="1">
+        <span style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">
+          @if (activeAction() === 'restock') { Stock levels will be increased by this quantity. }
+          @if (activeAction() === 'discard') { Stock levels will be decreased by this quantity. }
+          @if (activeAction() === 'return') { Returned item stock will be added back into inventory availability. }
+        </span>
+      </div>
+      }
+
+      <!-- Required Reason Code Autocomplete list -->
+      <div class="form-group" style="margin-top: 12px;">
+        <label for="reasonCodeInput">Reason Code *</label>
+        <input type="text" id="reasonCodeInput" [(ngModel)]="reasonCode" list="reasonSuggestions"
+          placeholder="Select or type adjustment reason...">
+        <datalist id="reasonSuggestions">
+          @if (activeAction() === 'restock') {
+          <option value="Vendor Restock">
+          <option value="Warehouse Stock replenishment">
+            } @else if (activeAction() === 'discard') {
+          <option value="Water Damage">
+          <option value="Damaged Items">
+          <option value="Theft/Loss">
+          <option value="Expired Stock">
+            } @else if (activeAction() === 'return') {
+          <option value="Customer Return">
+          <option value="Size Exchange Swap">
+            } @else if (activeAction() === 'correct') {
+          <option value="Audit Correction">
+          <option value="Physical Count Adjust">
+            }
+        </datalist>
+      </div>
+
+      <!-- Optional Reference Id -->
+      <div class="form-group" style="margin-top: 12px;">
+        <label for="refIdInput">Reference ID (Optional)</label>
+        <input type="text" id="refIdInput" [(ngModel)]="referenceId" placeholder="e.g. REF-INV-10092">
+      </div>
+
+      <!-- Optional Notes -->
+      <div class="form-group" style="margin-top: 12px;">
+        <label for="notesInput">Notes (Optional)</label>
+        <textarea id="notesInput" [(ngModel)]="notes" rows="3" placeholder="Additional audit details..."
+          style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); outline: none; background: var(--surface-color); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; resize: vertical;"></textarea>
       </div>
     </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeAdjustment()">Cancel</button>
+      <button class="btn btn-primary" (click)="submitAdjustment()"
+        [disabled]="!reasonCode() || reasonCode().trim() === ''">
+        Submit Adjustment
+      </button>
+    </div>
   </div>
+</div>
+}
+
+<!-- Variant Audit History Timeline Modal -->
+@if (selectedHistoryVariant()) {
+<div class="modal-backdrop">
+  <div class="modal-card" style="max-width: 580px;">
+    <div class="modal-header">
+      <h3>Variant Stock Audit History</h3>
+      <button class="close-btn" (click)="closeHistory()">×</button>
+    </div>
+    <div class="modal-body" style="max-height: 480px; overflow-y: auto;">
+      <p style="margin-bottom: 6px;">
+        Product: <strong>{{ selectedHistoryProductName() }}</strong>
+      </p>
+      <p style="margin-bottom: 20px;">
+        Variant SKU: <code
+          style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">{{ selectedHistoryVariant()?.sku }}</code>
+        ({{ selectedHistoryVariant()?.color }} / {{ selectedHistoryVariant()?.size }})
+      </p>
+
+      <!-- Timeline container -->
+      <div class="history-timeline-container"
+        style="position: relative; padding-left: 20px; border-left: 2px solid var(--border-color); margin-left: 10px;">
+        @if (historyQuery.isPending()) {
+        <div style="display: flex; justify-content: center; padding: 20px 0;">
+          <div class="spinner"></div>
+        </div>
+        } @else if (historyQuery.error()) {
+        <div class="alert alert-danger" style="padding: 12px; font-size: 0.875rem;">
+          Failed to load variant history logs. Please try again.
+        </div>
+        } @else if (historyQuery.data()?.length === 0) {
+        <div style="text-align: center; padding: 32px; color: var(--text-secondary);">
+          No historical stock movements logged for this variant.
+        </div>
+        } @else {
+        @for (log of historyQuery.data() || []; track log.id) {
+        <div class="timeline-node" style="position: relative; margin-bottom: 24px;">
+          <!-- Glowing node marker -->
+          <div class="node-marker" [style.background]="log.quantityChanged > 0 ? '#10b981' : '#ef4444'"
+            style="position: absolute; left: -27px; top: 4px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #ffffff; box-shadow: 0 0 8px rgba(0,0,0,0.15);">
+          </div>
+
+          <div class="node-card"
+            style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 16px;">
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 4px;">
+              <span class="badge" [style.background]="log.quantityChanged > 0 ? '#dcfce7' : '#fef2f2'"
+                [style.color]="log.quantityChanged > 0 ? '#15803d' : '#ef4444'">
+                {{ log.movementType }}
+              </span>
+              <span style="font-size: 0.75rem; color: var(--text-secondary);">{{ log.createdAt | date:'medium' }}</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.875rem;">
+              <div>
+                Quantity variance:
+                <strong [style.color]="log.quantityChanged > 0 ? '#10b981' : '#ef4444'">
+                  {{ log.quantityChanged > 0 ? '+' : '' }}{{ log.quantityChanged }}
+                </strong>
+              </div>
+              <div><strong>Reason:</strong> {{ log.reasonCode }}</div>
+              @if (log.referenceId) {
+              <div><strong>Reference:</strong> <span style="font-family: monospace; font-size: 0.8rem;">{{
+                  log.referenceId }}</span></div>
+              }
+              @if (log.notes) {
+              <div
+                style="background: #ffffff; border-radius: 6px; padding: 6px 10px; font-style: italic; border: 1px dashed var(--border-color); color: var(--text-secondary); margin-top: 4px;">
+                "{{ log.notes }}"
+              </div>
+              }
+              <div
+                style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; border-top: 1px solid var(--border-color); padding-top: 4px;">
+                By: {{ log.changedBy }}
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+        }
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeHistory()">Close</button>
+    </div>
+  </div>
+</div>
 }
