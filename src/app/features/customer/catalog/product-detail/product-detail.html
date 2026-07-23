@@ -2,20 +2,20 @@
   
   <!-- Breadcrumb -->
   <nav class="flex items-center space-x-2 text-xs font-medium text-slate-400">
-    <a routerLink="/" class="hover:text-indigo-600 transition">Home</a>
+    <a routerLink="/" class="hover:text-red-600 transition">Home</a>
     <span>/</span>
-    <a routerLink="/products" class="hover:text-indigo-600 transition">Products</a>
+    <a routerLink="/products" class="hover:text-red-600 transition">Products</a>
     <span>/</span>
-    <span class="text-slate-800 dark:text-slate-200 truncate max-w-xs">{{ productQuery.data()?.name || 'Detail' }}</span>
+    <span class="text-slate-800 truncate max-w-xs font-bold">{{ productQuery.data()?.name || 'Detail' }}</span>
   </nav>
 
   <!-- Loading State -->
   <div *ngIf="productQuery.isLoading()" class="animate-pulse grid grid-cols-1 lg:grid-cols-2 gap-12">
-    <div class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-3xl"></div>
+    <div class="aspect-square bg-slate-200 rounded-3xl"></div>
     <div class="space-y-6">
-      <div class="h-8 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
-      <div class="h-6 bg-slate-200 dark:bg-slate-800 rounded w-1/3"></div>
-      <div class="h-24 bg-slate-200 dark:bg-slate-800 rounded"></div>
+      <div class="h-8 bg-slate-200 rounded w-3/4"></div>
+      <div class="h-6 bg-slate-200 rounded w-1/3"></div>
+      <div class="h-24 bg-slate-200 rounded"></div>
     </div>
   </div>
 
@@ -25,7 +25,7 @@
     <!-- LEFT: IMAGE GALLERY -->
     <div class="space-y-4">
       <!-- Large Main Image Preview -->
-      <div class="relative aspect-square rounded-3xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-lg">
+      <div class="relative aspect-square rounded-3xl overflow-hidden bg-white border border-slate-200 shadow-sm">
         <img 
           [src]="getImageUrl(p.images && p.images.length > 0 ? p.images[selectedImageIndex()].imageUrl : '')" 
           [alt]="p.name" 
@@ -42,8 +42,8 @@
           *ngFor="let img of p.images; let i = index" 
           (click)="selectedImageIndex.set(i)"
           [class.ring-2]="selectedImageIndex() === i"
-          [class.ring-indigo-600]="selectedImageIndex() === i"
-          class="w-20 h-20 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shrink-0 transition"
+          [class.ring-red-600]="selectedImageIndex() === i"
+          class="w-20 h-20 rounded-2xl overflow-hidden bg-white border border-slate-200 shrink-0 transition"
         >
           <img [src]="getImageUrl(img.imageUrl)" [alt]="p.name" class="w-full h-full object-cover">
         </button>
@@ -55,25 +55,25 @@
       
       <!-- Category & Brand -->
       <div class="flex items-center space-x-3">
-        <span class="px-3 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-bold rounded-lg border border-indigo-200/50 dark:border-indigo-900/50 uppercase tracking-wider">
+        <span class="px-3 py-1 bg-red-50 text-red-600 text-xs font-bold rounded-lg border border-red-200 uppercase tracking-wider">
           {{ p.categoryName || 'Category' }}
         </span>
-        <span *ngIf="p.brandName" class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-lg uppercase tracking-wider">
+        <span *ngIf="p.brandName" class="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg uppercase tracking-wider">
           Brand: {{ p.brandName }}
         </span>
       </div>
 
       <!-- Name & Description -->
       <div>
-        <h1 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white leading-tight">{{ p.name }}</h1>
-        <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mt-3">{{ p.description }}</p>
+        <h1 class="text-3xl sm:text-4xl font-black text-slate-950 leading-tight">{{ p.name }}</h1>
+        <p class="text-slate-600 text-sm leading-relaxed mt-3">{{ p.description }}</p>
       </div>
 
       <!-- Price Section -->
-      <div class="p-4 bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center justify-between">
+      <div class="p-5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
         <div>
           <div class="flex items-baseline space-x-3">
-            <span class="text-3xl font-black text-slate-900 dark:text-white">${{ p.finalPrice | number:'1.2-2' }}</span>
+            <span class="text-3xl font-black text-slate-950">${{ p.finalPrice | number:'1.2-2' }}</span>
             <span *ngIf="p.isDiscounted" class="text-base text-slate-400 line-through">${{ p.basePrice | number:'1.2-2' }}</span>
           </div>
           <p class="text-xs text-slate-400 mt-0.5">Price inclusive of all taxes</p>
@@ -81,12 +81,12 @@
 
         <!-- Stock Indicator -->
         <div class="text-right">
-          <span *ngIf="(selectedVariant()?.availableStock ?? 0) > 0" class="inline-flex items-center text-xs font-bold text-emerald-600 dark:text-emerald-400">
+          <span *ngIf="(selectedVariant()?.availableStock ?? 0) > 0" class="inline-flex items-center text-xs font-bold text-emerald-600">
             <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-ping"></span>
-            In Stock ({{ selectedVariant()?.availableStock }} available)
+            In Stock ({{ selectedVariant()?.availableStock }} left)
           </span>
-          <span *ngIf="(selectedVariant()?.availableStock ?? 0) <= 0" class="inline-flex items-center text-xs font-bold text-red-500">
-            <span class="w-2 h-2 rounded-full bg-red-500 mr-1.5"></span>
+          <span *ngIf="(selectedVariant()?.availableStock ?? 0) <= 0" class="inline-flex items-center text-xs font-bold text-red-600">
+            <span class="w-2 h-2 rounded-full bg-red-600 mr-1.5"></span>
             Out of Stock
           </span>
         </div>
@@ -100,20 +100,18 @@
           <button 
             *ngFor="let v of p.variants" 
             (click)="selectVariant(v)"
-            [class.border-indigo-600]="selectedVariant()?.id === v.id"
-            [class.bg-indigo-50]="selectedVariant()?.id === v.id"
-            [class.dark:bg-indigo-950/40]="selectedVariant()?.id === v.id"
-            [class.text-indigo-600]="selectedVariant()?.id === v.id"
-            [class.dark:text-indigo-400]="selectedVariant()?.id === v.id"
-            class="p-3.5 border border-slate-200 dark:border-slate-800 rounded-2xl text-left hover:border-indigo-400 transition flex flex-col justify-between"
+            [class.border-red-600]="selectedVariant()?.id === v.id"
+            [class.bg-red-50]="selectedVariant()?.id === v.id"
+            [class.text-red-600]="selectedVariant()?.id === v.id"
+            class="p-3.5 border border-slate-200 rounded-2xl text-left hover:border-slate-400 transition flex flex-col justify-between"
           >
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-900 dark:text-white">{{ v.color }}</span>
-              <span class="text-[10px] font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-500">{{ v.size }}</span>
+              <span class="text-xs font-bold text-slate-900">{{ v.color }}</span>
+              <span class="text-[10px] font-semibold px-2 py-0.5 bg-slate-100 rounded text-slate-600">Size: {{ v.size }}</span>
             </div>
             <div class="mt-2 flex items-center justify-between text-[11px] text-slate-400">
               <span class="truncate">SKU: {{ v.sku }}</span>
-              <span [class.text-emerald-500]="v.availableStock > 0" [class.text-red-500]="v.availableStock <= 0" class="font-bold">
+              <span [class.text-emerald-600]="v.availableStock > 0" [class.text-red-600]="v.availableStock <= 0" class="font-bold">
                 {{ v.availableStock > 0 ? v.availableStock + ' left' : 'Sold out' }}
               </span>
             </div>
@@ -122,15 +120,15 @@
       </div>
 
       <!-- Quantity Selector & Actions -->
-      <div class="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+      <div class="space-y-4 pt-4 border-t border-slate-200">
         <div class="flex items-center space-x-4">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Quantity:</label>
-          <div class="flex items-center border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl p-1">
-            <button (click)="updateQuantity(-1)" [disabled]="quantity() <= 1" class="w-8 h-8 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-bold disabled:opacity-30">
+          <div class="flex items-center border border-slate-300 bg-white rounded-xl p-1">
+            <button (click)="updateQuantity(-1)" [disabled]="quantity() <= 1" class="w-8 h-8 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded-lg font-bold disabled:opacity-30">
               -
             </button>
-            <span class="w-10 text-center text-sm font-bold text-slate-900 dark:text-white">{{ quantity() }}</span>
-            <button (click)="updateQuantity(1)" [disabled]="quantity() >= (selectedVariant()?.availableStock ?? 99)" class="w-8 h-8 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-bold disabled:opacity-30">
+            <span class="w-10 text-center text-sm font-bold text-slate-900">{{ quantity() }}</span>
+            <button (click)="updateQuantity(1)" [disabled]="quantity() >= (selectedVariant()?.availableStock ?? 99)" class="w-8 h-8 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded-lg font-bold disabled:opacity-30">
               +
             </button>
           </div>
@@ -141,7 +139,7 @@
           <button 
             (click)="addToCart()" 
             [disabled]="isAddingToCart() || (selectedVariant()?.availableStock ?? 0) <= 0"
-            class="px-6 py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white rounded-2xl font-bold text-sm shadow-xl shadow-indigo-600/25 transition flex items-center justify-center space-x-2"
+            class="px-6 py-4 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-2xl font-bold text-sm shadow-md transition flex items-center justify-center space-x-2"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
             <span>{{ isAddingToCart() ? 'Adding...' : 'Add to Cart' }}</span>
@@ -150,7 +148,7 @@
           <button 
             (click)="buyNow()" 
             [disabled]="(selectedVariant()?.availableStock ?? 0) <= 0"
-            class="px-6 py-4 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 disabled:bg-slate-300 dark:disabled:bg-slate-800 rounded-2xl font-bold text-sm shadow-lg transition"
+            class="px-6 py-4 bg-red-600 hover:bg-red-700 text-white disabled:bg-slate-300 rounded-2xl font-bold text-sm shadow-md transition"
           >
             Buy Now & Pay via Bakong
           </button>

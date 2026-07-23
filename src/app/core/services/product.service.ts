@@ -15,6 +15,8 @@ export class ProductService {
     categoryId?: string; 
     hasDiscount?: boolean; 
     search?: string; 
+    minPrice?: number;
+    maxPrice?: number;
     pageNumber?: number; 
     pageSize?: number; 
   }): Observable<PaginatedResponse<Product>> {
@@ -28,6 +30,12 @@ export class ProductService {
     if (filters?.search) {
       params = params.set('search', filters.search);
     }
+    if (filters?.minPrice !== undefined) {
+      params = params.set('minPrice', filters.minPrice.toString());
+    }
+    if (filters?.maxPrice !== undefined) {
+      params = params.set('maxPrice', filters.maxPrice.toString());
+    }
     if (filters?.pageNumber !== undefined) {
       params = params.set('pageNumber', filters.pageNumber.toString());
     }
@@ -35,6 +43,19 @@ export class ProductService {
       params = params.set('pageSize', filters.pageSize.toString());
     }
     return this.http.get<PaginatedResponse<Product>>(this.apiUrl, { params });
+  }
+
+  getProductsUnderPrice(price: number = 20, pageNumber: number = 1, pageSize: number = 10): Observable<PaginatedResponse<Product>> {
+    let params = new HttpParams()
+      .set('price', price.toString())
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+    return this.http.get<PaginatedResponse<Product>>(`${this.apiUrl}/under-price`, { params });
+  }
+
+  getTopSellingProducts(count: number = 10): Observable<Product[]> {
+    let params = new HttpParams().set('count', count.toString());
+    return this.http.get<Product[]>(`${this.apiUrl}/top-selling`, { params });
   }
 
   getProductById(id: string): Observable<Product> {

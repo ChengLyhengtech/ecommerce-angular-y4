@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { NotificationItem } from '../../../core/models/notification.model';
 
 @Component({
@@ -13,7 +14,12 @@ import { NotificationItem } from '../../../core/models/notification.model';
 })
 export class AdminLayoutComponent implements OnInit, OnDestroy {
   notificationService = inject(NotificationService);
+  authService = inject(AuthService);
   private router = inject(Router);
+
+  logout(): void {
+    this.authService.logout();
+  }
 
   isSidebarCollapsed = typeof window !== 'undefined' ? localStorage.getItem('sidebarCollapsed') === 'true' : false;
   isMobileSidebarOpen = false;

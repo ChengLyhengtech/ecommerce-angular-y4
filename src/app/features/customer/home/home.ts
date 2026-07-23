@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { injectQuery } from '@tanstack/angular-query-experimental';
@@ -7,23 +7,30 @@ import { BannerService } from '../../../core/services/banner.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { ProductService } from '../../../core/services/product.service';
 import { CartService } from '../../../core/services/cart.service';
+import { WishlistService } from '../../../core/services/wishlist.service';
+import { ProductCardComponent } from '../../../shared/components/product-card/product-card';
 import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ProductCardComponent],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   private bannerService = inject(BannerService);
   private categoryService = inject(CategoryService);
   private productService = inject(ProductService);
   cartService = inject(CartService);
+  private wishlistService = inject(WishlistService);
 
   apiUrl = environment.apiUrl;
   activeBannerIndex = signal<number>(0);
+
+  ngOnInit(): void {
+    this.wishlistService.loadWishlist().subscribe();
+  }
 
   // TanStack Query for Banners
   bannersQuery = injectQuery(() => ({
@@ -43,38 +50,28 @@ export class HomeComponent {
     queryFn: () => lastValueFrom(this.productService.getProducts({ hasDiscount: true, pageSize: 6 }))
   }));
 
+  // TanStack Query for Top Selling Products (Best Sellers)
+  topSellingProductsQuery = injectQuery(() => ({
+    queryKey: ['topSellingProducts'],
+    queryFn: () => lastValueFrom(this.productService.getTopSellingProducts(10))
+  }));
+
+  // TanStack Query for Products Under $20
+  under20ProductsQuery = injectQuery(() => ({
+    queryKey: ['under20Products'],
+    queryFn: () => lastValueFrom(this.productService.getProductsUnderPrice(20, 1, 8))
+  }));
+
   // TanStack Query for New Arrivals
   latestProductsQuery = injectQuery(() => ({
     queryKey: ['latestProducts'],
-    queryFn: () => lastValueFrom(this.productService.getProducts({ pageSize: 8 }))
+    queryFn: () => lastValueFrom(this.productService.getProducts({ pageSize: 10 }))
   }));
 
   getImageUrl(url?: string): string {
     if (!url) return 'https://placehold.co/600x400?text=Product';
     if (url.startsWith('http')) return url;
     return `${this.apiUrl}${url}`;
-  }
-
-  getProductPrimaryImage(product: any): string {
-    if (product.images && product.images.length > 0) {
-      const primary = product.images.find((i: any) => i.isPrimary);
-      return this.getImageUrl(primary ? primary.imageUrl : product.images[0].imageUrl);
-    }
-    return 'https://placehold.co/600x400?text=No+Image';
-  }
-
-  quickAddToCart(product: any, event: Event): void {
-    event.stopPropagation();
-    event.preventDefault();
-    if (product.variants && product.variants.length > 0) {
-      // Pick first available variant
-      const variant = product.variants.find((v: any) => v.availableStock > 0) || product.variants[0];
-      this.cartService.addToCart(variant.id, 1).subscribe({
-        next: () => {
-          this.cartService.openDrawer();
-        }
-      });
-    }
   }
 
   nextBanner(total: number): void {

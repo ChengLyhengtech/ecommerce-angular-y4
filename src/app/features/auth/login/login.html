@@ -1,0 +1,134 @@
+<div class="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+  <div class="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-xl space-y-6">
+    
+    <!-- Header Logo & Title -->
+    <div class="text-center space-y-2">
+      <a routerLink="/" class="inline-flex items-center space-x-1">
+        <span class="text-3xl font-black tracking-tighter text-slate-950 font-serif">CLH168</span>
+        <span class="text-3xl font-black text-red-600">.</span>
+      </a>
+      <h2 class="text-2xl font-black text-slate-900">Welcome Back</h2>
+      <p class="text-xs text-slate-500">Sign in to your customer account or administrator portal.</p>
+    </div>
+
+    <!-- Error Banner -->
+    <div *ngIf="errorMessage()" class="p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-xs font-semibold flex items-center space-x-2">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <span>{{ errorMessage() }}</span>
+    </div>
+
+    <!-- Demo Fill Shortcuts -->
+    <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-2">
+      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Quick Demo Login</span>
+      <div class="flex gap-2">
+        <button (click)="fillCustomer()" type="button" class="flex-1 py-1.5 px-2 bg-white border border-slate-200 hover:border-red-500 rounded-xl font-bold text-slate-800 text-[11px] transition">
+          Customer Demo
+        </button>
+        <button (click)="fillAdmin()" type="button" class="flex-1 py-1.5 px-2 bg-white border border-slate-200 hover:border-slate-900 rounded-xl font-bold text-slate-800 text-[11px] transition">
+          Admin Demo
+        </button>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form (ngSubmit)="onLogin()" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email Address</label>
+        <input 
+          type="email" 
+          [ngModel]="email()" 
+          (ngModelChange)="email.set($event)"
+          name="email"
+          placeholder="name@example.com" 
+          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 font-medium"
+          required
+        >
+      </div>
+
+      <div>
+        <div class="flex justify-between items-center mb-1.5">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Password</label>
+        </div>
+        <input 
+          type="password" 
+          [ngModel]="password()" 
+          (ngModelChange)="password.set($event)"
+          name="password"
+          placeholder="••••••••" 
+          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 font-medium"
+          required
+        >
+      </div>
+
+      <button 
+        type="submit" 
+        [disabled]="isSubmitting()"
+        class="w-full py-3.5 bg-slate-950 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-lg transition flex items-center justify-center space-x-2 disabled:opacity-50"
+      >
+        <svg *ngIf="isSubmitting()" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        <span>{{ isSubmitting() ? 'Authenticating...' : 'Sign In' }}</span>
+      </button>
+    </form>
+
+    <!-- Divider for Customer Social Options -->
+    <div class="relative py-2">
+      <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+      <div class="relative flex justify-center text-xs uppercase"><span class="bg-white px-3 text-slate-400 font-bold">Or Customer Social Sign In</span></div>
+    </div>
+
+    <!-- Google & Telegram OAuth buttons -->
+    <div class="grid grid-cols-2 gap-3">
+      <button 
+        (click)="loginWithGoogle()" 
+        type="button" 
+        class="w-full py-2.5 px-3 border border-slate-200 hover:border-slate-400 bg-white rounded-xl text-xs font-bold text-slate-700 flex items-center justify-center space-x-2 transition shadow-xs"
+      >
+        <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 10.8 0 12.5s.7 2.8 1.9 5.2l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z"/></svg>
+        <span>Google</span>
+      </button>
+
+      <button 
+        (click)="loginWithTelegram()" 
+        type="button" 
+        class="w-full py-2.5 px-3 border border-slate-200 hover:border-sky-500 bg-white rounded-xl text-xs font-bold text-sky-600 flex items-center justify-center space-x-2 transition shadow-xs"
+      >
+        <svg class="w-4 h-4 fill-sky-500" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.16l-2.02 9.53c-.15.68-.56.84-1.13.52l-3.1-2.28-1.5 1.44c-.16.16-.3.3-.61.3l.22-3.17 5.77-5.21c.25-.22-.05-.34-.39-.12l-7.13 4.49-3.08-.96c-.67-.21-.68-.67.14-.99l12.04-4.64c.56-.2 1.05.14.86.89z"/></svg>
+        <span>Telegram</span>
+      </button>
+    </div>
+
+    <!-- Google Official GIS Button Container -->
+    <div id="googleBtnContainerLogin" class="flex justify-center my-2"></div>
+
+    <!-- Telegram OAuth Modal -->
+    <div *ngIf="showTelegramModal()" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 space-y-4 text-center">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+          <div class="flex items-center space-x-2">
+            <svg class="w-6 h-6 fill-sky-500" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.16l-2.02 9.53c-.15.68-.56.84-1.13.52l-3.1-2.28-1.5 1.44c-.16.16-.3.3-.61.3l.22-3.17 5.77-5.21c.25-.22-.05-.34-.39-.12l-7.13 4.49-3.08-.96c-.67-.21-.68-.67.14-.99l12.04-4.64c.56-.2 1.05.14.86.89z"/></svg>
+            <h3 class="font-bold text-slate-900 text-sm">Telegram Authentication</h3>
+          </div>
+          <button (click)="closeTelegramModal()" type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg px-2">✕</button>
+        </div>
+        <p class="text-xs text-slate-500">Click the Telegram Login button below to authorize with your Telegram account.</p>
+        
+        <div class="flex justify-center py-3" #telegramContainer>
+          <!-- Telegram Widget Script loaded dynamically -->
+        </div>
+
+        <button (click)="closeTelegramModal()" type="button" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition">
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- Register Footer -->
+    <div class="text-center pt-2">
+      <p class="text-xs text-slate-500">
+        Don't have a customer account? 
+        <a routerLink="/register" class="font-bold text-red-600 hover:underline">Register New Account</a>
+      </p>
+    </div>
+
+  </div>
+</div>

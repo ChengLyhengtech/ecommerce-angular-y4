@@ -26,6 +26,10 @@ export const routes: Routes = [
         loadComponent: () => import('./checkout/checkout').then(m => m.CheckoutComponent)
       },
       {
+        path: 'wishlist',
+        loadComponent: () => import('./wishlist/wishlist').then(m => m.WishlistComponent)
+      },
+      {
         path: 'orders',
         loadComponent: () => import('./account/order-history/order-history').then(m => m.OrderHistoryComponent)
       },

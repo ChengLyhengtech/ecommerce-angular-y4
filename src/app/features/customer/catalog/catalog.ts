@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -8,22 +8,25 @@ import { ProductService } from '../../../core/services/product.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { BrandService } from '../../../core/services/brand.service';
 import { CartService } from '../../../core/services/cart.service';
+import { WishlistService } from '../../../core/services/wishlist.service';
+import { ProductCardComponent } from '../../../shared/components/product-card/product-card';
 import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-catalog',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, ProductCardComponent],
   templateUrl: './catalog.html',
   styleUrl: './catalog.css'
 })
-export class CatalogComponent {
+export class CatalogComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
   cartService = inject(CartService);
+  private wishlistService = inject(WishlistService);
 
   apiUrl = environment.apiUrl;
 
@@ -32,17 +35,23 @@ export class CatalogComponent {
   selectedCategoryId = signal<string>('');
   selectedBrandId = signal<string>('');
   hasDiscountOnly = signal<boolean>(false);
+  maxPriceFilter = signal<number | null>(null);
   sortBy = signal<string>('name'); // 'name', 'priceAsc', 'priceDesc'
   pageNumber = signal<number>(1);
-  pageSize = signal<number>(12);
+  pageSize = signal<number>(15);
 
   constructor() {
     this.route.queryParams.subscribe((params) => {
       if (params['search']) this.searchQuery.set(params['search']);
       if (params['categoryId']) this.selectedCategoryId.set(params['categoryId']);
       if (params['hasDiscount']) this.hasDiscountOnly.set(params['hasDiscount'] === 'true');
+      if (params['maxPrice']) this.maxPriceFilter.set(+params['maxPrice']);
       if (params['pageNumber']) this.pageNumber.set(+params['pageNumber']);
     });
+  }
+
+  ngOnInit(): void {
+    this.wishlistService.loadWishlist().subscribe();
   }
 
   // TanStack Query for Categories
@@ -62,15 +71,17 @@ export class CatalogComponent {
     const search = this.searchQuery();
     const categoryId = this.selectedCategoryId();
     const hasDiscount = this.hasDiscountOnly();
+    const maxPrice = this.maxPriceFilter();
     const pageNumber = this.pageNumber();
     const pageSize = this.pageSize();
 
     return {
-      queryKey: ['catalogProducts', { search, categoryId, hasDiscount, pageNumber, pageSize }],
+      queryKey: ['catalogProducts', { search, categoryId, hasDiscount, maxPrice, pageNumber, pageSize }],
       queryFn: () => lastValueFrom(this.productService.getProducts({
         search: search || undefined,
         categoryId: categoryId || undefined,
         hasDiscount: hasDiscount ? true : undefined,
+        maxPrice: maxPrice ?? undefined,
         pageNumber,
         pageSize
       }))
@@ -100,20 +111,6 @@ export class CatalogComponent {
     return list;
   }
 
-  getImageUrl(url?: string): string {
-    if (!url) return 'https://placehold.co/600x400?text=Product';
-    if (url.startsWith('http')) return url;
-    return `${this.apiUrl}${url}`;
-  }
-
-  getProductPrimaryImage(product: any): string {
-    if (product.images && product.images.length > 0) {
-      const primary = product.images.find((i: any) => i.isPrimary);
-      return this.getImageUrl(primary ? primary.imageUrl : product.images[0].imageUrl);
-    }
-    return 'https://placehold.co/600x400?text=No+Image';
-  }
-
   onFilterChange(): void {
     this.pageNumber.set(1);
     this.updateQueryParams();
@@ -124,6 +121,7 @@ export class CatalogComponent {
     this.selectedCategoryId.set('');
     this.selectedBrandId.set('');
     this.hasDiscountOnly.set(false);
+    this.maxPriceFilter.set(null);
     this.sortBy.set('name');
     this.pageNumber.set(1);
     this.router.navigate([], { relativeTo: this.route, queryParams: {} });
@@ -144,22 +142,10 @@ export class CatalogComponent {
         search: this.searchQuery() || null,
         categoryId: this.selectedCategoryId() || null,
         hasDiscount: this.hasDiscountOnly() ? 'true' : null,
+        maxPrice: this.maxPriceFilter() ? this.maxPriceFilter() : null,
         pageNumber: this.pageNumber() > 1 ? this.pageNumber() : null
       },
       queryParamsHandling: 'merge'
     });
-  }
-
-  quickAddToCart(product: any, event: Event): void {
-    event.stopPropagation();
-    event.preventDefault();
-    if (product.variants && product.variants.length > 0) {
-      const variant = product.variants.find((v: any) => v.availableStock > 0) || product.variants[0];
-      this.cartService.addToCart(variant.id, 1).subscribe({
-        next: () => {
-          this.cartService.openDrawer();
-        }
-      });
-    }
   }
 }
