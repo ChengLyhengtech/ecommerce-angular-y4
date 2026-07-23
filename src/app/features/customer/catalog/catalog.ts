@@ -10,6 +10,7 @@ import { BrandService } from '../../../core/services/brand.service';
 import { CartService } from '../../../core/services/cart.service';
 import { WishlistService } from '../../../core/services/wishlist.service';
 import { ProductCardComponent } from '../../../shared/components/product-card/product-card';
+import { TARGET_GENDER_OPTIONS } from '../../../core/models/product.model';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -29,11 +30,13 @@ export class CatalogComponent implements OnInit {
   private wishlistService = inject(WishlistService);
 
   apiUrl = environment.apiUrl;
+  targetGenderOptions = TARGET_GENDER_OPTIONS;
 
   // Filter signals
   searchQuery = signal<string>('');
   selectedCategoryId = signal<string>('');
   selectedBrandId = signal<string>('');
+  selectedTargetGender = signal<string>('');
   hasDiscountOnly = signal<boolean>(false);
   maxPriceFilter = signal<number | null>(null);
   sortBy = signal<string>('name'); // 'name', 'priceAsc', 'priceDesc'
@@ -44,6 +47,7 @@ export class CatalogComponent implements OnInit {
     this.route.queryParams.subscribe((params) => {
       if (params['search']) this.searchQuery.set(params['search']);
       if (params['categoryId']) this.selectedCategoryId.set(params['categoryId']);
+      if (params['targetGender']) this.selectedTargetGender.set(params['targetGender']);
       if (params['hasDiscount']) this.hasDiscountOnly.set(params['hasDiscount'] === 'true');
       if (params['maxPrice']) this.maxPriceFilter.set(+params['maxPrice']);
       if (params['pageNumber']) this.pageNumber.set(+params['pageNumber']);
@@ -70,16 +74,18 @@ export class CatalogComponent implements OnInit {
   productsQuery = injectQuery(() => {
     const search = this.searchQuery();
     const categoryId = this.selectedCategoryId();
+    const targetGender = this.selectedTargetGender();
     const hasDiscount = this.hasDiscountOnly();
     const maxPrice = this.maxPriceFilter();
     const pageNumber = this.pageNumber();
     const pageSize = this.pageSize();
 
     return {
-      queryKey: ['catalogProducts', { search, categoryId, hasDiscount, maxPrice, pageNumber, pageSize }],
+      queryKey: ['catalogProducts', { search, categoryId, targetGender, hasDiscount, maxPrice, pageNumber, pageSize }],
       queryFn: () => lastValueFrom(this.productService.getProducts({
         search: search || undefined,
         categoryId: categoryId || undefined,
+        targetGender: targetGender || undefined,
         hasDiscount: hasDiscount ? true : undefined,
         maxPrice: maxPrice ?? undefined,
         pageNumber,
@@ -120,6 +126,7 @@ export class CatalogComponent implements OnInit {
     this.searchQuery.set('');
     this.selectedCategoryId.set('');
     this.selectedBrandId.set('');
+    this.selectedTargetGender.set('');
     this.hasDiscountOnly.set(false);
     this.maxPriceFilter.set(null);
     this.sortBy.set('name');
@@ -141,6 +148,7 @@ export class CatalogComponent implements OnInit {
       queryParams: {
         search: this.searchQuery() || null,
         categoryId: this.selectedCategoryId() || null,
+        targetGender: this.selectedTargetGender() || null,
         hasDiscount: this.hasDiscountOnly() ? 'true' : null,
         maxPrice: this.maxPriceFilter() ? this.maxPriceFilter() : null,
         pageNumber: this.pageNumber() > 1 ? this.pageNumber() : null

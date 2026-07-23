@@ -5,7 +5,7 @@ import { injectQuery, injectMutation, injectQueryClient } from '@tanstack/angula
 import { lastValueFrom } from 'rxjs';
 import { ProductService } from '../../../../core/services/product.service';
 import { CategoryService } from '../../../../core/services/category.service';
-import { Product } from '../../../../core/models/product.model';
+import { Product, TARGET_GENDER_OPTIONS } from '../../../../core/models/product.model';
 import { environment } from '../../../../../environments/environment';
 
 @Component({
@@ -25,8 +25,11 @@ export class ProductListComponent {
   // Filters and Pagination
   searchQuery = signal<string>('');
   selectedCategoryId = signal<string>('');
+  selectedTargetGender = signal<string>('');
   pageNumber = signal<number>(1);
   pageSize = signal<number>(10);
+
+  targetGenderOptions = TARGET_GENDER_OPTIONS;
 
   // TanStack Query for Categories
   categoriesQuery = injectQuery(() => ({
@@ -38,14 +41,16 @@ export class ProductListComponent {
   productsQuery = injectQuery(() => {
     const search = this.searchQuery();
     const categoryId = this.selectedCategoryId();
+    const targetGender = this.selectedTargetGender();
     const pageNumber = this.pageNumber();
     const pageSize = this.pageSize();
 
     return {
-      queryKey: ['products', { search, categoryId, pageNumber, pageSize }],
+      queryKey: ['products', { search, categoryId, targetGender, pageNumber, pageSize }],
       queryFn: () => lastValueFrom(this.productService.getProducts({
         search: search || undefined,
         categoryId: categoryId || undefined,
+        targetGender: targetGender || undefined,
         pageNumber,
         pageSize
       }))
@@ -72,6 +77,12 @@ export class ProductListComponent {
   onCategoryChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
     this.selectedCategoryId.set(value);
+    this.pageNumber.set(1);
+  }
+
+  onTargetGenderChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.selectedTargetGender.set(value);
     this.pageNumber.set(1);
   }
 

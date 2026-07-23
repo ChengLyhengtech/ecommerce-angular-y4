@@ -1,3 +1,20 @@
+export enum TargetGenderFlag {
+  None = 0,
+  Men = 1,
+  Women = 2,
+  Boys = 4,
+  Girls = 8,
+  Unisex = 16
+}
+
+export const TARGET_GENDER_OPTIONS = [
+  { value: TargetGenderFlag.Men, label: 'Men' },
+  { value: TargetGenderFlag.Women, label: 'Women' },
+  { value: TargetGenderFlag.Boys, label: 'Boys' },
+  { value: TargetGenderFlag.Girls, label: 'Girls' },
+  { value: TargetGenderFlag.Unisex, label: 'Unisex' }
+];
+
 export interface ProductImage {
   id: string;
   imageUrl: string;
@@ -26,6 +43,8 @@ export interface Product {
   categoryName: string;
   brandId: string;
   brandName: string;
+  targetGender?: number;
+  targetGenders?: string[];
   variants: ProductVariant[];
   images: ProductImage[];
 }
@@ -44,6 +63,7 @@ export interface ProductCreateDto {
   discountPercentage?: number;
   categoryId: string;
   brandId: string;
+  targetGender?: number | string;
   variants: VariantCreateDto[];
   images?: File[];
   imageTargetSkus?: string[];
@@ -57,6 +77,7 @@ export interface ProductUpdateDto {
   discountPercentage: number;
   categoryId: string;
   brandId: string;
+  targetGender?: number | string;
 }
 
 export interface ProductVariantUpdateDto {

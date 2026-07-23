@@ -83,17 +83,29 @@ export interface PlaceOrderDto {
 
 export interface PlaceOrderResponseData {
   orderId: string;
-  merchant_name: string;
-  qr_code: string;
-  qr_md5: string;
-  amount: number;
-  currency: string;
-  qr_expiration: string;
+  status?: string;
+  totalAmount?: number;
+  qrImage?: string;
+  qrString?: string;
+  qrMd5?: string;
+  expiration?: string;
+  merchant_name?: string;
+  qr_code?: string;
+  qr_md5?: string;
+  amount?: number;
+  currency?: string;
+  qr_expiration?: string;
 }
 
 export interface PlaceOrderResponseDto {
-  success: boolean;
-  message: string;
-  data: PlaceOrderResponseData;
+  orderId?: string;
+  status?: string;
+  totalAmount?: number;
+  qrImage?: string;
+  qrString?: string;
+  qrMd5?: string;
+  expiration?: string;
+  success?: boolean;
+  message?: string;
+  data?: PlaceOrderResponseData;
 }
-

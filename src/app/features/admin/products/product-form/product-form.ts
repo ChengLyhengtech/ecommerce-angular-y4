@@ -8,7 +8,7 @@ import { ProductService } from '../../../../core/services/product.service';
 import { CategoryService } from '../../../../core/services/category.service';
 import { BrandService } from '../../../../core/services/brand.service';
 import { Category } from '../../../../core/models/category.model';
-import { Product, ProductImage, VariantCreateDto } from '../../../../core/models/product.model';
+import { Product, ProductImage, VariantCreateDto, TARGET_GENDER_OPTIONS, TargetGenderFlag } from '../../../../core/models/product.model';
 import { environment } from '../../../../../environments/environment';
 
 interface SelectedImageFile {
@@ -34,6 +34,8 @@ export class ProductFormComponent implements OnInit {
   private router = inject(Router);
   public apiUrl = environment.apiUrl;
   private queryClient = injectQueryClient();
+
+  targetGenderOptions = TARGET_GENDER_OPTIONS;
 
   productForm!: FormGroup;
   isEditMode = signal<boolean>(false);
@@ -205,7 +207,8 @@ export class ProductFormComponent implements OnInit {
           basePrice: product.basePrice,
           discountPercentage: product.discountPercentage,
           categoryId: product.categoryId,
-          brandId: product.brandId
+          brandId: product.brandId,
+          targetGender: product.targetGender ?? 16
         });
 
         // Clear existing variants in FormArray
@@ -247,8 +250,24 @@ export class ProductFormComponent implements OnInit {
       discountPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
       categoryId: ['', [Validators.required]],
       brandId: ['', [Validators.required]],
+      targetGender: [16, [Validators.required]],
       variants: this.fb.array([])
     });
+  }
+
+  isGenderSelected(flagValue: number): boolean {
+    const current = Number(this.productForm.get('targetGender')?.value || 0);
+    return (current & flagValue) === flagValue;
+  }
+
+  toggleGenderFlag(flagValue: number): void {
+    let current = Number(this.productForm.get('targetGender')?.value || 0);
+    if ((current & flagValue) === flagValue) {
+      current = current ^ flagValue;
+    } else {
+      current = current | flagValue;
+    }
+    this.productForm.patchValue({ targetGender: current });
   }
 
   get variants(): FormArray {
@@ -438,6 +457,7 @@ export class ProductFormComponent implements OnInit {
       discountPercentage: Number(formValues.discountPercentage),
       categoryId: formValues.categoryId,
       brandId: formValues.brandId,
+      targetGender: Number(formValues.targetGender ?? 16),
       variants: formValues.variants.map((v: any) => ({
         color: v.color,
         size: v.size,
@@ -462,7 +482,8 @@ export class ProductFormComponent implements OnInit {
       basePrice: Number(formValues.basePrice),
       discountPercentage: Number(formValues.discountPercentage),
       categoryId: formValues.categoryId,
-      brandId: formValues.brandId
+      brandId: formValues.brandId,
+      targetGender: Number(formValues.targetGender ?? 16)
     };
 
     this.updateProductMutation.mutate({

@@ -122,6 +122,34 @@
           </div>
         </div>
 
+        <!-- Target Gender Filter -->
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Demographics</label>
+          <div class="flex flex-wrap gap-1.5 pt-1">
+            <button 
+              (click)="selectedTargetGender.set(''); onFilterChange()" 
+              [class.bg-slate-900]="!selectedTargetGender()"
+              [class.text-white]="!selectedTargetGender()"
+              [class.bg-slate-100]="selectedTargetGender()"
+              [class.text-slate-700]="selectedTargetGender()"
+              class="px-2.5 py-1 rounded-lg text-xs font-semibold transition"
+            >
+              All
+            </button>
+            <button 
+              *ngFor="let opt of targetGenderOptions"
+              (click)="selectedTargetGender.set(opt.value.toString()); onFilterChange()" 
+              [class.bg-slate-900]="selectedTargetGender() === opt.value.toString()"
+              [class.text-white]="selectedTargetGender() === opt.value.toString()"
+              [class.bg-slate-100]="selectedTargetGender() !== opt.value.toString()"
+              [class.text-slate-700]="selectedTargetGender() !== opt.value.toString()"
+              class="px-2.5 py-1 rounded-lg text-xs font-semibold transition"
+            >
+              {{ opt.label }}
+            </button>
+          </div>
+        </div>
+
         <!-- Categories Filter -->
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Category</label>

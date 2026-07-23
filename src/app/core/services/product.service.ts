@@ -17,6 +17,7 @@ export class ProductService {
     search?: string; 
     minPrice?: number;
     maxPrice?: number;
+    targetGender?: number | string;
     pageNumber?: number; 
     pageSize?: number; 
   }): Observable<PaginatedResponse<Product>> {
@@ -35,6 +36,9 @@ export class ProductService {
     }
     if (filters?.maxPrice !== undefined) {
       params = params.set('maxPrice', filters.maxPrice.toString());
+    }
+    if (filters?.targetGender !== undefined && filters.targetGender !== '') {
+      params = params.set('targetGender', filters.targetGender.toString());
     }
     if (filters?.pageNumber !== undefined) {
       params = params.set('pageNumber', filters.pageNumber.toString());
@@ -72,6 +76,9 @@ export class ProductService {
     }
     formData.append('CategoryId', data.categoryId);
     formData.append('BrandId', data.brandId);
+    if (data.targetGender !== undefined) {
+      formData.append('TargetGender', data.targetGender.toString());
+    }
     
     formData.append('Variants', JSON.stringify(data.variants));
 
