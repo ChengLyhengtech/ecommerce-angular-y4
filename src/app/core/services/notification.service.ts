@@ -2,6 +2,7 @@ import { Injectable, inject, signal, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, of } from 'rxjs';
 import * as signalR from '@microsoft/signalr';
+import { injectQueryClient } from '@tanstack/angular-query-experimental';
 import { environment } from '../../../environments/environment';
 import {
   NotificationItem,
@@ -15,6 +16,7 @@ import {
 })
 export class NotificationService implements OnDestroy {
   private http = inject(HttpClient);
+  private queryClient = injectQueryClient();
   private apiUrl = `${environment.apiUrl}/api/Notifications`;
 
   private hubConnection: signalR.HubConnection | null = null;
@@ -90,14 +92,14 @@ export class NotificationService implements OnDestroy {
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl, {
         accessTokenFactory: () =>
-          localStorage.getItem('jwt_token') || localStorage.getItem('token') || ''
+          localStorage.getItem('token') || localStorage.getItem('accessToken') || localStorage.getItem('jwt_token') || ''
       })
       .withAutomaticReconnect()
       .build();
 
-    // Register event listener for real-time notifications
+    // Event 1: ReceiveNotification (Standard Admin Alert Broadcast)
     this.hubConnection.on('ReceiveNotification', (notification: NotificationItem) => {
-      console.log('Real-time Notification Received:', notification);
+      console.log('📡 SignalR Real-time Notification Received:', notification);
 
       this.notifications.update((current) => {
         const exists = current.some((n) => n.id === notification.id);
@@ -113,12 +115,28 @@ export class NotificationService implements OnDestroy {
 
       this.toastNotification.set(notification);
 
+      // Auto-invalidate TanStack Query caches so UI updates in real-time without requiring manual refresh
+      this.queryClient.invalidateQueries({ queryKey: ['orders'] });
+      this.queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      this.queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      this.queryClient.invalidateQueries({ queryKey: ['adminDashboard'] });
+
       // Auto dismiss toast after 6 seconds
       setTimeout(() => {
         if (this.toastNotification()?.id === notification.id) {
           this.toastNotification.set(null);
         }
       }, 6000);
+    });
+
+    // Event 2: ReceiveNewOrder (Broadcasted when new order is placed)
+    this.hubConnection.on('ReceiveNewOrder', (data: any) => {
+      console.log('📡 SignalR Real-time ReceiveNewOrder Event:', data);
+      this.fetchUnreadNotifications().subscribe();
+      this.queryClient.invalidateQueries({ queryKey: ['orders'] });
+      this.queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      this.queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      this.queryClient.invalidateQueries({ queryKey: ['adminDashboard'] });
     });
 
     this.hubConnection

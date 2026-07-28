@@ -55,29 +55,61 @@
     </ng-template>
   </section>
 
-  <!-- CATEGORIES SHOWCASE -->
+  <!-- COMPACT & PROFESSIONAL CATEGORIES SHOWCASE -->
   <section *ngIf="categoriesQuery.data() && categoriesQuery.data()!.length > 0" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center justify-between mb-4">
       <div>
-        <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Shop by Category</h2>
-        <p class="text-sm text-slate-500 mt-1">Explore our wide selection of product categories</p>
+        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Shop by Category</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Explore our curated collections</p>
       </div>
-      <a routerLink="/products" class="text-sm font-bold text-red-600 hover:underline flex items-center">
-        <span>View All</span>
-        <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+      <a routerLink="/products" class="text-xs font-bold text-red-600 hover:underline flex items-center">
+        <span>View All Categories</span>
+        <svg class="w-3.5 h-3.5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
       </a>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
       <a *ngFor="let cat of categoriesQuery.data()" 
          [routerLink]="['/products']" 
          [queryParams]="{categoryId: cat.id}"
-         class="group bg-white border border-slate-200/80 rounded-2xl p-4 text-center hover:border-slate-900 hover:shadow-xl transition duration-300 flex flex-col items-center">
-        <div class="w-20 h-20 rounded-2xl bg-slate-100 overflow-hidden mb-3 group-hover:scale-105 transition duration-300 flex items-center justify-center">
+         class="group flex items-center p-2.5 bg-white border border-slate-200/80 rounded-2xl hover:border-red-500 hover:shadow-md transition-all duration-200 space-x-3">
+        <div class="w-11 h-11 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-100 group-hover:scale-105 transition">
           <img [src]="getImageUrl(cat.imageUrl)" [alt]="cat.name" class="w-full h-full object-cover">
         </div>
-        <h3 class="font-bold text-slate-900 text-sm group-hover:text-red-600 transition">{{ cat.name }}</h3>
-        <span class="text-xs text-slate-400 mt-0.5">{{ cat.productCount || 0 }} items</span>
+        <div class="min-w-0 flex-1">
+          <h3 class="font-bold text-slate-900 text-xs truncate group-hover:text-red-600 transition">{{ cat.name }}</h3>
+          <span class="text-[10px] font-medium text-slate-400 block truncate">{{ cat.productCount || 0 }} items</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- FEATURED BRANDS SHOWCASE (NEW FEATURE) -->
+  <section *ngIf="brandsQuery.data() && brandsQuery.data()!.length > 0" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Shop by Brand</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Filter by authentic official brands</p>
+      </div>
+      <a routerLink="/products" class="text-xs font-bold text-red-600 hover:underline flex items-center">
+        <span>All Brands</span>
+        <svg class="w-3.5 h-3.5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+      <a *ngFor="let brand of brandsQuery.data()" 
+         [routerLink]="['/products']" 
+         [queryParams]="{brandId: brand.id}"
+         class="group flex items-center p-2.5 bg-white border border-slate-200/80 rounded-2xl hover:border-slate-900 hover:shadow-md transition-all duration-200 space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-slate-50 overflow-hidden shrink-0 border border-slate-100 flex items-center justify-center p-1 group-hover:scale-105 transition">
+          <img *ngIf="brand.logoUrl" [src]="getImageUrl(brand.logoUrl)" [alt]="brand.name" class="w-full h-full object-contain">
+          <span *ngIf="!brand.logoUrl" class="text-xs font-black text-slate-700 uppercase">{{ brand.name.slice(0, 2) }}</span>
+        </div>
+        <div class="min-w-0 flex-1">
+          <h3 class="font-bold text-slate-900 text-xs truncate group-hover:text-red-600 transition">{{ brand.name }}</h3>
+          <span class="text-[10px] text-slate-400 block font-medium">Official Store</span>
+        </div>
       </a>
     </div>
   </section>
@@ -169,7 +201,7 @@
     </ng-template>
   </section>
 
-  <!-- STORE VALUE PROPOSITIONS (Moved to bottom right above footer as requested!) -->
+  <!-- STORE VALUE PROPOSITIONS -->
   <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-slate-200">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       <div class="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex items-start space-x-4">

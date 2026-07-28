@@ -96,8 +96,45 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       this.notificationService.markAsRead(notification.id).subscribe();
     }
     this.isNotificationDropdownOpen.set(false);
+    this.notificationService.dismissToast();
+
+    const type = notification.type;
+    const title = (notification.title || '').toLowerCase();
+    const targetUrl = (notification.targetUrl || '').toLowerCase();
+
+    // 1. New Order -> Navigate to admin/orders
+    if (type === 'NewOrder' || title.includes('order') || targetUrl.includes('order')) {
+      this.router.navigate(['/admin/orders']);
+      return;
+    }
+
+    // 2. Low Stock Alert -> Navigate to admin/inventory
+    if (type === 'LowStock' || title.includes('stock') || targetUrl.includes('inventory') || targetUrl.includes('stock')) {
+      this.router.navigate(['/admin/inventory']);
+      return;
+    }
+
+    // 3. Return Request -> Navigate to admin/returns
+    if (type === 'ReturnRequest' || title.includes('return') || targetUrl.includes('return')) {
+      this.router.navigate(['/admin/returns']);
+      return;
+    }
+
+    // Fallback for custom targetUrl
     if (notification.targetUrl) {
-      this.router.navigateByUrl(notification.targetUrl);
+      let url = notification.targetUrl;
+      if (url.includes('/orders')) {
+        url = '/admin/orders';
+      } else if (url.includes('/inventory') || url.includes('/stock')) {
+        url = '/admin/inventory';
+      } else if (url.includes('/returns')) {
+        url = '/admin/returns';
+      } else if (!url.startsWith('/admin') && !url.startsWith('http')) {
+        url = `/admin${url.startsWith('/') ? '' : '/'}${url}`;
+      }
+      this.router.navigateByUrl(url);
+    } else {
+      this.router.navigate(['/admin']);
     }
   }
 

@@ -5,6 +5,7 @@ import { injectQuery } from '@tanstack/angular-query-experimental';
 import { lastValueFrom } from 'rxjs';
 import { BannerService } from '../../../core/services/banner.service';
 import { CategoryService } from '../../../core/services/category.service';
+import { BrandService } from '../../../core/services/brand.service';
 import { ProductService } from '../../../core/services/product.service';
 import { CartService } from '../../../core/services/cart.service';
 import { WishlistService } from '../../../core/services/wishlist.service';
@@ -21,6 +22,7 @@ import { environment } from '../../../../environments/environment';
 export class HomeComponent implements OnInit {
   private bannerService = inject(BannerService);
   private categoryService = inject(CategoryService);
+  private brandService = inject(BrandService);
   private productService = inject(ProductService);
   cartService = inject(CartService);
   private wishlistService = inject(WishlistService);
@@ -42,6 +44,12 @@ export class HomeComponent implements OnInit {
   categoriesQuery = injectQuery(() => ({
     queryKey: ['homeCategories'],
     queryFn: () => lastValueFrom(this.categoryService.getCategories())
+  }));
+
+  // TanStack Query for Brands Showcase
+  brandsQuery = injectQuery(() => ({
+    queryKey: ['homeBrands'],
+    queryFn: () => lastValueFrom(this.brandService.getBrands())
   }));
 
   // TanStack Query for Discounted Hot Deals

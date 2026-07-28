@@ -6,6 +6,7 @@ import { lastValueFrom } from 'rxjs';
 import { ReturnRequestService } from '../../../core/services/return-request.service';
 import { ProductService } from '../../../core/services/product.service';
 import { ReturnRequestTicket, ReturnRequestReviewDto } from '../../../core/models/return-request.model';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-return-list',
@@ -18,6 +19,8 @@ export class ReturnListComponent {
   private returnRequestService = inject(ReturnRequestService);
   private productService = inject(ProductService);
   private queryClient = injectQueryClient();
+
+  apiUrl = environment.apiUrl;
 
   // Filter by ticket status: 'PendingReview' | 'Approved' | 'Rejected' | ''
   statusFilter = signal<string>('PendingReview');
@@ -37,7 +40,7 @@ export class ReturnListComponent {
     };
   });
 
-  // Query products to lookup variant name and SKU friendly displays
+  // Query products to lookup variant name and SKU friendly displays (Fallback)
   productsQuery = injectQuery(() => ({
     queryKey: ['products-lookup'],
     queryFn: () => lastValueFrom(this.productService.getProducts({ pageSize: 250 }))
@@ -51,17 +54,24 @@ export class ReturnListComponent {
       this.queryClient.invalidateQueries({ queryKey: ['returnRequests'] });
       this.queryClient.invalidateQueries({ queryKey: ['products-inventory'] });
       this.queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] });
-      alert('Ticket successfully resolved!');
+      alert('Return ticket successfully resolved!');
       this.closeReview();
     },
-    onError: (err) => {
+    onError: (err: any) => {
       console.error('Failed to resolve return ticket:', err);
-      alert('Failed to resolve return ticket. Please try again.');
+      const errMsg = err?.error?.message || err?.message || 'Failed to resolve return ticket.';
+      alert(`Error: ${errMsg}`);
     }
   }));
 
   setStatusFilter(status: string): void {
     this.statusFilter.set(status);
+  }
+
+  getItemImage(imageUrl?: string): string {
+    if (!imageUrl) return 'https://placehold.co/100x100?text=No+Image';
+    if (imageUrl.startsWith('http')) return imageUrl;
+    return `${this.apiUrl}${imageUrl}`;
   }
 
   openReview(ticket: ReturnRequestTicket): void {
@@ -88,17 +98,20 @@ export class ReturnListComponent {
     this.reviewMutation.mutate({ id: ticket.id, body: payload });
   }
 
-  getVariantDetails(variantId: string): { name: string, sku: string } {
+  getVariantDetails(ticket: ReturnRequestTicket): { name: string, sku: string } {
+    if (ticket.productName) {
+      return { name: ticket.productName, sku: ticket.sku || 'N/A' };
+    }
     const products = this.productsQuery.data()?.items;
     if (products) {
       for (const prod of products) {
-        const variant = prod.variants.find(v => v.id === variantId);
+        const variant = prod.variants.find(v => v.id === ticket.productVariantId);
         if (variant) {
           return { name: prod.name, sku: variant.sku };
         }
       }
     }
-    return { name: 'Unknown Variant', sku: variantId.substring(0, 8) + '...' };
+    return { name: 'Unknown Variant', sku: ticket.productVariantId.substring(0, 8) + '...' };
   }
 
   getStatusBadgeClass(status: string): string {

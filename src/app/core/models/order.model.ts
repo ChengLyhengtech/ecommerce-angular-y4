@@ -40,14 +40,29 @@ export interface PaymentDetailsDto {
   paidAt?: string;
 }
 
+export interface OrderItemImageDto {
+  id: string;
+  imageUrl: string;
+  isPrimary: boolean;
+  productVariantId?: string | null;
+}
+
 export interface OrderItemResponseDto {
   id: string;
+  productId?: string;
+  variantId?: string;
   productName: string;
+  productDescription?: string;
+  categoryName?: string;
+  brandName?: string;
   size?: string;
   color?: string;
   sku?: string;
+  imageUrl?: string;
+  images?: OrderItemImageDto[];
   quantity: number;
   priceAtPurchase: number;
+  subTotal?: number;
 }
 
 export interface OrderDetailsResponseDto {
@@ -59,6 +74,9 @@ export interface OrderDetailsResponseDto {
   shippingAddress: string;
   latitude: number;
   longitude: number;
+  paymentMethod?: string;
+  qrCode?: string;
+  qrMd5?: string;
   customer: CustomerSummaryDto;
   paymentDetails?: PaymentDetailsDto;
   items: OrderItemResponseDto[];

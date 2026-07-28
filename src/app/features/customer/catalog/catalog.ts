@@ -47,6 +47,7 @@ export class CatalogComponent implements OnInit {
     this.route.queryParams.subscribe((params) => {
       if (params['search']) this.searchQuery.set(params['search']);
       if (params['categoryId']) this.selectedCategoryId.set(params['categoryId']);
+      if (params['brandId']) this.selectedBrandId.set(params['brandId']);
       if (params['targetGender']) this.selectedTargetGender.set(params['targetGender']);
       if (params['hasDiscount']) this.hasDiscountOnly.set(params['hasDiscount'] === 'true');
       if (params['maxPrice']) this.maxPriceFilter.set(+params['maxPrice']);
@@ -74,6 +75,7 @@ export class CatalogComponent implements OnInit {
   productsQuery = injectQuery(() => {
     const search = this.searchQuery();
     const categoryId = this.selectedCategoryId();
+    const brandId = this.selectedBrandId();
     const targetGender = this.selectedTargetGender();
     const hasDiscount = this.hasDiscountOnly();
     const maxPrice = this.maxPriceFilter();
@@ -81,10 +83,11 @@ export class CatalogComponent implements OnInit {
     const pageSize = this.pageSize();
 
     return {
-      queryKey: ['catalogProducts', { search, categoryId, targetGender, hasDiscount, maxPrice, pageNumber, pageSize }],
+      queryKey: ['catalogProducts', { search, categoryId, brandId, targetGender, hasDiscount, maxPrice, pageNumber, pageSize }],
       queryFn: () => lastValueFrom(this.productService.getProducts({
         search: search || undefined,
         categoryId: categoryId || undefined,
+        brandId: brandId || undefined,
         targetGender: targetGender || undefined,
         hasDiscount: hasDiscount ? true : undefined,
         maxPrice: maxPrice ?? undefined,
@@ -100,7 +103,7 @@ export class CatalogComponent implements OnInit {
 
     let list = [...response.items];
 
-    // Filter by Brand locally if selected
+    // Local fallback filter by Brand if API returns unfiltered array
     if (this.selectedBrandId()) {
       list = list.filter((p) => p.brandId === this.selectedBrandId());
     }
@@ -148,6 +151,7 @@ export class CatalogComponent implements OnInit {
       queryParams: {
         search: this.searchQuery() || null,
         categoryId: this.selectedCategoryId() || null,
+        brandId: this.selectedBrandId() || null,
         targetGender: this.selectedTargetGender() || null,
         hasDiscount: this.hasDiscountOnly() ? 'true' : null,
         maxPrice: this.maxPriceFilter() ? this.maxPriceFilter() : null,

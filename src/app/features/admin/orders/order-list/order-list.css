@@ -452,34 +452,39 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(15, 23, 42, 0.6);
+  background-color: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 50;
-  padding: 24px;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  will-change: opacity;
 }
 
 .modal-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
-  max-height: 90vh;
+  max-height: 88vh;
   width: 100%;
   max-width: 600px;
   overflow: hidden;
-  animation: modalEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  animation: modalEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-card.wide-modal {
-  max-width: 1000px;
+  max-width: 1050px;
 }
 
 @keyframes modalEnter {
-  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  from { opacity: 0; transform: scale(0.97) translateY(8px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
@@ -490,6 +495,7 @@
   justify-content: space-between;
   align-items: flex-start;
   background-color: #fafbfc;
+  flex-shrink: 0;
 }
 
 .modal-title-area h3 {
@@ -529,9 +535,14 @@
 }
 
 .modal-body {
-  padding: 28px;
+  padding: 24px 28px;
   overflow-y: auto;
+  max-height: calc(88vh - 135px);
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
   background-color: #f8fafc;
+  will-change: transform;
 }
 
 .modal-footer {
@@ -540,6 +551,28 @@
   display: flex;
   justify-content: flex-end;
   background-color: #fafbfc;
+  flex-shrink: 0;
+}
+
+.item-thumb-img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+  background-color: #ffffff;
+}
+
+.badge-sub {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border-radius: 6px;
+  text-transform: uppercase;
+  border: 1px solid #e2e8f0;
 }
 
 /* STEPPER */

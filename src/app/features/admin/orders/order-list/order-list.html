@@ -1,104 +1,108 @@
-<div class="page-header">
-  <div class="header-title">
-    <h1>Orders & Transactions</h1>
-    <p>Manage customer orders, track payments, ship merchandise, and review dashboard transactions</p>
-  </div>
-</div>
-
-<!-- ==========================================================================
-     ORDER MANAGEMENT WORKSPACE
-     ========================================================================== -->
-<div class="card" style="position: relative;">
-  <!-- Global loading bar overlay -->
-  @if (isLoading()) {
-    <div class="loading-overlay">
-      <div class="spinner"></div>
-      <p>Updating orders database...</p>
+<div class="order-list-container">
+  
+  <!-- Page Header Title & Subtitle -->
+  <div class="page-header">
+    <div class="header-titles">
+      <h2>Customer Orders</h2>
+      <p class="subtitle">View order history, Bakong KHQR payment statuses, and manage fulfillment workflows.</p>
     </div>
-  }
-
-  <!-- Toolbar Filters -->
-  <div class="card-toolbar">
-    <div class="toolbar-left">
-      <div class="search-box">
-        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input type="text" placeholder="Search ID, phone, address, customer name..." [value]="searchTerm()" (input)="onSearch($event)">
+    
+    <div class="header-stats">
+      <div class="stat-pill">
+        <span class="stat-label">Total Filtered:</span>
+        <span class="stat-value">{{ ordersQuery.data()?.totalCount || 0 }}</span>
       </div>
+    </div>
+  </div>
 
+  <!-- Filter & Search Toolbar -->
+  <div class="toolbar-card">
+    <div class="search-box">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input 
+        type="text" 
+        placeholder="Search by customer name, email, or phone..." 
+        [value]="searchTerm()"
+        (input)="onSearch($event)"
+        class="search-input"
+      />
+    </div>
+
+    <div class="filter-actions">
+      <!-- Status Selector -->
       <div class="filter-group">
-        <label for="statusFilter">Status:</label>
-        <select id="statusFilter" [value]="status()" (change)="onStatusChange($event)">
-          <option value="">All Statuses (Auto Excludes Unpaid Pending)</option>
-          <option value="Pending">Pending (Unpaid)</option>
-          <option value="Paid">Paid (Awaiting Shipment)</option>
+        <label>Status:</label>
+        <select [value]="status()" (change)="onStatusChange($event)" class="select-control">
+          <option value="">All Statuses</option>
+          <option value="Pending">Pending Verification</option>
+          <option value="Paid">Paid (Settled)</option>
           <option value="Shipped">Shipped</option>
           <option value="Delivered">Delivered</option>
           <option value="Finished">Finished</option>
           <option value="Cancelled">Cancelled</option>
         </select>
       </div>
-    </div>
 
-    <div class="toolbar-right">
+      <!-- Sort By Selector -->
       <div class="filter-group">
-        <label for="sortBy">Sort By:</label>
-        <select id="sortBy" [value]="sortBy()" (change)="onSortChange($event)">
+        <label>Sort By:</label>
+        <select [value]="sortBy()" (change)="onSortChange($event)" class="select-control">
           <option value="date">Order Date</option>
-          <option value="amount">Total Amount</option>
+          <option value="total">Total Amount</option>
+          <option value="status">Status</option>
         </select>
+        
+        <button class="btn-icon" (click)="toggleSortDirection()" title="Toggle Sort Order">
+          @if (isDescending()) {
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          }
+        </button>
       </div>
 
-      <button class="btn btn-icon-toggle" (click)="toggleSortDirection()" title="Toggle sort direction">
-        @if (isDescending()) {
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <polyline points="19 12 12 19 5 12"></polyline>
-          </svg>
-          <span>Descending</span>
-        } @else {
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="19" x2="12" y2="5"></line>
-            <polyline points="5 12 12 5 19 12"></polyline>
-          </svg>
-          <span>Ascending</span>
-        }
-      </button>
-
+      <!-- Page Size Selector -->
       <div class="filter-group">
-        <label for="pageSize">Show:</label>
-        <select id="pageSize" [value]="pageSize()" (change)="onPageSizeChange($event)" style="width: 70px;">
+        <label>Show:</label>
+        <select [value]="pageSize()" (change)="onPageSizeChange($event)" class="select-control short-select">
           <option [value]="5">5</option>
           <option [value]="10">10</option>
-          <option [value]="20">20</option>
-          <option [value]="30">30</option>
+          <option [value]="25">25</option>
           <option [value]="50">50</option>
         </select>
       </div>
     </div>
   </div>
 
-  <!-- Main Order Table -->
-  <div class="table-scroll-container">
+  <!-- Orders Data Table Card -->
+  <div class="table-card relative">
+    @if (isLoading()) {
+      <div class="loading-overlay">
+        <div class="spinner"></div>
+        <span>Updating orders list...</span>
+      </div>
+    }
+
     <table class="data-table">
       <thead>
         <tr>
-          <th>Order ID</th>
+          <th>Order Info</th>
           <th>Customer Details</th>
           <th>Date</th>
-          <th class="text-right">Total Amount</th>
-          <th>Fulfillment Status</th>
-          <th class="text-center">Actions</th>
+          <th class="text-right">Total Payable</th>
+          <th>Status</th>
+          <th class="text-center">Action</th>
         </tr>
       </thead>
       <tbody>
-        @for (order of ordersQuery.data()?.items || []; track order.id) {
-          <tr (click)="openDetailsModal(order.id)" class="clickable-row">
+        @for (order of ordersQuery.data()?.items; track order.id) {
+          <tr class="clickable-row" (click)="openDetailsModal(order.id)">
             <td>
-              <div class="id-cell">
-                <span class="order-id" title="{{ order.id }}">#{{ order.id.substring(0, 8) }}</span>
+              <div class="order-id-cell">
+                <span class="id-short font-mono">#{{ order.id.substring(0, 8) }}...</span>
                 <button class="copy-btn" (click)="copyToClipboard(order.id, $event)" title="Copy Full ID">
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -114,7 +118,7 @@
               </div>
             </td>
             <td>
-              <span class="order-date">{{ order.orderDate | date:'medium' }}</span>
+              <span class="order-date">{{ order.orderDate | date:'short' }}</span>
             </td>
             <td class="text-right font-bold">
               {{ order.totalAmount | currency }}
@@ -243,13 +247,13 @@
             <div class="details-col-main">
               <!-- Purchased Items Table -->
               <div class="section-container">
-                <h4 class="section-title">Purchased Items</h4>
+                <h4 class="section-title">Purchased Items ({{ detail.items ? detail.items.length : 0 }})</h4>
                 <div class="items-table-wrapper">
                   <table class="items-table">
                     <thead>
                       <tr>
                         <th>Product Item</th>
-                        <th>Variant Details</th>
+                        <th>Variant</th>
                         <th class="text-right">Price</th>
                         <th class="text-center">Qty</th>
                         <th class="text-right">Subtotal</th>
@@ -259,9 +263,16 @@
                       @for (item of detail.items; track item.id) {
                         <tr>
                           <td>
-                            <div class="product-item-cell">
-                              <span class="product-name">{{ item.productName }}</span>
-                              <span class="product-sku">SKU: {{ item.sku || 'N/A' }}</span>
+                            <div class="product-item-cell" style="display: flex; align-items: center; gap: 12px;">
+                              <img [src]="getItemImage(item)" [alt]="item.productName" class="item-thumb-img" />
+                              <div style="min-w: 0;">
+                                <span class="product-name font-bold text-slate-900 block" style="font-size: 0.875rem;">{{ item.productName }}</span>
+                                <div class="item-submeta" style="display: flex; gap: 6px; margin: 2px 0;">
+                                  @if (item.categoryName) { <span class="badge-sub">{{ item.categoryName }}</span> }
+                                  @if (item.brandName) { <span class="badge-sub">{{ item.brandName }}</span> }
+                                </div>
+                                <span class="product-sku" style="font-size: 0.75rem; color: #64748b;">SKU: {{ item.sku || 'N/A' }}</span>
+                              </div>
                             </div>
                           </td>
                           <td>
@@ -273,7 +284,7 @@
                           </td>
                           <td class="text-right">{{ item.priceAtPurchase | currency }}</td>
                           <td class="text-center font-bold">{{ item.quantity }}</td>
-                          <td class="text-right font-bold">{{ (item.priceAtPurchase * item.quantity) | currency }}</td>
+                          <td class="text-right font-bold">{{ (item.subTotal ?? (item.priceAtPurchase * item.quantity)) | currency }}</td>
                         </tr>
                       }
                     </tbody>

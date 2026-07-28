@@ -150,6 +150,30 @@
           </div>
         </div>
 
+        <!-- Brands Filter (NEW) -->
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Brand</label>
+          <div class="space-y-1 max-h-48 overflow-y-auto pr-1">
+            <button 
+              (click)="selectedBrandId.set(''); onFilterChange()" 
+              [class.bg-slate-100]="!selectedBrandId()" 
+              [class.text-red-600]="!selectedBrandId()"
+              class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 transition flex justify-between items-center"
+            >
+              <span>All Brands</span>
+            </button>
+            <button 
+              *ngFor="let brand of brandsQuery.data()" 
+              (click)="selectedBrandId.set(brand.id); onFilterChange()" 
+              [class.bg-red-50]="selectedBrandId() === brand.id"
+              [class.text-red-600]="selectedBrandId() === brand.id"
+              class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 transition flex justify-between items-center"
+            >
+              <span>{{ brand.name }}</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Categories Filter -->
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Category</label>

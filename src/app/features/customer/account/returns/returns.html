@@ -1,0 +1,96 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  
+  <!-- Breadcrumb Navigation -->
+  <nav class="flex items-center space-x-2 text-xs font-medium text-slate-400">
+    <a routerLink="/" class="hover:text-red-600 transition">Home</a>
+    <span>/</span>
+    <a routerLink="/orders" class="hover:text-red-600 transition">My Orders</a>
+    <span>/</span>
+    <span class="text-slate-800 font-bold">Return Requests</span>
+  </nav>
+
+  <div class="border-b border-slate-200 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-black text-slate-950">My Return Tickets</h1>
+      <p class="text-sm text-slate-500 mt-1">Track return request tickets submitted for purchased items.</p>
+    </div>
+
+    <a routerLink="/orders" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm transition self-start sm:self-auto">
+      &larr; View Orders History
+    </a>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="returnsQuery.isLoading()" class="py-16 text-center text-slate-400">
+    <svg class="animate-spin w-8 h-8 text-slate-900 mx-auto mb-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+    <p class="text-sm font-medium">Fetching return request history...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!returnsQuery.isLoading() && (!returnsQuery.data() || returnsQuery.data()!.length === 0)" class="bg-white border border-slate-200 rounded-3xl p-12 text-center">
+    <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-4">
+      <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" /></svg>
+    </div>
+    <h3 class="text-lg font-bold text-slate-900 mb-1">No Return Tickets Submitted</h3>
+    <p class="text-sm text-slate-500 max-w-sm mx-auto mb-6">You have not submitted any item return requests yet.</p>
+    <a routerLink="/orders" class="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-md transition">
+      View Orders & Request Return
+    </a>
+  </div>
+
+  <!-- Tickets List -->
+  <div *ngIf="!returnsQuery.isLoading() && returnsQuery.data() && returnsQuery.data()!.length > 0" class="space-y-4">
+    <div *ngFor="let ticket of returnsQuery.data()" class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm hover:shadow-md transition space-y-4">
+      
+      <!-- Top Card Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
+        <div>
+          <div class="flex items-center space-x-3">
+            <span class="text-xs font-bold text-slate-400 font-mono">TICKET #{{ ticket.id.slice(0, 8) }}...</span>
+            <span [class]="getStatusBadgeClass(ticket.status)" class="px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider">
+              {{ ticket.status }}
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">Submitted on: {{ ticket.createdAt | date:'medium' }}</p>
+        </div>
+
+        <div class="text-left sm:text-right">
+          <span class="text-xs text-slate-400 block font-mono">Order Ref:</span>
+          <span class="text-sm font-bold font-mono text-slate-800">{{ ticket.orderId }}</span>
+        </div>
+      </div>
+
+      <!-- Item Details Body -->
+      <div class="flex items-center space-x-4">
+        <img [src]="getItemImage(ticket.imageUrl)" [alt]="ticket.productName || 'Product'" class="w-16 h-16 rounded-2xl object-cover border border-slate-200 bg-slate-50 shrink-0">
+        <div class="flex-1 min-w-0">
+          <h4 class="font-bold text-slate-900 text-sm">{{ ticket.productName || 'Product Variant' }}</h4>
+          <div class="flex items-center space-x-2 text-xs text-slate-500 mt-1">
+            <span *ngIf="ticket.color" class="px-2 py-0.5 bg-slate-100 rounded">Color: {{ ticket.color }}</span>
+            <span *ngIf="ticket.size" class="px-2 py-0.5 bg-slate-100 rounded">Size: {{ ticket.size }}</span>
+            <span *ngIf="ticket.sku" class="text-slate-400 font-mono">SKU: {{ ticket.sku }}</span>
+            <span class="font-bold text-slate-800">Qty: {{ ticket.quantity }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reasons & Notes Container -->
+      <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
+        <div>
+          <span class="font-bold text-slate-700">Reason:</span>
+          <span class="ml-2 font-semibold text-slate-900 bg-amber-50 text-amber-700 px-2.5 py-0.5 rounded border border-amber-200">{{ ticket.customerReason }}</span>
+        </div>
+        <div *ngIf="ticket.customerNotes">
+          <span class="font-bold text-slate-700">My Comments:</span>
+          <span class="ml-2 text-slate-600 font-normal">"{{ ticket.customerNotes }}"</span>
+        </div>
+        <div *ngIf="ticket.adminNotes" class="pt-2 border-t border-slate-200">
+          <span class="font-bold text-slate-900 block">Support Team Feedback:</span>
+          <p class="text-slate-700 italic mt-0.5">"{{ ticket.adminNotes }}"</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

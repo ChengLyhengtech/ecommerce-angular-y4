@@ -1,9 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { injectQuery, injectMutation, injectQueryClient } from '@tanstack/angular-query-experimental';
 import { lastValueFrom } from 'rxjs';
 import { OrderService } from '../../../../core/services/order.service';
-import { OrderHistoryResponseDto, OrderDetailsResponseDto } from '../../../../core/models/order.model';
+import { NotificationService } from '../../../../core/services/notification.service';
+import { OrderHistoryResponseDto, OrderDetailsResponseDto, OrderItemResponseDto } from '../../../../core/models/order.model';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-order-list',
@@ -14,7 +16,10 @@ import { OrderHistoryResponseDto, OrderDetailsResponseDto } from '../../../../co
 })
 export class OrderListComponent {
   private orderService = inject(OrderService);
+  private notificationService = inject(NotificationService);
   private queryClient = injectQueryClient();
+
+  apiUrl = environment.apiUrl;
 
   // Filter Signals
   pageNumber = signal<number>(1);
@@ -27,6 +32,17 @@ export class OrderListComponent {
   // Modal Signals
   selectedOrderId = signal<string | null>(null);
   showDetailsModal = signal<boolean>(false);
+
+  constructor() {
+    // Automatically invalidate & refetch order list when real-time SignalR notifications arrive
+    effect(() => {
+      const toast = this.notificationService.toastNotification();
+      const notifs = this.notificationService.notifications();
+      if (toast || notifs.length > 0) {
+        this.queryClient.invalidateQueries({ queryKey: ['orders'] });
+      }
+    });
+  }
 
   // TanStack Query for Order History List
   ordersQuery = injectQuery(() => {
@@ -46,7 +62,10 @@ export class OrderListComponent {
         searchTerm: search || undefined,
         sortBy: sort,
         isDescending: desc
-      }))
+      })),
+      staleTime: 0,
+      refetchOnMount: 'always' as const,
+      refetchOnWindowFocus: 'always' as const
     };
   });
 
@@ -80,6 +99,19 @@ export class OrderListComponent {
     this.ordersQuery.isPending() || 
     this.ordersQuery.isFetching() ||
     this.updateStatusMutation.isPending();
+
+  getItemImage(item: OrderItemResponseDto): string {
+    if (item.imageUrl) {
+      if (item.imageUrl.startsWith('http')) return item.imageUrl;
+      return `${this.apiUrl}${item.imageUrl}`;
+    }
+    if (item.images && item.images.length > 0) {
+      const primary = item.images.find(i => i.isPrimary) || item.images[0];
+      if (primary.imageUrl.startsWith('http')) return primary.imageUrl;
+      return `${this.apiUrl}${primary.imageUrl}`;
+    }
+    return 'https://placehold.co/100x100?text=No+Image';
+  }
 
   // Search input handler
   onSearch(event: Event): void {

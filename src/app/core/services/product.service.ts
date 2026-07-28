@@ -12,6 +12,7 @@ export class ProductService {
   private apiUrl = `${environment.apiUrl}/api/products`;
 
   getProducts(filters?: { 
+    brandId?: string;
     categoryId?: string; 
     hasDiscount?: boolean; 
     search?: string; 
@@ -22,6 +23,9 @@ export class ProductService {
     pageSize?: number; 
   }): Observable<PaginatedResponse<Product>> {
     let params = new HttpParams();
+    if (filters?.brandId) {
+      params = params.set('brandId', filters.brandId);
+    }
     if (filters?.categoryId) {
       params = params.set('categoryId', filters.categoryId);
     }
