@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
   
   <nav class="flex items-center space-x-2 text-xs font-medium text-slate-400">
     <a routerLink="/" class="hover:text-red-600 transition">Home</a>
@@ -15,14 +15,14 @@
   </div>
 
   <!-- Order Content -->
-  <div *ngIf="!orderDetailsQuery.isLoading() && orderDetailsQuery.data() as order" class="space-y-8">
+  <div *ngIf="!orderDetailsQuery.isLoading() && orderDetailsQuery.data() as order" class="space-y-6 sm:space-y-8">
     
     <!-- Title & Top Info Header -->
-    <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="bg-white border border-slate-200/80 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
         <div class="flex items-center space-x-3">
-          <h1 class="text-2xl sm:text-3xl font-black text-slate-950">Order Details</h1>
-          <span [class]="getStatusBadgeClass(order.status)" class="px-3.5 py-1 rounded-full text-xs font-bold border uppercase tracking-wider">
+          <h1 class="text-xl sm:text-3xl font-black text-slate-950">Order Details</h1>
+          <span [class]="getStatusBadgeClass(order.status)" class="px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold border uppercase tracking-wider">
             {{ order.status }}
           </span>
         </div>
@@ -30,22 +30,22 @@
         <p class="text-xs text-slate-500 mt-0.5">Placed on: {{ order.orderDate | date:'medium' }}</p>
       </div>
 
-      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <a routerLink="/orders/returns" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center space-x-1">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+        <a routerLink="/orders/returns" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center space-x-1">
           <span>📋 View Return Tickets</span>
         </a>
         <div class="text-left md:text-right">
           <span class="text-xs text-slate-400 block">Total Amount Paid / Payable</span>
-          <span class="text-3xl font-black text-slate-900">${{ order.totalAmount | number:'1.2-2' }}</span>
+          <span class="text-2xl sm:text-3xl font-black text-slate-900">${{ order.totalAmount | number:'1.2-2' }}</span>
         </div>
       </div>
     </div>
 
     <!-- Status Timeline Progress Bar -->
-    <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
-      <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Order Progress Tracker</h3>
+    <div class="bg-white border border-slate-200/80 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm space-y-4">
+      <h3 class="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">Order Progress Tracker</h3>
       
-      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-2">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-1">
         <div [class.opacity-40]="!isStepActive(order.status, 'placed')" class="flex items-center space-x-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
           <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">1</div>
           <div>

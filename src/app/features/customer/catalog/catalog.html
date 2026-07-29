@@ -1,21 +1,21 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
   
   <!-- Breadcrumb & Title -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4 sm:pb-6">
     <div>
-      <nav class="flex items-center space-x-2 text-xs font-medium text-slate-400 mb-2">
+      <nav class="flex items-center space-x-2 text-xs font-medium text-slate-400 mb-1 sm:mb-2">
         <a routerLink="/" class="hover:text-red-600 transition">Home</a>
         <span>/</span>
         <span class="text-slate-800 font-bold">Catalog</span>
       </nav>
-      <h1 class="text-3xl font-black text-slate-950">Shop Catalog</h1>
-      <p class="text-sm text-slate-500 mt-1">Explore our complete collection of products with real-time stock & instant Bakong KHQR checkout.</p>
+      <h1 class="text-2xl sm:text-3xl font-black text-slate-950">Shop Catalog</h1>
+      <p class="text-xs sm:text-sm text-slate-500 mt-1">Explore our complete collection of products with real-time stock & instant Bakong KHQR checkout.</p>
     </div>
 
-    <!-- Sorting selector -->
-    <div class="flex items-center space-x-3">
+    <!-- Sorting selector (Desktop view) -->
+    <div class="hidden lg:flex items-center space-x-3">
       <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Sort By:</span>
-      <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)" class="bg-white border border-slate-300 rounded-xl text-sm font-semibold px-3.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-sm">
+      <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)" class="bg-white border border-slate-300 rounded-xl text-sm font-semibold px-3.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-sm cursor-pointer">
         <option value="name">Product Name (A-Z)</option>
         <option value="priceAsc">Price: Low to High</option>
         <option value="priceDesc">Price: High to Low</option>
@@ -23,11 +23,38 @@
     </div>
   </div>
 
+  <!-- MOBILE STICKY CONTROL BAR (Phone screens < lg) -->
+  <div class="lg:hidden sticky top-16 z-30 bg-white/95 backdrop-blur-md p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between gap-2">
+    <!-- Filter Toggle Button -->
+    <button 
+      (click)="toggleMobileFilter()" 
+      class="flex items-center space-x-2 px-4 py-2.5 bg-slate-950 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-slate-800 transition active:scale-95"
+    >
+      <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+      </svg>
+      <span>Filters</span>
+      <span *ngIf="activeFilterCount > 0" class="ml-1 w-5 h-5 rounded-full bg-red-600 text-white text-[10px] font-black flex items-center justify-center">
+        {{ activeFilterCount }}
+      </span>
+    </button>
+
+    <!-- Mobile Sort Select -->
+    <div class="flex items-center space-x-2 flex-1 justify-end min-w-0">
+      <span class="text-[11px] font-bold text-slate-400 uppercase shrink-0">Sort:</span>
+      <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)" class="bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold px-2.5 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900 truncate max-w-[150px]">
+        <option value="name">Name (A-Z)</option>
+        <option value="priceAsc">Price Low-High</option>
+        <option value="priceDesc">Price High-Low</option>
+      </select>
+    </div>
+  </div>
+
   <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
     
-    <!-- LEFT SIDEBAR FILTERS -->
-    <aside class="space-y-6 lg:col-span-1">
-      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+    <!-- DESKTOP LEFT SIDEBAR FILTERS (Hidden on Mobile) -->
+    <aside class="hidden lg:block space-y-6 lg:col-span-1">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6 sticky top-24">
         
         <div class="flex items-center justify-between border-b border-slate-100 pb-4">
           <h3 class="font-bold text-slate-900 text-base flex items-center space-x-2">
@@ -55,7 +82,7 @@
         </div>
 
         <!-- On Sale Toggle -->
-        <div class="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-xl">
+        <div class="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-xl cursor-pointer" (click)="hasDiscountOnly.set(!hasDiscountOnly()); onFilterChange()">
           <div class="flex items-center space-x-2">
             <span class="text-base">🔥</span>
             <span class="text-xs font-bold text-slate-800">On Sale Only</span>
@@ -64,7 +91,8 @@
             type="checkbox" 
             [ngModel]="hasDiscountOnly()" 
             (ngModelChange)="hasDiscountOnly.set($event); onFilterChange()" 
-            class="w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500"
+            class="w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 cursor-pointer"
+            (click)="$event.stopPropagation()"
           >
         </div>
 
@@ -150,15 +178,15 @@
           </div>
         </div>
 
-        <!-- Brands Filter (NEW) -->
-        <div class="space-y-2">
+        <!-- Brands Filter -->
+        <div *ngIf="brandsQuery.data() && brandsQuery.data()!.length > 0" class="space-y-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Brand</label>
-          <div class="space-y-1 max-h-48 overflow-y-auto pr-1">
+          <div class="space-y-1 max-h-44 overflow-y-auto pr-1">
             <button 
               (click)="selectedBrandId.set(''); onFilterChange()" 
               [class.bg-slate-100]="!selectedBrandId()" 
               [class.text-red-600]="!selectedBrandId()"
-              class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 transition flex justify-between items-center"
+              class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 transition flex justify-between items-center"
             >
               <span>All Brands</span>
             </button>
@@ -167,7 +195,7 @@
               (click)="selectedBrandId.set(brand.id); onFilterChange()" 
               [class.bg-red-50]="selectedBrandId() === brand.id"
               [class.text-red-600]="selectedBrandId() === brand.id"
-              class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 transition flex justify-between items-center"
+              class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 transition flex justify-between items-center"
             >
               <span>{{ brand.name }}</span>
             </button>
@@ -175,14 +203,14 @@
         </div>
 
         <!-- Categories Filter -->
-        <div class="space-y-2">
+        <div *ngIf="categoriesQuery.data() && categoriesQuery.data()!.length > 0" class="space-y-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Category</label>
-          <div class="space-y-1 max-h-48 overflow-y-auto pr-1">
+          <div class="space-y-1 max-h-44 overflow-y-auto pr-1">
             <button 
               (click)="selectedCategoryId.set(''); onFilterChange()" 
               [class.bg-slate-100]="!selectedCategoryId()" 
               [class.text-red-600]="!selectedCategoryId()"
-              class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 transition flex justify-between items-center"
+              class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 transition flex justify-between items-center"
             >
               <span>All Categories</span>
             </button>
@@ -191,34 +219,10 @@
               (click)="selectedCategoryId.set(cat.id); onFilterChange()" 
               [class.bg-red-50]="selectedCategoryId() === cat.id"
               [class.text-red-600]="selectedCategoryId() === cat.id"
-              class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 transition flex justify-between items-center"
+              class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 transition flex justify-between items-center"
             >
               <span class="truncate pr-2">{{ cat.name }}</span>
-              <span class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{{ cat.productCount || 0 }}</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Brands Filter -->
-        <div *ngIf="brandsQuery.data() && brandsQuery.data()!.length > 0" class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Brand</label>
-          <div class="space-y-1 max-h-48 overflow-y-auto pr-1">
-            <button 
-              (click)="selectedBrandId.set(''); onFilterChange()" 
-              [class.bg-slate-100]="!selectedBrandId()" 
-              [class.text-red-600]="!selectedBrandId()"
-              class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 transition"
-            >
-              All Brands
-            </button>
-            <button 
-              *ngFor="let b of brandsQuery.data()" 
-              (click)="selectedBrandId.set(b.id); onFilterChange()" 
-              [class.bg-red-50]="selectedBrandId() === b.id"
-              [class.text-red-600]="selectedBrandId() === b.id"
-              class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 transition"
-            >
-              {{ b.name }}
+              <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{{ cat.productCount || 0 }}</span>
             </button>
           </div>
         </div>
@@ -230,28 +234,28 @@
     <main class="space-y-6 lg:col-span-3">
       
       <!-- Loading State -->
-      <div *ngIf="productsQuery.isLoading()" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        <div *ngFor="let i of [1,2,3,4,5,6]" class="bg-white rounded-2xl p-4 border border-slate-200 animate-pulse space-y-4">
-          <div class="aspect-square bg-slate-200 rounded-xl"></div>
-          <div class="h-4 bg-slate-200 rounded w-3/4"></div>
-          <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+      <div *ngIf="productsQuery.isLoading()" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div *ngFor="let i of [1,2,3,4,5,6]" class="bg-white rounded-2xl p-3 border border-slate-200 animate-pulse space-y-3">
+          <div class="aspect-[4/5] bg-slate-200 rounded-xl"></div>
+          <div class="h-3 bg-slate-200 rounded w-3/4"></div>
+          <div class="h-3 bg-slate-200 rounded w-1/2"></div>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div *ngIf="!productsQuery.isLoading() && filteredProducts.length === 0" class="bg-white border border-slate-200 rounded-3xl p-12 text-center">
+      <div *ngIf="!productsQuery.isLoading() && filteredProducts.length === 0" class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-12 text-center">
         <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-4">
-          <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 0118 0z" /></svg>
+          <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
         </div>
-        <h3 class="text-lg font-bold text-slate-900 mb-1">No products found</h3>
-        <p class="text-sm text-slate-500 max-w-sm mx-auto mb-6">We couldn't find any products matching your current filters or search terms.</p>
-        <button (click)="resetFilters()" class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-sm shadow-md transition">
+        <h3 class="text-base sm:text-lg font-bold text-slate-900 mb-1">No products found</h3>
+        <p class="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto mb-6">We couldn't find any products matching your current filters or search terms.</p>
+        <button (click)="resetFilters()" class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs sm:text-sm shadow-md transition">
           Clear Filters
         </button>
       </div>
 
-      <!-- Products Grid -->
-      <div *ngIf="!productsQuery.isLoading() && filteredProducts.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <!-- Products Grid (Mobile 2 columns, Laptop 4 columns) -->
+      <div *ngIf="!productsQuery.isLoading() && filteredProducts.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         <app-product-card *ngFor="let p of filteredProducts" [product]="p"></app-product-card>
       </div>
 
@@ -260,23 +264,239 @@
         <button 
           (click)="goToPage(pageNumber() - 1)" 
           [disabled]="pageNumber() <= 1"
-          class="px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold disabled:opacity-40 transition"
+          class="px-4 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold disabled:opacity-40 transition"
         >
           Previous
         </button>
-        <span class="text-sm font-medium text-slate-600 px-3">
+        <span class="text-xs sm:text-sm font-medium text-slate-600 px-3">
           Page {{ pageNumber() }} of {{ productsQuery.data()!.totalPages }}
         </span>
         <button 
           (click)="goToPage(pageNumber() + 1)" 
           [disabled]="pageNumber() >= productsQuery.data()!.totalPages"
-          class="px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold disabled:opacity-40 transition"
+          class="px-4 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold disabled:opacity-40 transition"
         >
           Next
         </button>
       </div>
 
     </main>
+  </div>
+
+  <!-- SLIDE-OVER MOBILE FILTER DRAWER (Phone Screens) -->
+  <div 
+    class="fixed inset-0 z-50 overflow-hidden lg:hidden transition-all duration-300 pointer-events-none" 
+    [class.pointer-events-auto]="isMobileFilterOpen()"
+    [class.pointer-events-none]="!isMobileFilterOpen()"
+    role="dialog" 
+    aria-modal="true"
+  >
+    <!-- Backdrop Blur -->
+    <div 
+      (click)="closeMobileFilter()" 
+      class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300 ease-in-out"
+      [class.opacity-100]="isMobileFilterOpen()"
+      [class.opacity-0]="!isMobileFilterOpen()"
+    ></div>
+
+    <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div 
+        class="w-screen max-w-xs sm:max-w-sm bg-white shadow-2xl flex flex-col justify-between transform transition-transform duration-300 ease-in-out"
+        [class.translate-x-0]="isMobileFilterOpen()"
+        [class.translate-x-full]="!isMobileFilterOpen()"
+      >
+        
+        <!-- Drawer Header -->
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+          <div class="flex items-center space-x-2">
+            <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+            <h3 class="font-bold text-slate-900 text-base">Filter Catalog</h3>
+          </div>
+          <button (click)="closeMobileFilter()" class="p-2 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-200 transition">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+
+        <!-- Drawer Content Body -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-6">
+          
+          <!-- Search Input -->
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Search Keywords</label>
+            <div class="relative">
+              <input 
+                type="text" 
+                [ngModel]="searchQuery()" 
+                (ngModelChange)="searchQuery.set($event); onFilterChange()" 
+                placeholder="Product name..." 
+                class="w-full pl-9 pr-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-slate-900"
+              >
+              <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </div>
+          </div>
+
+          <!-- On Sale Toggle -->
+          <div class="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-xl" (click)="hasDiscountOnly.set(!hasDiscountOnly()); onFilterChange()">
+            <div class="flex items-center space-x-2">
+              <span class="text-base">🔥</span>
+              <span class="text-xs font-bold text-slate-800">On Sale Only</span>
+            </div>
+            <input 
+              type="checkbox" 
+              [ngModel]="hasDiscountOnly()" 
+              (ngModelChange)="hasDiscountOnly.set($event); onFilterChange()" 
+              class="w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500"
+              (click)="$event.stopPropagation()"
+            >
+          </div>
+
+          <!-- Max Price Cutoff Filter -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Max Price ($)</label>
+              <span *ngIf="maxPriceFilter()" class="text-xs font-bold text-red-600">Under ${{ maxPriceFilter() }}</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <button 
+                (click)="maxPriceFilter.set(null); onFilterChange()" 
+                [class.bg-slate-900]="maxPriceFilter() === null"
+                [class.text-white]="maxPriceFilter() === null"
+                [class.bg-slate-100]="maxPriceFilter() !== null"
+                [class.text-slate-700]="maxPriceFilter() !== null"
+                class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition"
+              >
+                Any
+              </button>
+              <button 
+                (click)="maxPriceFilter.set(20); onFilterChange()" 
+                [class.bg-red-600]="maxPriceFilter() === 20"
+                [class.text-white]="maxPriceFilter() === 20"
+                [class.bg-slate-100]="maxPriceFilter() !== 20"
+                [class.text-slate-700]="maxPriceFilter() !== 20"
+                class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition"
+              >
+                Under $20
+              </button>
+              <button 
+                (click)="maxPriceFilter.set(50); onFilterChange()" 
+                [class.bg-slate-900]="maxPriceFilter() === 50"
+                [class.text-white]="maxPriceFilter() === 50"
+                [class.bg-slate-100]="maxPriceFilter() !== 50"
+                [class.text-slate-700]="maxPriceFilter() !== 50"
+                class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition"
+              >
+                Under $50
+              </button>
+              <button 
+                (click)="maxPriceFilter.set(100); onFilterChange()" 
+                [class.bg-slate-900]="maxPriceFilter() === 100"
+                [class.text-white]="maxPriceFilter() === 100"
+                [class.bg-slate-100]="maxPriceFilter() !== 100"
+                [class.text-slate-700]="maxPriceFilter() !== 100"
+                class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition"
+              >
+                Under $100
+              </button>
+            </div>
+          </div>
+
+          <!-- Target Gender Filter -->
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Demographics</label>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <button 
+                (click)="selectedTargetGender.set(''); onFilterChange()" 
+                [class.bg-slate-900]="!selectedTargetGender()"
+                [class.text-white]="!selectedTargetGender()"
+                [class.bg-slate-100]="selectedTargetGender()"
+                [class.text-slate-700]="selectedTargetGender()"
+                class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition"
+              >
+                All
+              </button>
+              <button 
+                *ngFor="let opt of targetGenderOptions"
+                (click)="selectedTargetGender.set(opt.value.toString()); onFilterChange()" 
+                [class.bg-slate-900]="selectedTargetGender() === opt.value.toString()"
+                [class.text-white]="selectedTargetGender() === opt.value.toString()"
+                [class.bg-slate-100]="selectedTargetGender() !== opt.value.toString()"
+                [class.text-slate-700]="selectedTargetGender() !== opt.value.toString()"
+                class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition"
+              >
+                {{ opt.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Brands Filter -->
+          <div *ngIf="brandsQuery.data() && brandsQuery.data()!.length > 0" class="space-y-2">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Brand</label>
+            <div class="space-y-1 max-h-40 overflow-y-auto pr-1">
+              <button 
+                (click)="selectedBrandId.set(''); onFilterChange()" 
+                [class.bg-slate-100]="!selectedBrandId()" 
+                [class.text-red-600]="!selectedBrandId()"
+                class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+              >
+                All Brands
+              </button>
+              <button 
+                *ngFor="let brand of brandsQuery.data()" 
+                (click)="selectedBrandId.set(brand.id); onFilterChange()" 
+                [class.bg-red-50]="selectedBrandId() === brand.id"
+                [class.text-red-600]="selectedBrandId() === brand.id"
+                class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+              >
+                {{ brand.name }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Categories Filter -->
+          <div *ngIf="categoriesQuery.data() && categoriesQuery.data()!.length > 0" class="space-y-2">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Category</label>
+            <div class="space-y-1 max-h-40 overflow-y-auto pr-1">
+              <button 
+                (click)="selectedCategoryId.set(''); onFilterChange()" 
+                [class.bg-slate-100]="!selectedCategoryId()" 
+                [class.text-red-600]="!selectedCategoryId()"
+                class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+              >
+                All Categories
+              </button>
+              <button 
+                *ngFor="let cat of categoriesQuery.data()" 
+                (click)="selectedCategoryId.set(cat.id); onFilterChange()" 
+                [class.bg-red-50]="selectedCategoryId() === cat.id"
+                [class.text-red-600]="selectedCategoryId() === cat.id"
+                class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 transition flex justify-between items-center"
+              >
+                <span class="truncate pr-2">{{ cat.name }}</span>
+                <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{{ cat.productCount || 0 }}</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Drawer Footer Buttons -->
+        <div class="p-5 border-t border-slate-200 bg-slate-50 space-y-2">
+          <button 
+            (click)="closeMobileFilter()" 
+            class="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow-md transition"
+          >
+            Apply & View Products ({{ filteredProducts.length }})
+          </button>
+          <button 
+            (click)="resetFilters()" 
+            class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl font-bold text-xs transition"
+          >
+            Reset All Filters
+          </button>
+        </div>
+
+      </div>
+    </div>
   </div>
 
 </div>

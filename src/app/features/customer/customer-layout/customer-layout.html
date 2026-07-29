@@ -1,24 +1,25 @@
-<div class="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans antialiased">
-  
+<div
+  class="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans antialiased overflow-x-hidden w-full max-w-full">
+
   <!-- Announcement Top Banner -->
-  <div class="bg-slate-900 text-slate-100 text-xs font-semibold py-2 px-4 text-center tracking-wide flex items-center justify-center space-x-2">
-    <span>✨ Welcome to <strong class="text-amber-400">CLH168.</strong> — Instant Bakong KHQR Payments & Express Delivery!</span>
+  <!-- <div
+    class="bg-slate-900 text-slate-100 text-xs font-semibold py-2 px-4 text-center tracking-wide flex items-center justify-center space-x-2">
+    <span>✨ Welcome to <strong class="text-amber-400">CLH168.</strong> — Instant Bakong KHQR Payments & Express
+      Delivery!</span>
     <a routerLink="/products" class="underline hover:text-amber-300 transition ml-2">Shop Catalog &rarr;</a>
-  </div>
+  </div> -->
 
   <!-- Header matching ZANDO aesthetic -->
   <header class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm transition-all">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16 sm:h-20">
-        
+
         <!-- LEFT SIDE: Hamburger Menu + CLH168. Brand Logo -->
         <div class="flex items-center space-x-3 sm:space-x-4">
           <!-- Hamburger Button (Left to Right Drawer Trigger) -->
-          <button 
-            (click)="toggleLeftDrawer()" 
+          <button (click)="toggleLeftDrawer()"
             class="p-2 rounded-xl text-slate-800 hover:bg-slate-100 transition focus:outline-none"
-            aria-label="Open Navigation Menu"
-          >
+            aria-label="Open Navigation Menu">
             <svg class="w-6 h-6 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
@@ -33,72 +34,49 @@
 
         <!-- CENTER NAVIGATION (Desktop) -->
         <nav class="hidden lg:flex items-center space-x-1 font-bold text-sm">
-          <a 
-            routerLink="/" 
-            routerLinkActive="text-red-600 border-b-2 border-red-600" 
-            [routerLinkActiveOptions]="{exact: true}" 
-            class="px-4 py-2 text-slate-700 hover:text-red-600 transition"
-          >
+          <a routerLink="/" routerLinkActive="text-red-600 border-b-2 border-red-600"
+            [routerLinkActiveOptions]="{exact: true}" class="px-4 py-2 text-slate-700 hover:text-red-600 transition">
             Home
           </a>
-          <a 
-            routerLink="/products" 
-            routerLinkActive="text-red-600 border-b-2 border-red-600" 
-            class="px-4 py-2 text-slate-700 hover:text-red-600 transition"
-          >
+          <a routerLink="/products" routerLinkActive="text-red-600 border-b-2 border-red-600"
+            class="px-4 py-2 text-slate-700 hover:text-red-600 transition">
             Shop All
           </a>
-          <a 
-            routerLink="/products" 
-            [queryParams]="{hasDiscount: true}"
-            class="px-4 py-2 text-red-600 hover:text-red-700 transition"
-          >
-            🔥 Hot Deals
-          </a>
-          <a 
-            routerLink="/orders" 
-            routerLinkActive="text-red-600 border-b-2 border-red-600" 
-            class="px-4 py-2 text-slate-700 hover:text-red-600 transition"
-          >
+          <a routerLink="/orders" routerLinkActive="text-red-600 border-b-2 border-red-600"
+            class="px-4 py-2 text-slate-700 hover:text-red-600 transition">
             My Orders
           </a>
         </nav>
 
         <!-- RIGHT SIDE ICONS: Search, Wishlist/Orders, Cart Bag with Red Badge, Account -->
         <div class="flex items-center space-x-1 sm:space-x-3">
-          
+
           <!-- Search Icon Button -->
-          <button 
-            (click)="toggleSearchModal()" 
-            class="p-2.5 rounded-full text-slate-800 hover:bg-slate-100 transition" 
-            title="Search Products"
-          >
+          <button (click)="toggleSearchModal()" class="p-2.5 rounded-full text-slate-800 hover:bg-slate-100 transition"
+            title="Search Products">
             <svg class="w-5 h-5 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </button>
 
           <!-- Wishlist Heart Icon Button -->
-          <a 
-            routerLink="/wishlist" 
-            class="p-2.5 rounded-full text-slate-800 hover:bg-slate-100 transition hidden sm:inline-flex" 
-            title="My Saved Favorites"
-          >
+          <a routerLink="/wishlist"
+            class="p-2.5 rounded-full text-slate-800 hover:bg-slate-100 transition hidden sm:inline-flex"
+            title="My Saved Favorites">
             <svg class="w-5 h-5 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
           </a>
 
           <!-- Cart Bag Icon with Red Badge -->
-          <button 
-            (click)="cartService.openDrawer()" 
-            class="relative p-2.5 rounded-full text-slate-900 hover:bg-slate-100 transition" 
-            title="Shopping Cart"
-          >
+          <button (click)="cartService.openDrawer()"
+            class="relative p-2.5 rounded-full text-slate-900 hover:bg-slate-100 transition" title="Shopping Cart">
             <svg class="w-6 h-6 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
-            <span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-black text-white shadow-sm">
+            <span
+              class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-black text-white shadow-sm">
               {{ cartService.cartItemsCount() }}
             </span>
           </button>
@@ -106,22 +84,20 @@
           <!-- Account / Profile Dropdown -->
           <div class="relative">
             <!-- Guest state: Sign In Button -->
-            <a 
-              *ngIf="!authService.isLoggedIn()" 
-              routerLink="/login" 
-              class="px-4 py-2 bg-slate-950 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center space-x-1.5"
-            >
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+            <a *ngIf="!authService.isLoggedIn()" routerLink="/login"
+              class="px-4 py-2 bg-slate-950 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center space-x-1.5">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
               <span>Sign In</span>
             </a>
 
             <!-- Logged In State: User Avatar & Dropdown Trigger -->
-            <button 
-              *ngIf="authService.isLoggedIn()" 
-              (click)="toggleUserMenu()" 
-              class="flex items-center space-x-2 p-1.5 rounded-xl hover:bg-slate-100 transition focus:outline-none"
-            >
-              <div class="w-8 h-8 rounded-full bg-red-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
+            <button *ngIf="authService.isLoggedIn()" (click)="toggleUserMenu()"
+              class="flex items-center space-x-2 p-1.5 rounded-xl hover:bg-slate-100 transition focus:outline-none">
+              <div
+                class="w-8 h-8 rounded-full bg-red-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
                 {{ authService.currentUser()?.fullName?.charAt(0) || 'U' }}
               </div>
               <span class="text-xs font-bold text-slate-800 hidden sm:inline-block max-w-[100px] truncate">
@@ -130,27 +106,29 @@
             </button>
 
             <!-- User Menu Popup Dropdown -->
-            <div 
-              *ngIf="authService.isLoggedIn() && isUserMenuOpen()" 
-              class="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 space-y-1"
-            >
+            <div *ngIf="authService.isLoggedIn() && isUserMenuOpen()"
+              class="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 space-y-1">
               <div class="px-4 py-2 border-b border-slate-100">
                 <p class="text-xs font-bold text-slate-900 truncate">{{ authService.currentUser()?.fullName }}</p>
                 <p class="text-[10px] text-slate-400 truncate">{{ authService.currentUser()?.email }}</p>
               </div>
-              
-              <a routerLink="/orders" (click)="closeUserMenu()" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+
+              <a routerLink="/orders" (click)="closeUserMenu()"
+                class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                 📦 My Orders
               </a>
-              <a routerLink="/wishlist" (click)="closeUserMenu()" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+              <a routerLink="/wishlist" (click)="closeUserMenu()"
+                class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                 ❤️ My Wishlist
               </a>
-              <a *ngIf="authService.isAdmin()" routerLink="/admin" (click)="closeUserMenu()" class="block px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50">
+              <a *ngIf="authService.isAdmin()" routerLink="/admin" (click)="closeUserMenu()"
+                class="block px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50">
                 ⚙️ Admin Dashboard
               </a>
 
               <div class="border-t border-slate-100 pt-1">
-                <button (click)="logout()" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-500 hover:text-red-600 hover:bg-slate-100">
+                <button (click)="logout()"
+                  class="w-full text-left px-4 py-2 text-xs font-bold text-slate-500 hover:text-red-600 hover:bg-slate-100">
                   Logout
                 </button>
               </div>
@@ -164,103 +142,96 @@
   </header>
 
   <!-- LEFT-TO-RIGHT SIDE DRAWER ("See More Menu") -->
-  <div *ngIf="isLeftDrawerOpen()" class="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 z-50 overflow-hidden transition-all duration-300 pointer-events-none"
+    [class.pointer-events-auto]="isLeftDrawerOpen()" [class.pointer-events-none]="!isLeftDrawerOpen()" role="dialog"
+    aria-modal="true">
     <!-- Backdrop Blur -->
-    <div 
-      (click)="closeLeftDrawer()" 
-      class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300"
-    ></div>
+    <div (click)="closeLeftDrawer()"
+      class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300 ease-in-out"
+      [class.opacity-100]="isLeftDrawerOpen()" [class.opacity-0]="!isLeftDrawerOpen()"></div>
 
     <div class="fixed inset-y-0 left-0 max-w-xs w-full flex">
-      <div class="w-full bg-white shadow-2xl flex flex-col justify-between transform transition-transform duration-300 ease-in-out">
-        
+      <div
+        class="w-full bg-white shadow-2xl flex flex-col justify-between transform transition-transform duration-300 ease-in-out"
+        [class.translate-x-0]="isLeftDrawerOpen()" [class.-translate-x-full]="!isLeftDrawerOpen()">
+
         <!-- Drawer Header -->
         <div class="p-6 border-b border-slate-200 flex items-center justify-between">
           <a routerLink="/" (click)="closeLeftDrawer()" class="flex items-center space-x-1">
             <span class="text-2xl font-black tracking-tighter text-slate-950 font-serif">CLH168</span>
             <span class="text-2xl font-black text-red-600">.</span>
           </a>
-          <button (click)="closeLeftDrawer()" class="p-2 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          <button (click)="closeLeftDrawer()"
+            class="p-2 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
         <!-- Drawer Body & Search -->
         <div class="flex-1 overflow-y-auto p-6 space-y-6">
-          
+
           <!-- Search input in side drawer -->
           <form (ngSubmit)="onSearchSubmit()" class="relative">
-            <input 
-              type="text" 
-              [(ngModel)]="searchQuery" 
-              name="leftDrawerSearch"
-              placeholder="Search products..." 
-              class="w-full pl-10 pr-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-slate-900"
-            >
-            <svg class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <input type="text" [(ngModel)]="searchQuery" name="leftDrawerSearch" placeholder="Search products..."
+              class="w-full pl-10 pr-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-slate-900">
+            <svg class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </form>
 
           <!-- Drawer Navigation Links -->
           <div class="space-y-1 font-bold text-sm text-slate-800">
-            <a 
-              routerLink="/" 
-              (click)="closeLeftDrawer()" 
-              routerLinkActive="bg-slate-100 text-red-600" 
+            <a routerLink="/" (click)="closeLeftDrawer()" routerLinkActive="bg-slate-100 text-red-600"
               [routerLinkActiveOptions]="{exact: true}"
-              class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 transition"
-            >
+              class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 transition">
               <span>Home Page</span>
-              <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+              <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
             </a>
 
-            <a 
-              routerLink="/products" 
-              (click)="closeLeftDrawer()" 
-              routerLinkActive="bg-slate-100 text-red-600"
-              class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 transition"
-            >
+            <a routerLink="/products" (click)="closeLeftDrawer()" routerLinkActive="bg-slate-100 text-red-600"
+              class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 transition">
               <span>Shop All Products</span>
-              <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+              <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
             </a>
 
-            <a 
-              routerLink="/products" 
-              [queryParams]="{hasDiscount: true}"
-              (click)="closeLeftDrawer()" 
-              class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 text-red-600 transition"
-            >
+            <a routerLink="/products" [queryParams]="{hasDiscount: true}" (click)="closeLeftDrawer()"
+              class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 text-red-600 transition">
               <span>🔥 Hot Discounted Deals</span>
-              <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+              <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
             </a>
 
-            <a 
-              routerLink="/products" 
-              [queryParams]="{maxPrice: 20}"
-              (click)="closeLeftDrawer()" 
-              class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 text-emerald-600 transition"
-            >
+            <a routerLink="/products" [queryParams]="{maxPrice: 20}" (click)="closeLeftDrawer()"
+              class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 text-emerald-600 transition">
               <span>🏷️ Products Under $20</span>
-              <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+              <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
             </a>
 
-            <a 
-              routerLink="/orders" 
-              (click)="closeLeftDrawer()" 
-              routerLinkActive="bg-slate-100 text-red-600"
-              class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 transition"
-            >
+            <a routerLink="/orders" (click)="closeLeftDrawer()" routerLinkActive="bg-slate-100 text-red-600"
+              class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 transition">
               <span>My Orders & KHQR History</span>
-              <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+              <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
             </a>
 
-            <a 
-              routerLink="/cart" 
-              (click)="closeLeftDrawer()" 
-              routerLinkActive="bg-slate-100 text-red-600"
-              class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 transition"
-            >
+            <a routerLink="/cart" (click)="closeLeftDrawer()" routerLinkActive="bg-slate-100 text-red-600"
+              class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 transition">
               <span>Shopping Cart ({{ cartService.cartItemsCount() }})</span>
-              <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+              <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
             </a>
           </div>
 
@@ -274,9 +245,13 @@
 
         <!-- Drawer Footer -->
         <div class="p-6 border-t border-slate-200 bg-slate-50">
-          <a routerLink="/admin" (click)="closeLeftDrawer()" class="w-full py-2.5 px-4 border border-slate-300 hover:border-slate-800 bg-white text-slate-800 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-sm">
+          <a routerLink="/admin" (click)="closeLeftDrawer()"
+            class="w-full py-2.5 px-4 border border-slate-300 hover:border-slate-800 bg-white text-slate-800 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-sm">
             <span>Access Admin Portal</span>
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
           </a>
         </div>
 
@@ -285,25 +260,34 @@
   </div>
 
   <!-- SEARCH MODAL POPUP -->
-  <div *ngIf="isSearchModalOpen()" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
-    <div (click)="closeSearchModal()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"></div>
+  <div class="fixed inset-0 z-50 overflow-y-auto transition-all duration-300 pointer-events-none"
+    [class.pointer-events-auto]="isSearchModalOpen()" [class.pointer-events-none]="!isSearchModalOpen()" role="dialog"
+    aria-modal="true">
+    <div (click)="closeSearchModal()"
+      class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300"
+      [class.opacity-100]="isSearchModalOpen()" [class.opacity-0]="!isSearchModalOpen()"></div>
     <div class="flex min-h-full items-start justify-center p-4 pt-16">
-      <div class="relative w-full max-w-xl bg-white rounded-3xl p-6 shadow-2xl space-y-4">
+      <div
+        class="relative w-full max-w-xl bg-white rounded-3xl p-6 shadow-2xl space-y-4 transform transition-all duration-300"
+        [class.scale-100]="isSearchModalOpen()" [class.opacity-100]="isSearchModalOpen()"
+        [class.scale-95]="!isSearchModalOpen()" [class.opacity-0]="!isSearchModalOpen()">
         <div class="flex items-center justify-between border-b border-slate-200 pb-3">
           <h3 class="font-bold text-slate-900 text-base">Search CLH168. Store</h3>
-          <button (click)="closeSearchModal()" class="text-slate-400 hover:text-slate-600 text-sm font-bold">Close ✕</button>
+          <button (click)="closeSearchModal()" class="text-slate-400 hover:text-slate-600 text-sm font-bold">Close
+            ✕</button>
         </div>
         <form (ngSubmit)="onSearchSubmit()" class="relative">
-          <input 
-            type="text" 
-            [(ngModel)]="searchQuery" 
-            name="popupSearchQuery"
-            placeholder="Type product name, category, or brand..." 
+          <input type="text" [(ngModel)]="searchQuery" name="popupSearchQuery"
+            placeholder="Type product name, category, or brand..."
             class="w-full pl-11 pr-24 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-slate-900"
-            autoFocus
-          >
-          <svg class="w-5 h-5 absolute left-4 top-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-          <button type="submit" class="absolute right-2 top-2 px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition">Search</button>
+            autoFocus>
+          <svg class="w-5 h-5 absolute left-4 top-4 text-slate-400" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <button type="submit"
+            class="absolute right-2 top-2 px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition">Search</button>
         </form>
       </div>
     </div>
@@ -313,7 +297,7 @@
   <app-cart-drawer></app-cart-drawer>
 
   <!-- Page Router Outlet -->
-  <main class="flex-1">
+  <main class="flex-1 w-full max-w-full overflow-x-hidden">
     <router-outlet></router-outlet>
   </main>
 
@@ -321,7 +305,7 @@
   <footer class="bg-white border-t border-slate-200 text-slate-600 mt-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-        
+
         <div class="space-y-3">
           <a routerLink="/" class="flex items-center space-x-1">
             <span class="text-2xl font-black tracking-tighter text-slate-950 font-serif">CLH168</span>
@@ -345,7 +329,8 @@
         <div class="space-y-2 text-xs">
           <h4 class="font-bold text-slate-900 uppercase tracking-wider">Payment Method</h4>
           <p class="text-slate-500">Scan & pay via Bakong KHQR with any Cambodian banking app.</p>
-          <div class="inline-block px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded font-black text-[11px]">
+          <div
+            class="inline-block px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded font-black text-[11px]">
             Bakong KHQR
           </div>
         </div>
@@ -358,7 +343,8 @@
 
       </div>
 
-      <div class="border-t border-slate-200 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400">
+      <div
+        class="border-t border-slate-200 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400">
         <p>&copy; 2026 CLH168. All rights reserved.</p>
         <p class="mt-1 sm:mt-0">Bakong KHQR Payment Integrated</p>
       </div>

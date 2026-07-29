@@ -43,6 +43,27 @@ export class CatalogComponent implements OnInit {
   pageNumber = signal<number>(1);
   pageSize = signal<number>(15);
 
+  isMobileFilterOpen = signal<boolean>(false);
+
+  toggleMobileFilter(): void {
+    this.isMobileFilterOpen.update(v => !v);
+  }
+
+  closeMobileFilter(): void {
+    this.isMobileFilterOpen.set(false);
+  }
+
+  get activeFilterCount(): number {
+    let count = 0;
+    if (this.searchQuery()) count++;
+    if (this.selectedCategoryId()) count++;
+    if (this.selectedBrandId()) count++;
+    if (this.selectedTargetGender()) count++;
+    if (this.hasDiscountOnly()) count++;
+    if (this.maxPriceFilter() !== null) count++;
+    return count;
+  }
+
   constructor() {
     this.route.queryParams.subscribe((params) => {
       if (params['search']) this.searchQuery.set(params['search']);

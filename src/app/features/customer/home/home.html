@@ -1,17 +1,17 @@
-<div class="space-y-16 pb-12">
+<div class="space-y-10 sm:space-y-16 pb-12 w-full max-w-full overflow-x-hidden">
   
   <!-- HERO BANNER SECTION -->
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-    <div *ngIf="bannersQuery.data() && bannersQuery.data()!.length > 0; else defaultHero" class="relative rounded-3xl overflow-hidden shadow-xl bg-slate-900 group aspect-[21/9] min-h-[360px]">
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+    <div *ngIf="bannersQuery.data() && bannersQuery.data()!.length > 0; else defaultHero" class="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl bg-slate-900 group min-h-[220px] sm:min-h-[360px] aspect-[16/9] sm:aspect-[21/9]">
       <div *ngFor="let banner of bannersQuery.data(); let i = index" 
            [class.hidden]="i !== activeBannerIndex()"
            class="absolute inset-0 transition-all duration-700 ease-in-out">
         <img [src]="getImageUrl(banner.imageUrl)" [alt]="banner.name" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/30 to-transparent flex flex-col justify-end p-8 md:p-12">
-          <span class="inline-block px-3.5 py-1 bg-red-600 text-white text-xs font-black uppercase tracking-wider rounded-lg w-max mb-3 shadow-md">Special Offer</span>
-          <h1 class="text-3xl md:text-5xl font-black text-white max-w-2xl leading-tight">{{ banner.name }}</h1>
-          <div class="mt-6 flex items-center space-x-4">
-            <a [href]="banner.linkUrl || '/products'" class="px-7 py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold text-sm shadow-xl shadow-red-600/30 transition transform hover:-translate-y-0.5">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/40 to-transparent flex flex-col justify-end p-5 sm:p-8 md:p-12">
+          <span class="inline-block px-2.5 py-0.5 sm:px-3.5 sm:py-1 bg-red-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider rounded-md sm:rounded-lg w-max mb-2 sm:mb-3 shadow-md">Special Offer</span>
+          <h1 class="text-xl sm:text-3xl md:text-5xl font-black text-white max-w-2xl leading-tight line-clamp-2">{{ banner.name }}</h1>
+          <div class="mt-3 sm:mt-6 flex items-center space-x-3 sm:space-x-4">
+            <a [href]="banner.linkUrl || '/products'" class="px-5 py-2.5 sm:px-7 sm:py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm shadow-xl shadow-red-600/30 transition transform hover:-translate-y-0.5">
               Explore Collection
             </a>
           </div>
@@ -19,34 +19,34 @@
       </div>
 
       <!-- Banner Controls -->
-      <div *ngIf="bannersQuery.data()!.length > 1" class="absolute bottom-6 right-8 flex items-center space-x-2">
-        <button (click)="prevBanner(bannersQuery.data()!.length)" class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/40 flex items-center justify-center transition">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+      <div *ngIf="bannersQuery.data()!.length > 1" class="absolute bottom-4 right-4 sm:bottom-6 sm:right-8 flex items-center space-x-2 z-10">
+        <button (click)="prevBanner(bannersQuery.data()!.length)" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/40 flex items-center justify-center transition">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
         </button>
-        <button (click)="nextBanner(bannersQuery.data()!.length)" class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/40 flex items-center justify-center transition">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        <button (click)="nextBanner(bannersQuery.data()!.length)" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/40 flex items-center justify-center transition">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
         </button>
       </div>
     </div>
 
     <!-- Default Hero -->
     <ng-template #defaultHero>
-      <div class="relative rounded-3xl overflow-hidden shadow-xl bg-gradient-to-r from-slate-900 via-slate-800 to-red-950 p-8 sm:p-12 md:p-16 text-white">
-        <div class="max-w-2xl space-y-6 relative z-10">
-          <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-black bg-red-600/30 text-red-300 border border-red-500/30 uppercase tracking-widest">
+      <div class="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl bg-gradient-to-r from-slate-900 via-slate-800 to-red-950 p-6 sm:p-12 md:p-16 text-white">
+        <div class="max-w-2xl space-y-4 sm:space-y-6 relative z-10">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] sm:text-xs font-black bg-red-600/30 text-red-300 border border-red-500/30 uppercase tracking-widest">
             Welcome to CLH168.
           </span>
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
+          <h1 class="text-2xl sm:text-4xl lg:text-6xl font-black tracking-tight leading-tight">
             Discover Quality Products & Pay via <span class="text-red-500">Bakong KHQR</span>
           </h1>
-          <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
+          <p class="text-slate-300 text-xs sm:text-base leading-relaxed">
             Shop footwear, apparel, and accessories with instant stock validation and seamless Cambodian digital payment.
           </p>
-          <div class="flex flex-wrap gap-4 pt-2">
-            <a routerLink="/products" class="px-8 py-4 bg-red-600 text-white hover:bg-red-700 font-bold rounded-2xl shadow-xl transition transform hover:-translate-y-0.5 text-sm">
+          <div class="flex flex-wrap gap-3 pt-2">
+            <a routerLink="/products" class="px-6 py-3 sm:px-8 sm:py-4 bg-red-600 text-white hover:bg-red-700 font-bold rounded-xl sm:rounded-2xl shadow-xl transition transform hover:-translate-y-0.5 text-xs sm:text-sm">
               Shop All Products
             </a>
-            <a routerLink="/products" [queryParams]="{hasDiscount: true}" class="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold rounded-2xl transition text-sm">
+            <a routerLink="/products" [queryParams]="{hasDiscount: true}" class="px-6 py-3 sm:px-8 sm:py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold rounded-xl sm:rounded-2xl transition text-xs sm:text-sm">
               View Hot Deals
             </a>
           </div>
@@ -57,23 +57,24 @@
 
   <!-- COMPACT & PROFESSIONAL CATEGORIES SHOWCASE -->
   <section *ngIf="categoriesQuery.data() && categoriesQuery.data()!.length > 0" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-3 sm:mb-4">
       <div>
-        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Shop by Category</h2>
-        <p class="text-xs text-slate-500 mt-0.5">Explore our curated collections</p>
+        <h2 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">Shop by Category</h2>
+        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Explore our curated collections</p>
       </div>
       <a routerLink="/products" class="text-xs font-bold text-red-600 hover:underline flex items-center">
-        <span>View All Categories</span>
+        <span>View All</span>
         <svg class="w-3.5 h-3.5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
       </a>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+    <!-- Scrollable on phone screens, grid on desktop -->
+    <div class="flex sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
       <a *ngFor="let cat of categoriesQuery.data()" 
          [routerLink]="['/products']" 
          [queryParams]="{categoryId: cat.id}"
-         class="group flex items-center p-2.5 bg-white border border-slate-200/80 rounded-2xl hover:border-red-500 hover:shadow-md transition-all duration-200 space-x-3">
-        <div class="w-11 h-11 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-100 group-hover:scale-105 transition">
+         class="group flex items-center p-2.5 bg-white border border-slate-200/80 rounded-2xl hover:border-red-500 hover:shadow-md transition-all duration-200 space-x-3 shrink-0 w-44 sm:w-auto">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-100 group-hover:scale-105 transition">
           <img [src]="getImageUrl(cat.imageUrl)" [alt]="cat.name" class="w-full h-full object-cover">
         </div>
         <div class="min-w-0 flex-1">
@@ -84,12 +85,12 @@
     </div>
   </section>
 
-  <!-- FEATURED BRANDS SHOWCASE (NEW FEATURE) -->
+  <!-- FEATURED BRANDS SHOWCASE -->
   <section *ngIf="brandsQuery.data() && brandsQuery.data()!.length > 0" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-3 sm:mb-4">
       <div>
-        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Shop by Brand</h2>
-        <p class="text-xs text-slate-500 mt-0.5">Filter by authentic official brands</p>
+        <h2 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">Shop by Brand</h2>
+        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Filter by authentic official brands</p>
       </div>
       <a routerLink="/products" class="text-xs font-bold text-red-600 hover:underline flex items-center">
         <span>All Brands</span>
@@ -97,12 +98,12 @@
       </a>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+    <div class="flex sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
       <a *ngFor="let brand of brandsQuery.data()" 
          [routerLink]="['/products']" 
          [queryParams]="{brandId: brand.id}"
-         class="group flex items-center p-2.5 bg-white border border-slate-200/80 rounded-2xl hover:border-slate-900 hover:shadow-md transition-all duration-200 space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-slate-50 overflow-hidden shrink-0 border border-slate-100 flex items-center justify-center p-1 group-hover:scale-105 transition">
+         class="group flex items-center p-2.5 bg-white border border-slate-200/80 rounded-2xl hover:border-slate-900 hover:shadow-md transition-all duration-200 space-x-3 shrink-0 w-44 sm:w-auto">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-50 overflow-hidden shrink-0 border border-slate-100 flex items-center justify-center p-1 group-hover:scale-105 transition">
           <img *ngIf="brand.logoUrl" [src]="getImageUrl(brand.logoUrl)" [alt]="brand.name" class="w-full h-full object-contain">
           <span *ngIf="!brand.logoUrl" class="text-xs font-black text-slate-700 uppercase">{{ brand.name.slice(0, 2) }}</span>
         </div>
@@ -116,42 +117,42 @@
 
   <!-- TOP SELLING PRODUCTS (BEST SELLERS) SECTION -->
   <section *ngIf="topSellingProductsQuery.data() && topSellingProductsQuery.data()!.length > 0" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center justify-between mb-4 sm:mb-6">
       <div>
         <div class="flex items-center space-x-2">
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-black bg-amber-500/10 text-amber-600 border border-amber-500/20 uppercase tracking-wider">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-black bg-amber-500/10 text-amber-600 border border-amber-500/20 uppercase tracking-wider">
             🏆 Customer Favorites
           </span>
         </div>
-        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">Top Selling Products</h2>
-        <p class="text-sm text-slate-500">Our most popular items ordered by customer volume</p>
+        <h2 class="text-xl sm:text-3xl font-black text-slate-900 mt-1">Top Selling Products</h2>
+        <p class="text-xs sm:text-sm text-slate-500">Our most popular items ordered by customer volume</p>
       </div>
-      <a routerLink="/products" class="text-sm font-bold text-amber-600 hover:underline flex items-center">
+      <a routerLink="/products" class="text-xs sm:text-sm font-bold text-amber-600 hover:underline flex items-center">
         <span>View Catalog</span>
         <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
       </a>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
       <app-product-card *ngFor="let p of topSellingProductsQuery.data()" [product]="p"></app-product-card>
     </div>
   </section>
 
   <!-- PRODUCTS UNDER $20 BARGAINS SECTION -->
   <section *ngIf="under20ProductsQuery.data()?.items && under20ProductsQuery.data()!.items.length > 0" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="bg-emerald-50/60 border border-emerald-200/60 rounded-3xl p-6 sm:p-8">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+    <div class="bg-emerald-50/60 border border-emerald-200/60 rounded-2xl sm:rounded-3xl p-4 sm:p-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
         <div>
-          <span class="inline-block px-3 py-1 bg-emerald-600 text-white text-xs font-black uppercase tracking-wider rounded-lg mb-2">🏷️ Budget Finds</span>
-          <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Products Under $20</h2>
-          <p class="text-sm text-slate-500 mt-0.5">High value essentials at affordable price points</p>
+          <span class="inline-block px-2.5 py-0.5 bg-emerald-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider rounded-lg mb-1 sm:mb-2">🏷️ Budget Finds</span>
+          <h2 class="text-xl sm:text-3xl font-black text-slate-900">Products Under $20</h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">High value essentials at affordable price points</p>
         </div>
-        <a routerLink="/products" [queryParams]="{maxPrice: 20}" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition self-start sm:self-auto">
+        <a routerLink="/products" [queryParams]="{maxPrice: 20}" class="px-4 py-2 sm:px-5 sm:py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition self-start sm:self-auto">
           View Under $20 Deals &rarr;
         </a>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
         <app-product-card *ngFor="let p of under20ProductsQuery.data()!.items" [product]="p"></app-product-card>
       </div>
     </div>
@@ -159,18 +160,18 @@
 
   <!-- HOT DEALS & SPECIAL OFFERS SECTION -->
   <section *ngIf="discountedProductsQuery.data()?.items && discountedProductsQuery.data()!.items.length > 0" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="bg-red-50/60 border border-red-200/60 rounded-3xl p-6 sm:p-8">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+    <div class="bg-red-50/60 border border-red-200/60 rounded-2xl sm:rounded-3xl p-4 sm:p-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
         <div>
-          <span class="inline-block px-3 py-1 bg-red-600 text-white text-xs font-black uppercase tracking-wider rounded-lg mb-2">🔥 Limited Time Deals</span>
-          <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Hot Discounted Offers</h2>
+          <span class="inline-block px-2.5 py-0.5 bg-red-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider rounded-lg mb-1 sm:mb-2">🔥 Limited Time Deals</span>
+          <h2 class="text-xl sm:text-3xl font-black text-slate-900">Hot Discounted Offers</h2>
         </div>
-        <a routerLink="/products" [queryParams]="{hasDiscount: true}" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-md transition self-start sm:self-auto">
+        <a routerLink="/products" [queryParams]="{hasDiscount: true}" class="px-4 py-2 sm:px-5 sm:py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-md transition self-start sm:self-auto">
           See All Deals &rarr;
         </a>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
         <app-product-card *ngFor="let p of discountedProductsQuery.data()!.items" [product]="p"></app-product-card>
       </div>
     </div>
@@ -178,69 +179,69 @@
 
   <!-- LATEST PRODUCTS GRID -->
   <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center justify-between mb-4 sm:mb-6">
       <div>
-        <h2 class="text-2xl sm:text-3xl font-black text-slate-900">New Arrivals</h2>
-        <p class="text-sm text-slate-500 mt-1">Check out our latest added products</p>
+        <h2 class="text-xl sm:text-3xl font-black text-slate-900">New Arrivals</h2>
+        <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Check out our latest added products</p>
       </div>
-      <a routerLink="/products" class="text-sm font-bold text-red-600 hover:underline flex items-center">
+      <a routerLink="/products" class="text-xs sm:text-sm font-bold text-red-600 hover:underline flex items-center">
         <span>Explore All</span>
         <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
       </a>
     </div>
 
     <!-- Products Grid -->
-    <div *ngIf="latestProductsQuery.data()?.items && latestProductsQuery.data()!.items.length > 0; else noProducts" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+    <div *ngIf="latestProductsQuery.data()?.items && latestProductsQuery.data()!.items.length > 0; else noProducts" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
       <app-product-card *ngFor="let p of latestProductsQuery.data()!.items" [product]="p"></app-product-card>
     </div>
 
     <ng-template #noProducts>
       <div class="text-center py-12 text-slate-400">
-        <p class="text-base font-medium">No products currently available.</p>
+        <p class="text-sm font-medium">No products currently available.</p>
       </div>
     </ng-template>
   </section>
 
   <!-- STORE VALUE PROPOSITIONS -->
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-slate-200">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex items-start space-x-4">
-        <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-600 shrink-0 font-black">
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 border-t border-slate-200">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div class="p-4 sm:p-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex items-start space-x-4">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-600 shrink-0 font-black text-xs sm:text-sm">
           KHQR
         </div>
         <div>
-          <h4 class="font-bold text-slate-900 text-base">Bakong KHQR Payment</h4>
-          <p class="text-xs text-slate-500 mt-1">Instant USD/KHR digital payment with zero hassle.</p>
+          <h4 class="font-bold text-slate-900 text-sm sm:text-base">Bakong KHQR Payment</h4>
+          <p class="text-xs text-slate-500 mt-0.5">Instant USD/KHR digital payment with zero hassle.</p>
         </div>
       </div>
 
-      <div class="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex items-start space-x-4">
-        <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-900 shrink-0">
-          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+      <div class="p-4 sm:p-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex items-start space-x-4">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-900 shrink-0">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
         </div>
         <div>
-          <h4 class="font-bold text-slate-900 text-base">Guaranteed Stock</h4>
-          <p class="text-xs text-slate-500 mt-1">Real-time inventory reservation upon order placement.</p>
+          <h4 class="font-bold text-slate-900 text-sm sm:text-base">Guaranteed Stock</h4>
+          <p class="text-xs text-slate-500 mt-0.5">Real-time inventory reservation upon order placement.</p>
         </div>
       </div>
 
-      <div class="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex items-start space-x-4">
-        <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-900 shrink-0">
-          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+      <div class="p-4 sm:p-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex items-start space-x-4">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-900 shrink-0">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
         </div>
         <div>
-          <h4 class="font-bold text-slate-900 text-base">Express Delivery</h4>
-          <p class="text-xs text-slate-500 mt-1">Fast shipping across Phnom Penh & provinces.</p>
+          <h4 class="font-bold text-slate-900 text-sm sm:text-base">Express Delivery</h4>
+          <p class="text-xs text-slate-500 mt-0.5">Fast shipping across Phnom Penh & provinces.</p>
         </div>
       </div>
 
-      <div class="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex items-start space-x-4">
-        <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-900 shrink-0">
-          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+      <div class="p-4 sm:p-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex items-start space-x-4">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-900 shrink-0">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
         </div>
         <div>
-          <h4 class="font-bold text-slate-900 text-base">Customer Support</h4>
-          <p class="text-xs text-slate-500 mt-1">Dedicated support for your purchase and order details.</p>
+          <h4 class="font-bold text-slate-900 text-sm sm:text-base">Customer Support</h4>
+          <p class="text-xs text-slate-500 mt-0.5">Dedicated support for your purchase and order details.</p>
         </div>
       </div>
     </div>

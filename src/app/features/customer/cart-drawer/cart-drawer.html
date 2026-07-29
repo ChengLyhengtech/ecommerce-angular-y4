@@ -1,40 +1,112 @@
-<div *ngIf="cartService.isDrawerOpen()" class="fixed inset-0 z-50 overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
-  <!-- Backdrop -->
-  <div (click)="close()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity opacity-100 duration-300"></div>
+<div 
+  class="fixed inset-0 z-50 overflow-hidden transition-all duration-300 pointer-events-none"
+  [class.pointer-events-auto]="cartService.isDrawerOpen()"
+  [class.pointer-events-none]="!cartService.isDrawerOpen()"
+  aria-labelledby="drawer-title" 
+  role="dialog" 
+  aria-modal="true"
+>
+  <!-- Backdrop Blur -->
+  <div 
+    (click)="close()" 
+    class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300 ease-in-out"
+    [class.opacity-100]="cartService.isDrawerOpen()"
+    [class.opacity-0]="!cartService.isDrawerOpen()"
+  ></div>
 
-  <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
-    <div class="pointer-events-auto w-screen max-w-md transform transition duration-300 ease-in-out">
-      <div class="flex h-full flex-col overflow-y-scroll bg-white shadow-2xl">
-        
-        <!-- Header -->
-        <div class="flex items-center justify-between px-6 py-5 border-b border-slate-200">
-          <div class="flex items-center space-x-3">
-            <div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-            </div>
-            <div>
-              <h2 class="text-lg font-bold text-slate-900" id="slide-over-title">Shopping Cart</h2>
-              <p class="text-xs text-slate-500">{{ cartService.cartItemsCount() }} items selected</p>
-            </div>
-          </div>
-          <button (click)="close()" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+  <!-- Drawer Slide Container (FULL SCREEN ON MOBILE phone: w-full, sm:max-w-md md:max-w-lg on laptop) -->
+  <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-0 sm:pl-10">
+    <div 
+      class="pointer-events-auto w-screen w-full sm:max-w-md md:max-w-lg transform transition-transform duration-300 ease-in-out bg-white shadow-2xl flex flex-col h-full"
+      [class.translate-x-0]="cartService.isDrawerOpen()"
+      [class.translate-x-full]="!cartService.isDrawerOpen()"
+    >
+      
+      <!-- TOP DUAL TABS HEADER (Bag | Wishlist) matching ZANDO / Myten11 aesthetics -->
+      <div class="flex items-center justify-between px-4 sm:px-6 pt-5 pb-2 border-b border-slate-200 bg-white shrink-0">
+        <!-- Tabs Group -->
+        <div class="flex items-center space-x-6">
+          <!-- Bag Tab -->
+          <button 
+            (click)="setTab('bag')"
+            [class.border-slate-950]="activeTab() === 'bag'"
+            [class.text-slate-950]="activeTab() === 'bag'"
+            [class.border-transparent]="activeTab() !== 'bag'"
+            [class.text-slate-400]="activeTab() !== 'bag'"
+            class="pb-3 border-b-2 font-black text-base sm:text-lg flex items-center space-x-2 transition cursor-pointer"
+          >
+            <span>Bag</span>
+            <span 
+              [class.bg-slate-900]="activeTab() === 'bag'"
+              [class.text-white]="activeTab() === 'bag'"
+              [class.bg-slate-100]="activeTab() !== 'bag'"
+              [class.text-slate-600]="activeTab() !== 'bag'"
+              class="px-2 py-0.5 rounded-full text-xs font-bold transition"
+            >
+              {{ cartService.cartItemsCount() }}
+            </span>
+          </button>
+
+          <!-- Wishlist Tab -->
+          <button 
+            (click)="setTab('wishlist')"
+            [class.border-slate-950]="activeTab() === 'wishlist'"
+            [class.text-slate-950]="activeTab() === 'wishlist'"
+            [class.border-transparent]="activeTab() !== 'wishlist'"
+            [class.text-slate-400]="activeTab() !== 'wishlist'"
+            class="pb-3 border-b-2 font-black text-base sm:text-lg flex items-center space-x-2 transition cursor-pointer"
+          >
+            <span>Wishlist</span>
+            <span 
+              [class.bg-slate-900]="activeTab() === 'wishlist'"
+              [class.text-white]="activeTab() === 'wishlist'"
+              [class.bg-slate-100]="activeTab() !== 'wishlist'"
+              [class.text-slate-600]="activeTab() !== 'wishlist'"
+              class="px-2 py-0.5 rounded-full text-xs font-bold transition"
+            >
+              {{ wishlistService.wishlistItems().length }}
+            </span>
           </button>
         </div>
 
-        <!-- Cart Content -->
-        <div class="flex-1 overflow-y-auto px-6 py-4">
+        <!-- Close ✕ Button -->
+        <button 
+          (click)="close()" 
+          class="p-2 text-slate-400 hover:text-slate-950 rounded-full hover:bg-slate-100 transition"
+          aria-label="Close drawer"
+        >
+          <svg class="w-5 h-5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- SUB-HEADER TOOLBAR (Items Count readout + Sort Filter) -->
+      <div class="px-4 sm:px-6 py-2.5 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between text-xs text-slate-500 shrink-0">
+        <span class="font-medium">
+          {{ activeTab() === 'bag' ? cartService.cartItemsCount() + ' items in bag' : wishlistService.wishlistItems().length + ' saved items' }}
+        </span>
+        <div class="flex items-center space-x-1">
+          <span class="font-semibold text-slate-700">Recently added</span>
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- TAB 1: SHOPPING BAG TAB CONTENT -->
+      <div *ngIf="activeTab() === 'bag'" class="flex-1 overflow-y-auto flex flex-col justify-between">
+        
+        <!-- Cart Items List -->
+        <div class="p-4 sm:p-6 space-y-4 flex-1">
+          
           <!-- Loading state -->
           <div *ngIf="cartService.isLoading()" class="flex flex-col items-center justify-center py-12 text-slate-400">
             <svg class="animate-spin w-8 h-8 text-red-600 mb-3" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p class="text-sm font-medium">Updating cart...</p>
+            <p class="text-xs font-semibold">Updating shopping bag...</p>
           </div>
 
           <!-- Empty State -->
@@ -44,49 +116,49 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
               </svg>
             </div>
-            <h3 class="text-base font-semibold text-slate-800 mb-1">Your cart is empty</h3>
-            <p class="text-sm text-slate-500 mb-6 max-w-xs">Looks like you haven't added any products to your shopping cart yet.</p>
-            <a routerLink="/products" (click)="close()" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-semibold shadow-md transition">
-              Explore Catalog
+            <h3 class="text-base font-bold text-slate-900 mb-1">Your bag is empty</h3>
+            <p class="text-xs text-slate-500 mb-6 max-w-xs">Discover products from our catalog and add them to your shopping bag.</p>
+            <a routerLink="/products" (click)="close()" class="px-6 py-3 bg-slate-950 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold shadow-md transition">
+              Browse Catalog
             </a>
           </div>
 
           <!-- Item list -->
-          <div *ngIf="!cartService.isLoading() && cartService.cart()?.items && cartService.cart()!.items.length > 0" class="space-y-4">
-            <div *ngFor="let item of cartService.cart()!.items" class="flex gap-4 p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 hover:border-slate-300 transition">
+          <div *ngIf="!cartService.isLoading() && cartService.cart()?.items && cartService.cart()!.items.length > 0" class="space-y-3.5">
+            <div *ngFor="let item of cartService.cart()!.items" class="flex gap-3.5 p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 hover:border-slate-300 transition">
               <!-- Item Image -->
-              <img [src]="getItemImage(item)" [alt]="getItemName(item)" class="w-20 h-20 object-cover rounded-xl bg-white border border-slate-200 shrink-0">
+              <img [src]="getItemImage(item)" [alt]="getItemName(item)" class="w-20 h-24 object-cover rounded-xl bg-white border border-slate-200 shrink-0">
               
               <!-- Item Details -->
               <div class="flex-1 flex flex-col justify-between min-w-0">
                 <div>
                   <div class="flex justify-between items-start">
-                    <h4 class="text-sm font-semibold text-slate-900 truncate pr-2">{{ getItemName(item) }}</h4>
-                    <button (click)="removeItem(item.id)" class="text-slate-400 hover:text-red-600 transition p-0.5">
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-900 truncate pr-2">{{ getItemName(item) }}</h4>
+                    <button (click)="removeItem(item.id)" class="text-slate-400 hover:text-red-600 transition p-0.5 shrink-0" title="Remove item">
                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
                   </div>
-                  <div class="flex items-center space-x-2 mt-1 text-xs text-slate-500">
+                  <div class="flex items-center space-x-2 mt-1 text-[11px] text-slate-500">
                     <span *ngIf="item.productVariant?.color" class="px-2 py-0.5 bg-white rounded border border-slate-200">{{ item.productVariant.color }}</span>
                     <span *ngIf="item.productVariant?.size" class="px-2 py-0.5 bg-white rounded border border-slate-200">Size: {{ item.productVariant.size }}</span>
                   </div>
                 </div>
 
-                <div class="flex items-center justify-between mt-2">
+                <div class="flex items-center justify-between mt-2 pt-1">
                   <!-- Price -->
-                  <div class="text-sm font-bold text-slate-900">
+                  <div class="text-sm font-black text-red-600">
                     ${{ (getItemPrice(item) * item.quantity) | number:'1.2-2' }}
                   </div>
 
                   <!-- Qty Modifier -->
-                  <div class="flex items-center space-x-2 bg-white border border-slate-200 rounded-lg p-0.5">
-                    <button (click)="updateQuantity(item.id, item.quantity, -1)" class="w-6 h-6 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded transition font-semibold text-xs">
+                  <div class="flex items-center space-x-1.5 bg-white border border-slate-200 rounded-xl p-0.5">
+                    <button (click)="updateQuantity(item.id, item.quantity, -1)" class="w-6 h-6 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded-lg transition font-bold text-xs">
                       -
                     </button>
-                    <span class="text-xs font-bold text-slate-900 px-1">{{ item.quantity }}</span>
-                    <button (click)="updateQuantity(item.id, item.quantity, 1)" class="w-6 h-6 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded transition font-semibold text-xs">
+                    <span class="text-xs font-bold text-slate-900 px-1.5">{{ item.quantity }}</span>
+                    <button (click)="updateQuantity(item.id, item.quantity, 1)" class="w-6 h-6 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded-lg transition font-bold text-xs">
                       +
                     </button>
                   </div>
@@ -94,36 +166,126 @@
               </div>
             </div>
           </div>
+
         </div>
 
-        <!-- Footer -->
-        <div *ngIf="cartService.cart()?.items && cartService.cart()!.items.length > 0" class="p-6 border-t border-slate-200 bg-slate-50 space-y-4">
-          <div class="space-y-2">
-            <div class="flex justify-between text-sm text-slate-500">
+        <!-- Bag Footer with Subtotal & Checkout -->
+        <div *ngIf="cartService.cart()?.items && cartService.cart()!.items.length > 0" class="p-4 sm:p-6 border-t border-slate-200 bg-slate-50 space-y-4 shrink-0">
+          <div class="space-y-2 text-xs sm:text-sm">
+            <div class="flex justify-between text-slate-600">
               <span>Subtotal</span>
-              <span class="font-medium text-slate-900">${{ cartService.cartSubtotal() | number:'1.2-2' }}</span>
+              <span class="font-bold text-slate-900">${{ cartService.cartSubtotal() | number:'1.2-2' }}</span>
             </div>
-            <div class="flex justify-between text-sm text-slate-500">
+            <div class="flex justify-between text-slate-600">
               <span>Shipping</span>
-              <span class="font-medium text-emerald-600">FREE Delivery</span>
+              <span class="font-bold text-emerald-600">FREE Delivery</span>
             </div>
-            <div class="pt-2 border-t border-slate-200 flex justify-between text-base font-bold text-slate-900">
-              <span>Total</span>
+            <div class="pt-2 border-t border-slate-200 flex justify-between text-base font-black text-slate-950">
+              <span>Total Payable</span>
               <span class="text-red-600">${{ cartService.cartSubtotal() | number:'1.2-2' }}</span>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-3 pt-2">
-            <a routerLink="/cart" (click)="close()" class="w-full text-center px-4 py-3 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl font-semibold text-sm transition">
-              View Cart
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <a routerLink="/cart" (click)="close()" class="w-full text-center px-4 py-3 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl font-bold text-xs transition">
+              View Bag Page
             </a>
-            <a routerLink="/checkout" (click)="close()" class="w-full text-center px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-sm shadow-md transition">
-              Checkout
+            <a routerLink="/checkout" (click)="close()" class="w-full text-center px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow-md transition">
+              Checkout & Pay KHQR
             </a>
           </div>
         </div>
 
       </div>
+
+      <!-- TAB 2: WISHLIST TAB CONTENT (2-COLUMN GRID MATCHING ZANDO/MYTEN11 REFERENCE IMAGE 2) -->
+      <div *ngIf="activeTab() === 'wishlist'" class="flex-1 overflow-y-auto p-4">
+        
+        <!-- Loading state -->
+        <div *ngIf="wishlistService.isLoading()" class="flex flex-col items-center justify-center py-12 text-slate-400">
+          <svg class="animate-spin w-8 h-8 text-slate-900 mb-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          <p class="text-xs font-semibold">Loading saved wishlist items...</p>
+        </div>
+
+        <!-- Empty Wishlist State -->
+        <div *ngIf="!wishlistService.isLoading() && wishlistService.wishlistItems().length === 0" class="flex flex-col items-center justify-center py-16 text-center">
+          <div class="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-4">
+            <svg class="w-10 h-10 stroke-[1.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </div>
+          <h3 class="text-base font-bold text-slate-900 mb-1">Your wishlist is empty</h3>
+          <p class="text-xs text-slate-500 mb-6 max-w-xs">Click the heart icon on any product to save items for later.</p>
+          <a routerLink="/products" (click)="close()" class="px-6 py-3 bg-slate-950 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold shadow-md transition">
+            Explore Catalog
+          </a>
+        </div>
+
+        <!-- 2-COLUMN WISHLIST PRODUCT CARDS GRID (Reference Image 2) -->
+        <div *ngIf="!wishlistService.isLoading() && wishlistService.wishlistItems().length > 0" class="grid grid-cols-2 gap-3 sm:gap-4">
+          <div 
+            *ngFor="let item of wishlistService.wishlistItems()" 
+            class="bg-white rounded-2xl p-2.5 border border-slate-200/80 shadow-2xs space-y-2 flex flex-col justify-between"
+          >
+            <div>
+              <!-- Product Image Container -->
+              <div class="relative aspect-[4/5] rounded-xl overflow-hidden bg-slate-50 mb-2 border border-slate-100">
+                <img [src]="getProductPrimaryImage(item.product)" [alt]="item.product.name" class="w-full h-full object-cover">
+                
+                <!-- Heart Wishlist Toggle Button (Filled black heart) -->
+                <button 
+                  (click)="removeFromWishlist($event, item.productId)" 
+                  class="absolute top-2 right-2 p-1 bg-white/80 backdrop-blur-xs rounded-full text-slate-900 hover:text-red-600 transition shadow-sm"
+                  title="Remove from Wishlist"
+                >
+                  <svg class="w-4 h-4 fill-slate-900 text-slate-900 hover:fill-red-600 hover:text-red-600" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Product Info -->
+              <h4 class="text-xs font-bold text-slate-900 truncate" [title]="item.product.name">{{ item.product.name }}</h4>
+
+              <!-- Price Row: Red final price, discount %, base price -->
+              <div class="flex items-baseline space-x-1 mt-0.5 text-xs">
+                <span class="font-black text-red-600">${{ item.product.finalPrice | number:'1.2-2' }}</span>
+                <span *ngIf="item.product.isDiscounted" class="text-[10px] text-slate-400 font-semibold">-{{ item.product.discountPercentage }}%</span>
+                <span *ngIf="item.product.isDiscounted" class="text-[10px] text-slate-400 line-through">${{ item.product.basePrice | number:'1.2-2' }}</span>
+              </div>
+
+              <!-- Variant Selectors (Color & Size) -->
+              <div *ngIf="item.product.variants && item.product.variants.length > 0" class="grid grid-cols-2 gap-1.5 pt-2">
+                <select 
+                  [ngModel]="getSelectedVariantId(item)" 
+                  (ngModelChange)="onVariantSelect(item.productId, $event)" 
+                  class="bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-semibold p-1 text-slate-800 truncate focus:outline-none focus:ring-1 focus:ring-slate-900"
+                >
+                  <option *ngFor="let v of item.product.variants" [value]="v.id">
+                    {{ v.color || 'Standard' }} ({{ v.size }})
+                  </option>
+                </select>
+
+                <div class="bg-slate-100 rounded-lg text-[10px] font-bold text-slate-600 flex items-center justify-center p-1 truncate">
+                  Stock: {{ item.product.totalAvailableStock }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Full Width Add to Bag Button -->
+            <button 
+              (click)="addWishlistItemToBag(item)" 
+              [disabled]="item.product.totalAvailableStock <= 0 || addingToBagMap()[item.productId]"
+              class="w-full py-2 bg-slate-950 hover:bg-red-600 active:bg-red-700 disabled:bg-slate-300 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center space-x-1 mt-2 cursor-pointer"
+            >
+              <svg *ngIf="addingToBagMap()[item.productId]" class="animate-spin w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <span>{{ addingToBagMap()[item.productId] ? 'Adding...' : 'Add to bag' }}</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
     </div>
   </div>
 </div>
