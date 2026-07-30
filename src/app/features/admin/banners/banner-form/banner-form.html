@@ -14,7 +14,7 @@
       </a>
       <h1>{{ isEditMode() ? 'Edit Banner Campaign' : 'Create New Banner' }}</h1>
     </div>
-    <p>Upload a promotional image, link destination, and layout position for storefront display</p>
+    <p>Upload promotional images (Desktop & Mobile), link destination, and layout position for storefront display</p>
   </div>
   <div class="header-actions">
     <a routerLink="/admin/banners" class="btn btn-secondary">Cancel</a>
@@ -61,34 +61,31 @@
       <div class="card-body">
         <div class="form-group">
           <label for="name">Banner Campaign Name *</label>
-          <input type="text" id="name" formControlName="name" placeholder="e.g. Summer Collection Launch">
+          <input type="text" id="name" formControlName="name" placeholder="e.g. Summer Hero Carousel">
           @if (bannerForm.get('name')?.touched && bannerForm.get('name')?.invalid) {
             <div class="error-text">Campaign name is required (max 150 characters)</div>
           }
         </div>
 
         <div class="form-group">
-          <label for="linkUrl">Redirect Link URL *</label>
-          <input type="text" id="linkUrl" formControlName="linkUrl" placeholder="e.g. /products?category=shoes">
-          @if (bannerForm.get('linkUrl')?.touched && bannerForm.get('linkUrl')?.invalid) {
-            <div class="error-text">Link URL is required</div>
-          }
+          <label for="linkUrl">Redirect Link URL</label>
+          <input type="text" id="linkUrl" formControlName="linkUrl" placeholder="e.g. /products?hasDiscount=true">
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label for="position">Target Layout Position *</label>
             <select id="position" formControlName="position">
-              <option value="1">Homepage Hero Carousel</option>
-              <option value="2">Product List Top Header</option>
-              <option value="3">Cart Page Footer Ad</option>
-              <option value="4">Promotion Popup Modal</option>
+              <option value="1">1 - HomePage Hero Carousel</option>
+              <option value="2">2 - All Products Top Header</option>
+              <option value="3">3 - Cart Page Bottom</option>
+              <option value="4">4 - Promotion Popup</option>
             </select>
           </div>
           
           <div class="form-group">
             <label for="sortOrder">Sort Priority Index *</label>
-            <input type="number" id="sortOrder" formControlName="sortOrder" min="0" placeholder="0">
+            <input type="number" id="sortOrder" formControlName="sortOrder" min="0" placeholder="1">
             @if (bannerForm.get('sortOrder')?.touched && bannerForm.get('sortOrder')?.invalid) {
               <div class="error-text">Sort index must be positive</div>
             }
@@ -106,70 +103,93 @@
       </div>
     </div>
 
-    <!-- Media Files Card -->
+    <!-- Dual Media Files Card: Desktop & Mobile -->
     <div class="form-card">
       <div class="card-header">
-        <h2>Banner Image Asset</h2>
-        <p>Choose a promotional picture for store rendering</p>
+        <h2>Responsive Image Assets</h2>
+        <p>Upload high-res desktop wide image and mobile portrait/square image</p>
       </div>
       
       <div class="card-body">
-        @if (previewUrl()) {
-          <!-- Preview selected new local file -->
-          <div class="uploaded-preview-container">
-            <div class="preview-img-card">
-              <img [src]="previewUrl()" alt="Local Preview">
-            </div>
-            <div class="preview-file-details">
-              <div class="file-info-meta">
-                <span class="file-name">{{ selectedFile()?.name }}</span>
-                <span class="file-size">{{ (selectedFile()?.size || 0) / 1024 | number:'1.0-1' }} KB</span>
+        
+        <!-- Desktop Image Upload -->
+        <div class="form-group">
+          <label>Desktop Image (1920x600 recommended) {{ isEditMode() ? '' : '*' }}</label>
+          @if (desktopPreviewUrl()) {
+            <div class="uploaded-preview-container">
+              <div class="preview-img-card">
+                <img [src]="desktopPreviewUrl()" alt="Desktop Preview">
               </div>
-              <button type="button" class="btn-remove-image" (click)="removeSelectedFile()">
-                <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  <line x1="10" y1="11" x2="10" y2="17"></line>
-                  <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg> Remove Selection
-              </button>
+              <div class="preview-file-details">
+                <div class="file-info-meta">
+                  <span class="file-name">{{ selectedDesktopFile()?.name }}</span>
+                  <span class="file-size">{{ (selectedDesktopFile()?.size || 0) / 1024 | number:'1.0-1' }} KB</span>
+                </div>
+                <button type="button" class="btn-remove-image" (click)="removeDesktopFile()">Remove Selection</button>
+              </div>
             </div>
-          </div>
-        } @else if (existingImageUrl()) {
-          <!-- Display current server image and replacement dropzone -->
-          <div class="uploaded-preview-container">
-            <div class="preview-img-card">
-              <img [src]="apiUrl + existingImageUrl()" alt="Server Image">
+          } @else if (existingDesktopUrl()) {
+            <div class="uploaded-preview-container">
+              <div class="preview-img-card">
+                <img [src]="apiUrl + existingDesktopUrl()" alt="Current Desktop Image">
+              </div>
+              <div class="upload-dropzone compact-dropzone">
+                <input type="file" accept="image/*" (change)="onDesktopFileSelected($event)">
+                <div class="dropzone-label">
+                  <h3>Replace Desktop Image</h3>
+                </div>
+              </div>
             </div>
-            <div class="upload-dropzone compact-dropzone">
-              <input type="file" accept="image/*" (change)="onFileSelected($event)">
+          } @else {
+            <div class="upload-dropzone">
+              <input type="file" accept="image/*" (change)="onDesktopFileSelected($event)">
               <div class="dropzone-label">
-                <svg class="icon-svg upload-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="17 8 12 3 7 8"></polyline>
-                  <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                <h3>Choose Different Image</h3>
-                <p>Click to replace the current display graphic</p>
+                <h3>Upload Desktop Image</h3>
+                <p>Click to browse desktop wide image (.jpg, .png, .webp)</p>
               </div>
             </div>
-          </div>
-        } @else {
-          <!-- Empty Uploader Drop-zone -->
-          <div class="upload-dropzone">
-            <input type="file" accept="image/*" (change)="onFileSelected($event)">
-            <div class="dropzone-label">
-              <svg class="icon-svg upload-icon" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-              <h3>Upload Image File</h3>
-              <p>Click to browse files or drag images here</p>
-              <span class="sub-label">Supports PNG, JPG, WEBP formats</span>
+          }
+        </div>
+
+        <!-- Mobile Image Upload -->
+        <div class="form-group mt-6">
+          <label>Mobile Image (800x1000 recommended) {{ isEditMode() ? '' : '*' }}</label>
+          @if (mobilePreviewUrl()) {
+            <div class="uploaded-preview-container">
+              <div class="preview-img-card">
+                <img [src]="mobilePreviewUrl()" alt="Mobile Preview">
+              </div>
+              <div class="preview-file-details">
+                <div class="file-info-meta">
+                  <span class="file-name">{{ selectedMobileFile()?.name }}</span>
+                  <span class="file-size">{{ (selectedMobileFile()?.size || 0) / 1024 | number:'1.0-1' }} KB</span>
+                </div>
+                <button type="button" class="btn-remove-image" (click)="removeMobileFile()">Remove Selection</button>
+              </div>
             </div>
-          </div>
-        }
+          } @else if (existingMobileUrl()) {
+            <div class="uploaded-preview-container">
+              <div class="preview-img-card">
+                <img [src]="apiUrl + existingMobileUrl()" alt="Current Mobile Image">
+              </div>
+              <div class="upload-dropzone compact-dropzone">
+                <input type="file" accept="image/*" (change)="onMobileFileSelected($event)">
+                <div class="dropzone-label">
+                  <h3>Replace Mobile Image</h3>
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="upload-dropzone">
+              <input type="file" accept="image/*" (change)="onMobileFileSelected($event)">
+              <div class="dropzone-label">
+                <h3>Upload Mobile Image</h3>
+                <p>Click to browse mobile portrait file (.jpg, .png, .webp)</p>
+              </div>
+            </div>
+          }
+        </div>
+
       </div>
     </div>
   </div>
@@ -185,22 +205,17 @@
       <div class="card-body">
         <div class="preview-layout-card">
           <div class="simulated-image-frame">
-            @if (previewUrl()) {
-              <img [src]="previewUrl()" alt="Simulated Banner">
-            } @else if (existingImageUrl()) {
-              <img [src]="apiUrl + existingImageUrl()" alt="Simulated Server Banner">
+            @if (desktopPreviewUrl()) {
+              <img [src]="desktopPreviewUrl()" alt="Simulated Banner">
+            } @else if (existingDesktopUrl()) {
+              <img [src]="apiUrl + existingDesktopUrl()" alt="Simulated Server Banner">
             } @else {
               <div class="simulated-placeholder">
-                <svg class="icon-svg placeholder-icon" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                  <polyline points="21 15 16 10 5 21"></polyline>
-                </svg>
-                <span>No Asset Selected</span>
+                <span>No Desktop Asset Selected</span>
               </div>
             }
             <div class="position-overlay-badge">
-              Position: {{ bannerForm.get('position')?.value == 1 ? 'Hero Carousel' : bannerForm.get('position')?.value == 2 ? 'List Top Header' : bannerForm.get('position')?.value == 3 ? 'Cart Footer' : 'Promo Popup' }}
+              Position: {{ bannerForm.get('position')?.value == 1 ? '1-HomePageHero' : bannerForm.get('position')?.value == 2 ? '2-AllProductsTop' : bannerForm.get('position')?.value == 3 ? '3-CartPageBottom' : '4-PromotionPopup' }}
             </div>
             
             <div class="status-indicator-dot" [class.active]="bannerForm.get('isActive')?.value" title="Active Campaign status"></div>
@@ -212,9 +227,6 @@
               <span class="link-label">Redirect link:</span>
               <span class="link-val">{{ bannerForm.get('linkUrl')?.value || 'Not Configured' }}</span>
             </div>
-            <button type="button" class="btn btn-primary btn-sm simulated-action-btn" [disabled]="!bannerForm.get('linkUrl')?.value">
-              Test Action Trigger
-            </button>
           </div>
         </div>
       </div>

@@ -19,7 +19,8 @@ export interface ProductImage {
   id: string;
   imageUrl: string;
   isPrimary: boolean;
-  productVariantId: string;
+  productVariantId?: string;
+  color?: string;
 }
 
 export interface ProductVariant {
@@ -39,6 +40,7 @@ export interface Product {
   finalPrice: number;
   isDiscounted: boolean;
   totalAvailableStock: number;
+  status?: string;
   categoryId: string;
   categoryName: string;
   brandId: string;
@@ -56,6 +58,17 @@ export interface VariantCreateDto {
   sku: string;
 }
 
+export interface ColorGroupSizeItem {
+  size: string;
+  physicalQuantity: number;
+  sku: string;
+}
+
+export interface ColorGroup {
+  color: string;
+  sizes: ColorGroupSizeItem[];
+}
+
 export interface ProductCreateDto {
   name: string;
   description: string;
@@ -64,8 +77,11 @@ export interface ProductCreateDto {
   categoryId: string;
   brandId: string;
   targetGender?: number | string;
-  variants: VariantCreateDto[];
+  colorGroups?: ColorGroup[];
+  colorGroupsJson?: string;
+  variants?: VariantCreateDto[];
   images?: File[];
+  imageColors?: string[];
   imageTargetSkus?: string[];
   imageIsPrimary?: boolean[];
 }

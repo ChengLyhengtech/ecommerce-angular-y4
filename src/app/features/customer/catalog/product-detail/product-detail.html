@@ -1,5 +1,5 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
-  
+
   <!-- Breadcrumb -->
   <nav class="flex items-center space-x-2 text-xs font-medium text-slate-400 truncate">
     <a routerLink="/" class="hover:text-red-600 transition shrink-0">Home</a>
@@ -20,45 +20,55 @@
   </div>
 
   <!-- Product Detail Content -->
-  <div *ngIf="!productQuery.isLoading() && productQuery.data() as p" class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-    
+  <div *ngIf="!productQuery.isLoading() && productQuery.data() as p"
+    class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+
     <!-- LEFT: IMAGE GALLERY -->
     <div class="space-y-3 sm:space-y-4">
       <!-- Large Main Image Preview -->
-      <div class="relative aspect-square rounded-2xl sm:rounded-3xl overflow-hidden bg-white border border-slate-200 shadow-sm">
-        <img 
-          [src]="getImageUrl(p.images && p.images.length > 0 ? p.images[selectedImageIndex()].imageUrl : '')" 
-          [alt]="p.name" 
-          class="w-full h-full object-cover"
-        >
-        <span *ngIf="p.isDiscounted" class="absolute top-3 left-3 sm:top-4 sm:left-4 px-2.5 py-1 bg-red-600 text-white text-[11px] sm:text-xs font-black rounded-lg sm:rounded-xl shadow">
+      <div
+        class="relative aspect-square rounded-2xl sm:rounded-3xl overflow-hidden bg-white border border-slate-200 shadow-sm">
+        <img [src]="getImageUrl(displayedImage()?.imageUrl)" [alt]="p.name"
+          class="w-full h-full object-cover transition-all duration-300">
+
+        <!-- Discount Tag -->
+        <span *ngIf="p.isDiscounted"
+          class="absolute top-3 left-3 sm:top-4 sm:left-4 px-2.5 py-1 bg-red-600 text-white text-[11px] sm:text-xs font-black rounded-lg sm:rounded-xl shadow">
           -{{ p.discountPercentage }}% OFF
+        </span>
+
+        <!-- Primary Image Badge -->
+        <span *ngIf="displayedImage()?.isPrimary"
+          class="absolute top-3 right-3 sm:top-4 sm:right-4 px-2.5 py-1 bg-slate-900/80 backdrop-blur text-white text-[10px] sm:text-xs font-bold rounded-lg shadow">
+          Primary View
         </span>
       </div>
 
-      <!-- Thumbnail Carousel -->
-      <div *ngIf="p.images && p.images.length > 1" class="flex items-center space-x-2.5 sm:space-x-3 overflow-x-auto pb-2 scrollbar-none">
-        <button 
-          *ngFor="let img of p.images; let i = index" 
-          (click)="selectedImageIndex.set(i)"
-          [class.ring-2]="selectedImageIndex() === i"
-          [class.ring-red-600]="selectedImageIndex() === i"
-          class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden bg-white border border-slate-200 shrink-0 transition"
-        >
+      <!-- Thumbnail Carousel (Filtered by selected variant / color) -->
+      <div *ngIf="filteredImages().length > 1"
+        class="flex items-center space-x-2.5 sm:space-x-3 overflow-x-auto pb-2 scrollbar-none">
+        <button *ngFor="let img of filteredImages(); let i = index" (click)="selectedImageIndex.set(i)"
+          [class.ring-2]="selectedImageIndex() === i" [class.ring-red-600]="selectedImageIndex() === i"
+          [class.border-red-600]="selectedImageIndex() === i"
+          class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden bg-white border border-slate-200 shrink-0 transition hover:border-slate-400">
           <img [src]="getImageUrl(img.imageUrl)" [alt]="p.name" class="w-full h-full object-cover">
+          <span *ngIf="img.isPrimary"
+            class="absolute bottom-1 right-1 px-1 py-0.5 bg-red-600 text-[8px] font-black text-white rounded shadow-sm">Main</span>
         </button>
       </div>
     </div>
 
     <!-- RIGHT: PRODUCT INFO & VARIANTS -->
     <div class="space-y-5 sm:space-y-6">
-      
+
       <!-- Category & Brand -->
       <div class="flex flex-wrap items-center gap-2">
-        <span class="px-2.5 py-1 bg-red-50 text-red-600 text-[11px] sm:text-xs font-bold rounded-lg border border-red-200 uppercase tracking-wider">
+        <span
+          class="px-2.5 py-1 bg-red-50 text-red-600 text-[11px] sm:text-xs font-bold rounded-lg border border-red-200 uppercase tracking-wider">
           {{ p.categoryName || 'Category' }}
         </span>
-        <span *ngIf="p.brandName" class="px-2.5 py-1 bg-slate-100 text-slate-700 text-[11px] sm:text-xs font-bold rounded-lg uppercase tracking-wider">
+        <span *ngIf="p.brandName"
+          class="px-2.5 py-1 bg-slate-100 text-slate-700 text-[11px] sm:text-xs font-bold rounded-lg uppercase tracking-wider">
           Brand: {{ p.brandName }}
         </span>
       </div>
@@ -74,49 +84,93 @@
         <div>
           <div class="flex items-baseline space-x-2 sm:space-x-3">
             <span class="text-2xl sm:text-3xl font-black text-slate-950">${{ p.finalPrice | number:'1.2-2' }}</span>
-            <span *ngIf="p.isDiscounted" class="text-xs sm:text-base text-slate-400 line-through">${{ p.basePrice | number:'1.2-2' }}</span>
+            <span *ngIf="p.isDiscounted" class="text-xs sm:text-base text-slate-400 line-through">${{ p.basePrice |
+              number:'1.2-2' }}</span>
           </div>
           <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Price inclusive of all taxes</p>
         </div>
 
         <!-- Stock Indicator -->
         <div class="text-right shrink-0">
-          <span *ngIf="(selectedVariant()?.availableStock ?? 0) > 0" class="inline-flex items-center text-xs font-bold text-emerald-600">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-ping"></span>
+          <span *ngIf="selectedVariant() && (selectedVariant()?.availableStock ?? 0) > 0"
+            class="inline-flex items-center text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
             In Stock ({{ selectedVariant()?.availableStock }} left)
           </span>
-          <span *ngIf="(selectedVariant()?.availableStock ?? 0) <= 0" class="inline-flex items-center text-xs font-bold text-red-600">
+          <span *ngIf="!selectedVariant() || (selectedVariant()?.availableStock ?? 0) <= 0"
+            class="inline-flex items-center text-xs font-bold text-red-600 bg-red-50 px-3 py-1.5 rounded-xl border border-red-200">
             <span class="w-2 h-2 rounded-full bg-red-600 mr-1.5"></span>
             Out of Stock
           </span>
         </div>
       </div>
 
-      <!-- Variants Selection -->
-      <div *ngIf="p.variants && p.variants.length > 0" class="space-y-3 pt-1">
-        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Product Option / Size / Color</label>
-        
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
-          <button 
-            *ngFor="let v of p.variants" 
-            (click)="selectVariant(v)"
-            [class.border-red-600]="selectedVariant()?.id === v.id"
-            [class.bg-red-50]="selectedVariant()?.id === v.id"
-            [class.text-red-600]="selectedVariant()?.id === v.id"
-            class="p-3 border border-slate-200 rounded-2xl text-left hover:border-slate-400 transition flex flex-col justify-between"
-          >
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-900 truncate pr-1">{{ v.color }}</span>
-              <span class="text-[10px] font-semibold px-1.5 py-0.5 bg-slate-100 rounded text-slate-600 shrink-0">Size: {{ v.size }}</span>
-            </div>
-            <div class="mt-2 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-400">
-              <span class="truncate pr-1">SKU: {{ v.sku }}</span>
-              <span [class.text-emerald-600]="v.availableStock > 0" [class.text-red-600]="v.availableStock <= 0" class="font-bold shrink-0">
-                {{ v.availableStock > 0 ? v.availableStock + ' left' : 'Sold out' }}
-              </span>
-            </div>
-          </button>
+      <!-- Variants Selection Controls -->
+      <div *ngIf="variants().length > 0" class="space-y-4 pt-1">
+
+        <!-- Color Selection -->
+        <div *ngIf="availableColors().length > 0" class="space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              Color: <span class="text-slate-950 font-black capitalize ml-1">{{ selectedColor() }}</span>
+            </label>
+          </div>
+          <div class="flex flex-wrap gap-2.5">
+            <button *ngFor="let color of availableColors()" (click)="selectColor(color)"
+              [class.bg-slate-950]="selectedColor().toLowerCase() === color.toLowerCase()"
+              [class.text-white]="selectedColor().toLowerCase() === color.toLowerCase()"
+              [class.border-slate-950]="selectedColor().toLowerCase() === color.toLowerCase()"
+              [class.shadow-md]="selectedColor().toLowerCase() === color.toLowerCase()"
+              [class.ring-2]="selectedColor().toLowerCase() === color.toLowerCase()"
+              [class.ring-slate-950/20]="selectedColor().toLowerCase() === color.toLowerCase()"
+              [class.bg-white]="selectedColor().toLowerCase() !== color.toLowerCase()"
+              [class.text-slate-700]="selectedColor().toLowerCase() !== color.toLowerCase()"
+              [class.border-slate-200]="selectedColor().toLowerCase() !== color.toLowerCase()"
+              [class.hover:border-slate-400]="selectedColor().toLowerCase() !== color.toLowerCase()"
+              class="px-4 py-2.5 rounded-2xl border text-xs font-bold transition-all duration-200 flex items-center space-x-2.5 shadow-sm active:scale-95">
+              <span
+                class="w-4 h-4 rounded-full border border-black/10 shadow-inner shrink-0 transition-transform duration-200"
+                [class.scale-110]="selectedColor().toLowerCase() === color.toLowerCase()"
+                [class.ring-2]="selectedColor().toLowerCase() === color.toLowerCase()"
+                [class.ring-white]="selectedColor().toLowerCase() === color.toLowerCase()"
+                [style.backgroundColor]="getColorHex(color)"></span>
+              <span class="capitalize tracking-wide">{{ color }}</span>
+              <svg *ngIf="selectedColor().toLowerCase() === color.toLowerCase()" class="w-3.5 h-3.5 text-white ml-0.5"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </button>
+          </div>
         </div>
+
+        <!-- Size Selection -->
+        <div *ngIf="sizeOptions().length > 0" class="space-y-2.5 pt-1">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              Size: <span class="text-slate-950 font-black ml-1">{{ selectedSize() }}</span>
+            </label>
+            <span *ngIf="selectedVariant()?.sku" class="text-[11px] font-medium text-slate-400">
+              SKU: <span class="text-slate-700 font-mono font-bold">{{ selectedVariant()?.sku }}</span>
+            </span>
+          </div>
+          <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
+            <button *ngFor="let option of sizeOptions()"
+              (click)="option.existsForColor && option.availableStock > 0 ? selectSize(option.size) : null"
+              [disabled]="!option.existsForColor || option.availableStock <= 0"
+              [class.bg-red-600]="selectedSize() === option.size && option.existsForColor && option.availableStock > 0"
+              [class.text-white]="selectedSize() === option.size && option.existsForColor && option.availableStock > 0"
+              [class.border-red-600]="selectedSize() === option.size && option.existsForColor && option.availableStock > 0"
+              [class.opacity-40]="!option.existsForColor || option.availableStock <= 0"
+              [class.line-through]="!option.existsForColor || option.availableStock <= 0"
+              [class.cursor-not-allowed]="!option.existsForColor || option.availableStock <= 0"
+              [class.bg-white]="selectedSize() !== option.size || !option.existsForColor || option.availableStock <= 0"
+              [class.text-slate-800]="selectedSize() !== option.size && option.existsForColor && option.availableStock > 0"
+              class="py-2.5 px-2 border border-slate-200 rounded-xl text-xs font-bold text-center transition hover:border-slate-400 relative">
+              <span>{{ option.size }}</span>
+            </button>
+          </div>
+        </div>
+
       </div>
 
       <!-- Quantity Selector & Actions -->
@@ -124,11 +178,13 @@
         <div class="flex items-center space-x-4">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Quantity:</label>
           <div class="flex items-center border border-slate-300 bg-white rounded-xl p-1">
-            <button (click)="updateQuantity(-1)" [disabled]="quantity() <= 1" class="w-8 h-8 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded-lg font-bold disabled:opacity-30">
+            <button (click)="updateQuantity(-1)" [disabled]="quantity() <= 1"
+              class="w-8 h-8 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded-lg font-bold disabled:opacity-30">
               -
             </button>
             <span class="w-10 text-center text-sm font-bold text-slate-900">{{ quantity() }}</span>
-            <button (click)="updateQuantity(1)" [disabled]="quantity() >= (selectedVariant()?.availableStock ?? 99)" class="w-8 h-8 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded-lg font-bold disabled:opacity-30">
+            <button (click)="updateQuantity(1)" [disabled]="quantity() >= (selectedVariant()?.availableStock ?? 99)"
+              class="w-8 h-8 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded-lg font-bold disabled:opacity-30">
               +
             </button>
           </div>
@@ -136,20 +192,17 @@
 
         <!-- Action Buttons -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1">
-          <button 
-            (click)="addToCart()" 
-            [disabled]="isAddingToCart() || (selectedVariant()?.availableStock ?? 0) <= 0"
-            class="px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-2xl font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center space-x-2"
-          >
-            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+          <button (click)="addToCart()" [disabled]="isAddingToCart() || (selectedVariant()?.availableStock ?? 0) <= 0"
+            class="px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-2xl font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center space-x-2">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
             <span>{{ isAddingToCart() ? 'Adding...' : 'Add to Cart' }}</span>
           </button>
 
-          <button 
-            (click)="buyNow()" 
-            [disabled]="(selectedVariant()?.availableStock ?? 0) <= 0"
-            class="px-5 py-3.5 sm:px-6 sm:py-4 bg-red-600 hover:bg-red-700 text-white disabled:bg-slate-300 rounded-2xl font-bold text-xs sm:text-sm shadow-md transition"
-          >
+          <button (click)="buyNow()" [disabled]="(selectedVariant()?.availableStock ?? 0) <= 0"
+            class="px-5 py-3.5 sm:px-6 sm:py-4 bg-red-600 hover:bg-red-700 text-white disabled:bg-slate-300 rounded-2xl font-bold text-xs sm:text-sm shadow-md transition">
             Buy Now & Pay via Bakong
           </button>
         </div>

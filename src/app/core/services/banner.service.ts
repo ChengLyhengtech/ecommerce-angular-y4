@@ -26,26 +26,31 @@ export class BannerService {
     return this.http.get<Banner>(`${this.apiUrl}/${id}`);
   }
 
-  createBanner(data: BannerCreateDto): Observable<{ message: string, bannerId: string }> {
+  createBanner(data: BannerCreateDto): Observable<{ message: string; bannerId: string }> {
     const formData = new FormData();
     formData.append('Name', data.name);
-    formData.append('LinkUrl', data.linkUrl);
+    if (data.linkUrl) formData.append('LinkUrl', data.linkUrl);
     formData.append('Position', data.position.toString());
-    formData.append('SortOrder', data.sortOrder.toString());
-    formData.append('ImageFile', data.imageFile);
+    if (data.sortOrder !== undefined) formData.append('SortOrder', data.sortOrder.toString());
+    formData.append('DesktopImage', data.desktopImage);
+    formData.append('MobileImage', data.mobileImage);
 
-    return this.http.post<{ message: string, bannerId: string }>(this.apiUrl, formData);
+    return this.http.post<{ message: string; bannerId: string }>(this.apiUrl, formData);
   }
 
   updateBanner(id: string, data: BannerUpdateDto): Observable<Banner> {
     const formData = new FormData();
     formData.append('Name', data.name);
-    formData.append('LinkUrl', data.linkUrl);
+    if (data.linkUrl) formData.append('LinkUrl', data.linkUrl);
     formData.append('Position', data.position.toString());
-    formData.append('SortOrder', data.sortOrder.toString());
+    if (data.sortOrder !== undefined) formData.append('SortOrder', data.sortOrder.toString());
     formData.append('IsActive', data.isActive.toString());
-    if (data.imageFile) {
-      formData.append('ImageFile', data.imageFile);
+    
+    if (data.desktopImage) {
+      formData.append('DesktopImage', data.desktopImage);
+    }
+    if (data.mobileImage) {
+      formData.append('MobileImage', data.mobileImage);
     }
 
     return this.http.put<Banner>(`${this.apiUrl}/${id}`, formData);
@@ -59,4 +64,3 @@ export class BannerService {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
 }
-

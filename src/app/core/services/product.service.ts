@@ -70,7 +70,7 @@ export class ProductService {
     return this.http.get<Product>(`${this.apiUrl}/${id}`);
   }
 
-  createProduct(data: ProductCreateDto): Observable<{ message: string, productId: string }> {
+  createProduct(data: ProductCreateDto): Observable<{ message: string; productId: string }> {
     const formData = new FormData();
     formData.append('Name', data.name);
     formData.append('Description', data.description);
@@ -84,7 +84,26 @@ export class ProductService {
       formData.append('TargetGender', data.targetGender.toString());
     }
     
-    formData.append('Variants', JSON.stringify(data.variants));
+    // Support ColorGroups payload
+    if (data.colorGroupsJson) {
+      formData.append('ColorGroups', data.colorGroupsJson);
+    } else if (data.colorGroups) {
+      formData.append('ColorGroups', JSON.stringify(data.colorGroups));
+    } else if (data.variants) {
+      // Fallback: group flat variants by color if colorGroups is not provided directly
+      const groupsMap = new Map<string, any[]>();
+      data.variants.forEach(v => {
+        const c = v.color || 'Default';
+        if (!groupsMap.has(c)) groupsMap.set(c, []);
+        groupsMap.get(c)!.push({
+          size: v.size,
+          physicalQuantity: v.initialPhysicalQuantity,
+          sku: v.sku
+        });
+      });
+      const colorGroups = Array.from(groupsMap.entries()).map(([color, sizes]) => ({ color, sizes }));
+      formData.append('ColorGroups', JSON.stringify(colorGroups));
+    }
 
     if (data.images) {
       data.images.forEach((image) => {
@@ -92,7 +111,13 @@ export class ProductService {
       });
     }
 
-    if (data.imageTargetSkus) {
+    if (data.imageColors) {
+      data.imageColors.forEach((color) => {
+        formData.append('ImageColors', color);
+      });
+    }
+
+    if (data.imageTargetSkus && (!data.imageColors || data.imageColors.length === 0)) {
       data.imageTargetSkus.forEach((sku) => {
         formData.append('ImageTargetSkus', sku);
       });
@@ -104,7 +129,7 @@ export class ProductService {
       });
     }
 
-    return this.http.post<{ message: string, productId: string }>(this.apiUrl, formData);
+    return this.http.post<{ message: string; productId: string }>(this.apiUrl, formData);
   }
 
   updateProductCore(id: string, data: ProductUpdateDto): Observable<{ message: string }> {
@@ -123,18 +148,21 @@ export class ProductService {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/variants/${variantId}`);
   }
 
-  createProductVariant(productId: string, data: VariantCreateDto): Observable<{ message: string, id?: string }> {
-    return this.http.post<{ message: string, id?: string }>(`${this.apiUrl}/${productId}/variants`, data);
+  createProductVariant(productId: string, data: VariantCreateDto): Observable<{ message: string; id?: string }> {
+    return this.http.post<{ message: string; id?: string }>(`${this.apiUrl}/${productId}/variants`, data);
   }
 
-  uploadProductImage(productId: string, file: File, isPrimary: boolean = false, variantId?: string): Observable<{ message: string, imageId?: string, path?: string }> {
+  uploadProductImage(productId: string, file: File, isPrimary: boolean = false, color?: string, variantId?: string): Observable<{ message: string; imageId?: string; path?: string }> {
     const formData = new FormData();
     formData.append('File', file);
     formData.append('IsPrimary', isPrimary.toString());
+    if (color) {
+      formData.append('Color', color);
+    }
     if (variantId) {
       formData.append('ProductVariantId', variantId);
     }
-    return this.http.post<{ message: string, imageId?: string, path?: string }>(`${this.apiUrl}/${productId}/images`, formData);
+    return this.http.post<{ message: string; imageId?: string; path?: string }>(`${this.apiUrl}/${productId}/images`, formData);
   }
 
   setProductImagePrimary(imageId: string): Observable<{ message: string }> {

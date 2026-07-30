@@ -291,9 +291,9 @@
                     } @else {
                       <!-- Saved Variant: Server images associated with this variant -->
                       @for (image of existingImages(); track image.id) {
-                        @if (image.productVariantId === variant.get('id')?.value) {
+                        @if (isImageForVariant(image, variant)) {
                           <div class="media-thumb-card" [class.is-primary]="image.isPrimary">
-                            <img [src]="apiUrl + image.imageUrl" alt="Variant Image">
+                            <img [src]="getImageUrl(image.imageUrl)" alt="Variant Image">
                             <div class="media-actions-overlay">
                               <button type="button" class="btn-media-star" (click)="!image.isPrimary && onSetPrimaryImageEdit(image.id)" [title]="image.isPrimary ? 'Primary Catalog Image' : 'Make Primary'">
                                 <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" [attr.fill]="image.isPrimary ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -310,7 +310,7 @@
                       
                       <!-- Upload Trigger Area (Immediate Upload) -->
                       <div class="media-upload-trigger">
-                        <input type="file" accept="image/*" (change)="onUploadImageEdit($event, variant.get('id')?.value)">
+                        <input type="file" accept="image/*" (change)="onUploadImageEdit($event, variant.get('id')?.value, variant.get('color')?.value)">
                         <div class="trigger-label">
                           <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -391,7 +391,7 @@
                   @if (isEditMode()) {
                     @if (existingImages().length > 0) {
                       @let activeImg = existingImages().find(img => img.isPrimary) || existingImages()[0];
-                      <img [src]="apiUrl + activeImg.imageUrl" alt="Storefront Preview">
+                      <img [src]="getImageUrl(activeImg.imageUrl)" alt="Storefront Preview">
                     } @else {
                       <div class="preview-no-img">No Image Uploaded</div>
                     }
@@ -427,9 +427,9 @@
           <div class="card-body">
             <div class="media-edit-gallery">
               @for (image of existingImages(); track image.id) {
-                @if (image.productVariantId === null) {
+                @if (isGeneralImage(image, variants.controls)) {
                   <div class="media-thumb-card" [class.is-primary]="image.isPrimary">
-                    <img [src]="apiUrl + image.imageUrl" alt="Product Image">
+                    <img [src]="getImageUrl(image.imageUrl)" alt="Product Image">
                     <div class="media-actions-overlay">
                       <button type="button" class="btn-media-star" (click)="!image.isPrimary && onSetPrimaryImageEdit(image.id)" [title]="image.isPrimary ? 'Primary Catalog Image' : 'Make Primary'">
                         <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" [attr.fill]="image.isPrimary ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

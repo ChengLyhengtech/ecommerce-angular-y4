@@ -14,6 +14,7 @@ import { environment } from '../../../../../environments/environment';
 interface SelectedImageFile {
   file: File;
   previewUrl: string;
+  color: string;
   variantSku: string;
   isPrimary: boolean;
 }
@@ -242,6 +243,43 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
+  getImageUrl(url?: string): string {
+    if (!url) return 'https://placehold.co/600x600?text=No+Image';
+    if (url.startsWith('http')) return url;
+    return `${this.apiUrl}${url}`;
+  }
+
+  isImageForVariant(image: ProductImage, variantFormGroupOrValue: any): boolean {
+    if (!image) return false;
+    const vId = (variantFormGroupOrValue?.get ? variantFormGroupOrValue.get('id')?.value : variantFormGroupOrValue?.id) || '';
+    const vColor = (variantFormGroupOrValue?.get ? variantFormGroupOrValue.get('color')?.value : variantFormGroupOrValue?.color) || '';
+    const vSku = (variantFormGroupOrValue?.get ? variantFormGroupOrValue.get('sku')?.value : variantFormGroupOrValue?.sku) || '';
+
+    const imgVariantId = (image.productVariantId || '').toLowerCase();
+    const imgColor = (image.color || '').toLowerCase();
+
+    // 1. Direct variantId match
+    if (vId && (imgVariantId === vId.toLowerCase() || imgColor === vId.toLowerCase())) {
+      return true;
+    }
+    // 2. Direct SKU match
+    if (vSku && (imgVariantId === vSku.toLowerCase() || imgColor === vSku.toLowerCase())) {
+      return true;
+    }
+    // 3. Color match
+    if (vColor && imgColor === vColor.toLowerCase()) {
+      return true;
+    }
+
+    return false;
+  }
+
+  isGeneralImage(image: ProductImage, variantsArray: any[]): boolean {
+    if (!image) return false;
+    if (!image.color && !image.productVariantId) return true;
+    return !variantsArray.some(v => this.isImageForVariant(image, v));
+  }
+
   private initForm(): void {
     this.productForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(150)]],
@@ -330,7 +368,9 @@ export class ProductFormComponent implements OnInit {
   // Handle local image file selection (Create mode)
   onFileSelected(event: Event, variantIndex: number): void {
     const input = event.target as HTMLInputElement;
-    const sku = this.variants.at(variantIndex).get('sku')?.value;
+    const variantGroup = this.variants.at(variantIndex);
+    const sku = variantGroup.get('sku')?.value;
+    const color = variantGroup.get('color')?.value || '';
 
     if (!sku) {
       alert('Please fill in the Variant SKU before selecting images.');
@@ -352,6 +392,7 @@ export class ProductFormComponent implements OnInit {
         newFiles.push({
           file,
           previewUrl,
+          color,
           variantSku: sku,
           isPrimary: isFirstGlobalImage
         });
@@ -393,7 +434,7 @@ export class ProductFormComponent implements OnInit {
   }
 
   // Direct image upload (Edit mode)
-  onUploadImageEdit(event: Event, variantId?: string): void {
+  onUploadImageEdit(event: Event, variantId?: string, color?: string): void {
     const input = event.target as HTMLInputElement;
     const productId = this.productId();
 
@@ -446,8 +487,21 @@ export class ProductFormComponent implements OnInit {
   }
 
   private saveCreateProduct(formValues: any): void {
+    // Group form variants by color into ColorGroups JSON
+    const groupsMap = new Map<string, any[]>();
+    formValues.variants.forEach((v: any) => {
+      const c = (v.color || 'Default').trim();
+      if (!groupsMap.has(c)) groupsMap.set(c, []);
+      groupsMap.get(c)!.push({
+        size: v.size,
+        physicalQuantity: Number(v.physicalQuantity),
+        sku: v.sku
+      });
+    });
+    const colorGroups = Array.from(groupsMap.entries()).map(([color, sizes]) => ({ color, sizes }));
+
     const files = this.selectedFiles().map(f => f.file);
-    const targetSkus = this.selectedFiles().map(f => f.variantSku);
+    const imageColors = this.selectedFiles().map(f => f.color || f.variantSku);
     const isPrimaries = this.selectedFiles().map(f => f.isPrimary);
 
     const productDto = {
@@ -458,6 +512,8 @@ export class ProductFormComponent implements OnInit {
       categoryId: formValues.categoryId,
       brandId: formValues.brandId,
       targetGender: Number(formValues.targetGender ?? 16),
+      colorGroupsJson: JSON.stringify(colorGroups),
+      colorGroups: colorGroups,
       variants: formValues.variants.map((v: any) => ({
         color: v.color,
         size: v.size,
@@ -465,7 +521,7 @@ export class ProductFormComponent implements OnInit {
         sku: v.sku
       })),
       images: files.length > 0 ? files : undefined,
-      imageTargetSkus: targetSkus.length > 0 ? targetSkus : undefined,
+      imageColors: imageColors.length > 0 ? imageColors : undefined,
       imageIsPrimary: isPrimaries.length > 0 ? isPrimaries : undefined
     };
 

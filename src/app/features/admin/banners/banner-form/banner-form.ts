@@ -24,17 +24,22 @@ export class BannerFormComponent implements OnInit {
 
   bannerForm!: FormGroup;
   public apiUrl = environment.apiUrl;
-  selectedFile = signal<File | null>(null);
-  previewUrl = signal<string | null>(null);
+  
+  selectedDesktopFile = signal<File | null>(null);
+  selectedMobileFile = signal<File | null>(null);
+  desktopPreviewUrl = signal<string | null>(null);
+  mobilePreviewUrl = signal<string | null>(null);
+  
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
 
   // Edit Mode Signals
   isEditMode = signal<boolean>(false);
   bannerId = signal<string | null>(null);
+  existingDesktopUrl = signal<string | null>(null);
+  existingMobileUrl = signal<string | null>(null);
   existingImageUrl = signal<string | null>(null);
 
-  // TanStack Query for loading details when in Edit Mode
   bannerQuery = injectQuery(() => {
     const id = this.bannerId();
     return {
@@ -44,7 +49,6 @@ export class BannerFormComponent implements OnInit {
     };
   });
 
-  // Constructor reactive effects
   constructor() {
     effect(() => {
       const data = this.bannerQuery.data();
@@ -56,12 +60,13 @@ export class BannerFormComponent implements OnInit {
           sortOrder: data.sortOrder,
           isActive: data.isActive
         });
-        this.existingImageUrl.set(data.imageUrl);
+        this.existingDesktopUrl.set(data.desktopImageUrl || data.imageUrl || null);
+        this.existingMobileUrl.set(data.mobileImageUrl || data.imageUrl || null);
+        this.existingImageUrl.set(data.imageUrl || null);
       }
     });
   }
 
-  // TanStack Mutation for creation
   createMutation = injectMutation(() => ({
     mutationFn: (dto: BannerCreateDto) => lastValueFrom(this.bannerService.createBanner(dto)),
     onSuccess: () => {
@@ -73,11 +78,10 @@ export class BannerFormComponent implements OnInit {
     },
     onError: (err) => {
       console.error('Failed to create banner:', err);
-      this.errorMessage.set('Failed to create banner. Please verify file size and fields.');
+      this.errorMessage.set('Failed to create banner. Please upload both desktop and mobile images.');
     }
   }));
 
-  // TanStack Mutation for update
   updateMutation = injectMutation(() => ({
     mutationFn: ({ id, dto }: { id: string; dto: BannerUpdateDto }) => 
       lastValueFrom(this.bannerService.updateBanner(id, dto)),
@@ -103,49 +107,60 @@ export class BannerFormComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     
+    this.bannerForm = this.fb.group({
+      name: ['', [Validators.required, Validators.maxLength(150)]],
+      linkUrl: [''],
+      position: [1, [Validators.required]],
+      sortOrder: [1, [Validators.required, Validators.min(0)]],
+      isActive: [true, [Validators.required]]
+    });
+
     if (id) {
       this.bannerId.set(id);
       this.isEditMode.set(true);
-      
-      this.bannerForm = this.fb.group({
-        name: ['', [Validators.required, Validators.maxLength(150)]],
-        linkUrl: ['', [Validators.required]],
-        position: [1, [Validators.required]],
-        sortOrder: [0, [Validators.required, Validators.min(0)]],
-        isActive: [true, [Validators.required]]
-      });
-    } else {
-      this.bannerForm = this.fb.group({
-        name: ['', [Validators.required, Validators.maxLength(150)]],
-        linkUrl: ['', [Validators.required]],
-        position: [1, [Validators.required]],
-        sortOrder: [0, [Validators.required, Validators.min(0)]],
-        isActive: [true, [Validators.required]]
-      });
     }
   }
 
-  onFileSelected(event: Event): void {
+  onDesktopFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      this.selectedFile.set(file);
-
-      // Create local URL for preview
-      if (this.previewUrl()) {
-        URL.revokeObjectURL(this.previewUrl()!);
+      this.selectedDesktopFile.set(file);
+      if (this.desktopPreviewUrl()) {
+        URL.revokeObjectURL(this.desktopPreviewUrl()!);
       }
-      this.previewUrl.set(URL.createObjectURL(file));
+      this.desktopPreviewUrl.set(URL.createObjectURL(file));
       this.errorMessage.set(null);
     }
   }
 
-  removeSelectedFile(): void {
-    if (this.previewUrl()) {
-      URL.revokeObjectURL(this.previewUrl()!);
+  onMobileFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.selectedMobileFile.set(file);
+      if (this.mobilePreviewUrl()) {
+        URL.revokeObjectURL(this.mobilePreviewUrl()!);
+      }
+      this.mobilePreviewUrl.set(URL.createObjectURL(file));
+      this.errorMessage.set(null);
     }
-    this.selectedFile.set(null);
-    this.previewUrl.set(null);
+  }
+
+  removeDesktopFile(): void {
+    if (this.desktopPreviewUrl()) {
+      URL.revokeObjectURL(this.desktopPreviewUrl()!);
+    }
+    this.selectedDesktopFile.set(null);
+    this.desktopPreviewUrl.set(null);
+  }
+
+  removeMobileFile(): void {
+    if (this.mobilePreviewUrl()) {
+      URL.revokeObjectURL(this.mobilePreviewUrl()!);
+    }
+    this.selectedMobileFile.set(null);
+    this.mobilePreviewUrl.set(null);
   }
 
   onSubmit(): void {
@@ -155,31 +170,34 @@ export class BannerFormComponent implements OnInit {
       return;
     }
 
-    const file = this.selectedFile();
     const formValue = this.bannerForm.value;
+    const desktopFile = this.selectedDesktopFile();
+    const mobileFile = this.selectedMobileFile();
     this.errorMessage.set(null);
 
     if (this.isEditMode()) {
       const dto: BannerUpdateDto = {
         name: formValue.name,
-        linkUrl: formValue.linkUrl,
+        linkUrl: formValue.linkUrl || '',
         position: Number(formValue.position),
         sortOrder: Number(formValue.sortOrder),
         isActive: formValue.isActive,
-        imageFile: file || undefined
+        desktopImage: desktopFile || undefined,
+        mobileImage: mobileFile || undefined
       };
       this.updateMutation.mutate({ id: this.bannerId()!, dto });
     } else {
-      if (!file) {
-        this.errorMessage.set('Please upload a banner image file.');
+      if (!desktopFile || !mobileFile) {
+        this.errorMessage.set('Please upload both Desktop and Mobile banner images.');
         return;
       }
       const dto: BannerCreateDto = {
         name: formValue.name,
-        linkUrl: formValue.linkUrl,
+        linkUrl: formValue.linkUrl || '',
         position: Number(formValue.position),
         sortOrder: Number(formValue.sortOrder),
-        imageFile: file
+        desktopImage: desktopFile,
+        mobileImage: mobileFile
       };
       this.createMutation.mutate(dto);
     }

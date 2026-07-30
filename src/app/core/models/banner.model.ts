@@ -1,6 +1,8 @@
 export interface Banner {
   id: string;
   name: string;
+  desktopImageUrl?: string;
+  mobileImageUrl?: string;
   imageUrl: string;
   linkUrl: string;
   position: number;
@@ -17,18 +19,19 @@ export enum BannerPosition {
 
 export interface BannerCreateDto {
   name: string;
-  linkUrl: string;
+  linkUrl?: string;
   position: number;
-  sortOrder: number;
-  imageFile: File;
+  sortOrder?: number;
+  desktopImage: File;
+  mobileImage: File;
 }
 
 export interface BannerUpdateDto {
   name: string;
-  linkUrl: string;
+  linkUrl?: string;
   position: number;
-  sortOrder: number;
+  sortOrder?: number;
   isActive: boolean;
-  imageFile?: File;
+  desktopImage?: File;
+  mobileImage?: File;
 }
-
