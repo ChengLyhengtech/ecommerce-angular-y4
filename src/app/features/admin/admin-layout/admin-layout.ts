@@ -1,9 +1,13 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { injectQuery } from '@tanstack/angular-query-experimental';
+import { lastValueFrom } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ShopService } from '../../../core/services/shop.service';
 import { NotificationItem } from '../../../core/models/notification.model';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-admin-layout',
@@ -15,10 +19,26 @@ import { NotificationItem } from '../../../core/models/notification.model';
 export class AdminLayoutComponent implements OnInit, OnDestroy {
   notificationService = inject(NotificationService);
   authService = inject(AuthService);
+  shopService = inject(ShopService);
   private router = inject(Router);
+
+  apiUrl = environment.apiUrl;
+
+  // Global Dynamic Shop Profile Query (Cached across all components)
+  shopProfileQuery = injectQuery(() => ({
+    queryKey: ['shop-profile'],
+    queryFn: () => lastValueFrom(this.shopService.getShopProfile()),
+    staleTime: 1000 * 60 * 10
+  }));
 
   logout(): void {
     this.authService.logout();
+  }
+
+  getImageUrl(path?: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return `${this.apiUrl}${path}`;
   }
 
   isSidebarCollapsed = typeof window !== 'undefined' ? localStorage.getItem('sidebarCollapsed') === 'true' : false;

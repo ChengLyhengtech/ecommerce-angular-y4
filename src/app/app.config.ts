@@ -15,8 +15,11 @@ export const appConfig: ApplicationConfig = {
     provideTanStackQuery(new QueryClient({
       defaultOptions: {
         queries: {
-          staleTime: 1000 * 60 * 5, // 5 minutes
-          gcTime: 1000 * 60 * 10,   // 10 minutes
+          staleTime: 1000 * 60 * 5, // 5 minutes cache
+          gcTime: 1000 * 60 * 10,   // 10 minutes GC
+          retry: false,             // Do not retry failed API queries endlessly
+          refetchOnWindowFocus: false, // Prevent refetching when user switches tabs
+          refetchOnMount: false      // Do not refetch on component remount if cached
         }
       }
     }))

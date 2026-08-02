@@ -101,6 +101,7 @@ export interface PlaceOrderDto {
 
 export interface PlaceOrderResponseData {
   orderId: string;
+  invoice?: string;
   status?: string;
   totalAmount?: number;
   qrImage?: string;
@@ -117,6 +118,7 @@ export interface PlaceOrderResponseData {
 
 export interface PlaceOrderResponseDto {
   orderId?: string;
+  invoice?: string;
   status?: string;
   totalAmount?: number;
   qrImage?: string;

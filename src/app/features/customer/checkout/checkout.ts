@@ -10,10 +10,18 @@ import { CartService } from '../../../core/services/cart.service';
 import { OrderService } from '../../../core/services/order.service';
 import { PaymentService } from '../../../core/services/payment.service';
 import { PlaceOrderDto, PlaceOrderResponseDto } from '../../../core/models/order.model';
+import {
+  GenerateKhqrRequest,
+  GenerateKhqrResponse,
+  CheckPaymentStatusResponse,
+  PaymentSimulateSuccessResponse,
+  KhqrDeeplinkResponse
+} from '../../../core/models/payment.model';
 import { environment } from '../../../../environments/environment';
 
 export interface NormalizedOrderQrData {
   orderId: string;
+  invoice?: string;
   status: string;
   totalAmount: number;
   qrImage?: string;
@@ -22,6 +30,8 @@ export interface NormalizedOrderQrData {
   expiration: string;
   merchantName?: string;
   currency?: string;
+  shortLink?: string;
+  bakongAppDeepLink?: string;
 }
 
 @Component({
@@ -34,7 +44,7 @@ export interface NormalizedOrderQrData {
 export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
   cartService = inject(CartService);
   private orderService = inject(OrderService);
-  private paymentService = inject(PaymentService);
+  paymentService = inject(PaymentService);
   private http = inject(HttpClient);
   private router = inject(Router);
 
@@ -62,11 +72,21 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
   khqrData = signal<NormalizedOrderQrData | null>(null);
   qrDataUrl = signal<string>('');
 
-  // Timer state
+  // Expiration & Timer state (Default 30 Minutes for Bakong KHQR)
+  isQrExpired = signal<boolean>(false);
   remainingSeconds = signal<number>(0);
-  timerFormatted = signal<string>('15:00');
+  timerFormatted = signal<string>('30:00');
   private countdownTimer: any = null;
   copiedMd5 = signal<boolean>(false);
+
+  // Polling state
+  isPolling = signal<boolean>(false);
+  isRegenerating = signal<boolean>(false);
+  private pollingTimer: any = null;
+
+  // Mobile Deeplink State
+  isGeneratingDeeplink = signal<boolean>(false);
+  deeplinkData = signal<{ shortLink?: string; bakongAppDeepLink?: string } | null>(null);
 
   // Payment Confirmation & SignalR State
   isPaymentSuccess = signal<boolean>(false);
@@ -76,6 +96,11 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
   paymentNotice = signal<string>('');
 
   private orderHubConnection: signalR.HubConnection | null = null;
+
+  get khrAmount(): number {
+    const usd = this.khqrData()?.totalAmount || 0;
+    return Math.round(usd * 4100);
+  }
 
   ngOnInit(): void {
     if (!this.cartService.cart() || this.cartService.cart()!.items.length === 0) {
@@ -93,6 +118,7 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopCountdown();
+    this.stopPolling();
     this.stopOrderHub();
     if (this.map) {
       this.map.remove();
@@ -296,14 +322,21 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
         const normalized = this.normalizeOrderResponse(res);
         if (normalized && normalized.orderId) {
           this.khqrData.set(normalized);
+          this.isQrExpired.set(false);
 
           if (normalized.qrImage) {
             this.qrDataUrl.set(normalized.qrImage);
-          } else if (normalized.qrString) {
+          }
+          if (normalized.qrString) {
             this.generateQrCode(normalized.qrString);
           }
 
+          if (!normalized.qrString && !normalized.qrImage) {
+            this.fetchKhqrFromBackend(normalized.orderId, normalized.totalAmount, normalized.currency);
+          }
+
           this.startCountdown(normalized.expiration);
+          this.startPolling(normalized.invoice, normalized.qrMd5, normalized.orderId);
           this.showKhqrModal.set(true);
 
           // Connect to SignalR OrderHub for real-time payment success listener
@@ -323,6 +356,58 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  private fetchKhqrFromBackend(orderId: string, amount: number, currency: string = 'USD'): void {
+    const req: GenerateKhqrRequest = { orderId, amount, currency };
+    this.paymentService.generateKhqr(req).subscribe({
+      next: (res: GenerateKhqrResponse) => {
+        if (!res) return;
+        const current = this.khqrData();
+        const expiration = res.expiration || res.qr_expiration || current?.expiration || new Date(Date.now() + 30 * 60000).toISOString();
+        let qrString = res.qrString || res.qr_code || current?.qrString || '';
+        let qrMd5 = res.qr_md5 || res.md5 || res.qrMd5 || current?.qrMd5 || '';
+        let invoice = res.invoice || current?.invoice;
+        let qrImage = (invoice || qrMd5) ? this.paymentService.getQrImageUrl(invoice || qrMd5) : current?.qrImage;
+
+        const validated = this.ensureValidKhqr(
+          qrString,
+          orderId,
+          amount,
+          currency,
+          res.merchant_name || current?.merchantName || 'ChengLyheng',
+          expiration
+        );
+
+        qrString = validated.qrString;
+        qrMd5 = validated.qrMd5 || qrMd5;
+
+        const updated: NormalizedOrderQrData = {
+          orderId,
+          invoice,
+          status: 'Pending',
+          totalAmount: res.amount || amount,
+          qrImage,
+          qrString,
+          qrMd5,
+          expiration,
+          merchantName: res.merchant_name || current?.merchantName,
+          currency: res.currency || currency
+        };
+
+        this.khqrData.set(updated);
+        if (updated.qrImage) {
+          this.qrDataUrl.set(updated.qrImage);
+        }
+        if (qrString) {
+          this.generateQrCode(qrString);
+        }
+        this.startPolling(invoice, qrMd5, orderId);
+      },
+      error: (err) => {
+        console.warn('Could not fetch KHQR directly from backend generate endpoint:', err);
+      }
+    });
+  }
+
   private normalizeOrderResponse(res: PlaceOrderResponseDto): NormalizedOrderQrData | null {
     if (!res) return null;
 
@@ -331,15 +416,35 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
     const orderId = res.orderId || data?.orderId || '';
     const status = res.status || data?.status || 'Pending';
     const totalAmount = res.totalAmount ?? data?.totalAmount ?? data?.amount ?? 0;
-    const qrImage = res.qrImage || data?.qrImage;
-    const qrString = res.qrString || data?.qrString || data?.qr_code || '';
-    const qrMd5 = res.qrMd5 || data?.qrMd5 || data?.qr_md5 || '';
-    const expiration = res.expiration || data?.expiration || data?.qr_expiration || new Date(Date.now() + 15 * 60000).toISOString();
-    const merchantName = data?.merchant_name || 'CLH168.';
+
+    let qrString = res.qrString || data?.qrString || data?.qr_code || '';
+    let qrMd5 = res.qrMd5 || data?.qrMd5 || data?.qr_md5 || '';
+    const expiration = res.expiration || data?.expiration || data?.qr_expiration || new Date(Date.now() + 30 * 60000).toISOString();
+    const merchantName = data?.merchant_name || 'ChengLyheng';
     const currency = data?.currency || 'USD';
+
+    let invoice = res.invoice || data?.invoice;
+    if (!invoice && qrString) {
+      const match = qrString.match(/(INV-[A-Za-z0-9]+)/i);
+      if (match) {
+        invoice = match[1];
+      }
+    }
+    if (!invoice) {
+      invoice = orderId ? `INV-${orderId.substring(0, 8)}` : '';
+    }
+
+    // Image URL using /api/qr-image/{invoice}
+    let qrImage = res.qrImage || data?.qrImage || (invoice || qrMd5 ? this.paymentService.getQrImageUrl(invoice || qrMd5) : undefined);
+
+    // Verify and ensure valid NBC Bakong KHQR payload string
+    const validated = this.ensureValidKhqr(qrString, orderId, totalAmount, currency, merchantName, expiration);
+    qrString = validated.qrString;
+    qrMd5 = validated.qrMd5 || qrMd5;
 
     return {
       orderId,
+      invoice,
       status,
       totalAmount,
       qrImage,
@@ -351,7 +456,92 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
     };
   }
 
+  private ensureValidKhqr(
+    qrString: string,
+    orderId: string,
+    amount: number,
+    currency: string,
+    merchantName: string,
+    expirationIso: string
+  ): { qrString: string; qrMd5: string } {
+    try {
+      // Dynamic require avoids TypeScript type-only stripping issues from @types/bakong-khqr
+      const BakongSDK: any = typeof window !== 'undefined' ? (window as any).BakongKHQR || require('bakong-khqr') : require('bakong-khqr');
+
+      if (qrString && BakongSDK?.BakongKHQR) {
+        const verifyResult = BakongSDK.BakongKHQR.verify(qrString);
+        if (verifyResult && verifyResult.isValid) {
+          return { qrString, qrMd5: '' };
+        }
+      }
+    } catch (e) {
+      console.warn('KHQR Verification check notice:', e);
+    }
+
+    // If string is invalid or missing required EMVCo tags (e.g. tag 99 timestamp for dynamic QR), generate compliant KHQR
+    try {
+      const BakongSDK: any = typeof window !== 'undefined' ? (window as any).BakongKHQR || require('bakong-khqr') : require('bakong-khqr');
+      if (!BakongSDK) return { qrString: qrString || '', qrMd5: '' };
+
+      let bakongAccountId = 'vann_sak@bkrt';
+      let city = 'PHNOM PENH';
+      let name = merchantName || 'ChengLyheng';
+
+      if (qrString && BakongSDK.BakongKHQR) {
+        try {
+          const decoded = BakongSDK.BakongKHQR.decode(qrString);
+          const decodedData = decoded?.data;
+          if (decodedData?.bakongAccountID) {
+            bakongAccountId = decodedData.bakongAccountID;
+          }
+          if (decodedData?.merchantName) {
+            name = decodedData.merchantName;
+          }
+          if (decodedData?.merchantCity) {
+            city = decodedData.merchantCity;
+          }
+        } catch (e) { }
+      }
+
+      let expTime = new Date(expirationIso).getTime();
+      if (isNaN(expTime) || expTime <= Date.now()) {
+        expTime = Date.now() + 30 * 60 * 1000;
+      }
+
+      const cleanBillNo = (orderId || '').replace(/-/g, '').substring(0, 25);
+      const curr = (currency || 'USD').toUpperCase() === 'KHR'
+        ? BakongSDK.khqrData?.currency?.khr || '116'
+        : BakongSDK.khqrData?.currency?.usd || '840';
+
+      const indInfo = new BakongSDK.IndividualInfo(
+        bakongAccountId,
+        name,
+        city,
+        {
+          currency: curr,
+          amount: amount > 0 ? amount : undefined,
+          billNumber: cleanBillNo || undefined,
+          storeLabel: name,
+          terminalLabel: 'POS1',
+          expirationTimestamp: expTime
+        }
+      );
+
+      const bakong = new BakongSDK.BakongKHQR();
+      const res = bakong.generateIndividual(indInfo);
+      if (res && res.data && res.data.qr) {
+        console.log('✅ Generated valid NBC Bakong KHQR:', res.data.qr);
+        return { qrString: res.data.qr, qrMd5: res.data.md5 };
+      }
+    } catch (err) {
+      console.error('Failed to generate fallback KHQR:', err);
+    }
+
+    return { qrString: qrString || '', qrMd5: '' };
+  }
+
   private generateQrCode(qrString: string): void {
+    if (!qrString) return;
     QRCode.toDataURL(qrString, { width: 300, margin: 2 }, (err, url) => {
       if (err) {
         console.error('QR Generation Error:', err);
@@ -363,8 +553,12 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private startCountdown(expirationIso: string): void {
     this.stopCountdown();
+    this.isQrExpired.set(false);
 
-    const expirationTime = new Date(expirationIso).getTime();
+    let expirationTime = new Date(expirationIso).getTime();
+    if (isNaN(expirationTime) || expirationTime <= Date.now()) {
+      expirationTime = Date.now() + 30 * 60 * 1000;
+    }
 
     const updateTimer = () => {
       const now = new Date().getTime();
@@ -376,7 +570,11 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
       this.timerFormatted.set(`${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`);
 
       if (diff <= 0) {
+        this.isQrExpired.set(true);
+        this.timerFormatted.set('00:00');
+        this.paymentNotice.set('This KHQR code has expired. Please click "Regenerate KHQR Code" to refresh payment instructions.');
         this.stopCountdown();
+        this.stopPolling();
       }
     };
 
@@ -389,6 +587,163 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
       clearInterval(this.countdownTimer);
       this.countdownTimer = null;
     }
+  }
+
+  // --- 3-5 SECOND BACKUP POLLING MECHANISM ---
+  private startPolling(invoice?: string, qrMd5?: string, orderId?: string): void {
+    this.stopPolling();
+    const targetIdentifier = invoice || qrMd5 || orderId;
+    if (!targetIdentifier) return;
+
+    this.isPolling.set(true);
+
+    this.pollingTimer = setInterval(() => {
+      if (!this.showKhqrModal() || this.isQrExpired() || this.isPaymentSuccess()) {
+        this.stopPolling();
+        return;
+      }
+
+      this.paymentService.checkPaymentStatus(targetIdentifier).subscribe({
+        next: (res: CheckPaymentStatusResponse) => {
+          const isPaid = res && (
+            res.paid === true ||
+            res.status === 'PAID' ||
+            res.status === 'Paid' ||
+            res.success === true
+          );
+
+          if (isPaid) {
+            this.handlePaymentConfirmed({
+              orderId: res.orderId || res.order_id || orderId,
+              invoice: res.invoice || invoice,
+              status: 'PAID',
+              amount: res.amount,
+              currency: res.currency,
+              paidAt: res.paid_at,
+              transactionRef: res.transactionRef || res.invoice || 'KHQR-VERIFIED-SUCCESS',
+              message: res.message || 'Payment successfully verified!'
+            });
+          }
+        },
+        error: (err) => {
+          console.warn('Polling status check notice:', err);
+        }
+      });
+    }, 3000);
+  }
+
+  private stopPolling(): void {
+    if (this.pollingTimer) {
+      clearInterval(this.pollingTimer);
+      this.pollingTimer = null;
+    }
+    this.isPolling.set(false);
+  }
+
+  // Regenerate KHQR when QR code expires
+  regenerateKhqr(): void {
+    const currentData = this.khqrData();
+    if (!currentData) return;
+
+    this.isRegenerating.set(true);
+    this.paymentNotice.set('');
+
+    const req: GenerateKhqrRequest = {
+      orderId: currentData.orderId,
+      amount: currentData.totalAmount,
+      currency: currentData.currency || 'USD'
+    };
+
+    this.paymentService.generateKhqr(req).subscribe({
+      next: (res: GenerateKhqrResponse) => {
+        this.isRegenerating.set(false);
+        const freshExpiration = res?.expiration || res?.qr_expiration || new Date(Date.now() + 30 * 60000).toISOString();
+        let freshQrString = res?.qrString || res?.qr_code || currentData.qrString || '';
+        let freshMd5 = res?.qr_md5 || res?.md5 || res?.qrMd5 || currentData.qrMd5 || '';
+        let freshInvoice = res?.invoice || currentData.invoice;
+
+        const validated = this.ensureValidKhqr(
+          freshQrString,
+          currentData.orderId,
+          currentData.totalAmount,
+          currentData.currency || 'USD',
+          res?.merchant_name || currentData.merchantName || 'ChengLyheng',
+          freshExpiration
+        );
+
+        freshQrString = validated.qrString;
+        freshMd5 = validated.qrMd5 || freshMd5;
+
+        const qrImageUrl = (freshInvoice || freshMd5)
+          ? this.paymentService.getQrImageUrl(freshInvoice || freshMd5)
+          : undefined;
+
+        const updatedData: NormalizedOrderQrData = {
+          ...currentData,
+          invoice: freshInvoice,
+          qrString: freshQrString,
+          qrMd5: freshMd5,
+          qrImage: qrImageUrl || currentData.qrImage,
+          expiration: freshExpiration
+        };
+
+        this.khqrData.set(updatedData);
+        this.isQrExpired.set(false);
+
+        if (updatedData.qrImage) {
+          this.qrDataUrl.set(updatedData.qrImage);
+        }
+        if (freshQrString) {
+          this.generateQrCode(freshQrString);
+        }
+
+        this.startCountdown(freshExpiration);
+        this.startPolling(freshInvoice, freshMd5, updatedData.orderId);
+        this.startOrderHub(updatedData.orderId);
+      },
+      error: () => {
+        this.isRegenerating.set(false);
+        // Fallback: Extend timer locally for 30 mins
+        const extendedExpiration = new Date(Date.now() + 30 * 60000).toISOString();
+        this.khqrData.update((prev) => prev ? { ...prev, expiration: extendedExpiration } : null);
+        this.isQrExpired.set(false);
+        this.startCountdown(extendedExpiration);
+        this.startPolling(currentData.invoice, currentData.qrMd5, currentData.orderId);
+      }
+    });
+  }
+
+  // Generate DeepLink for Bakong / Mobile Banking Redirects
+  generateDeeplink(): void {
+    const qrString = this.khqrData()?.qrString;
+    if (!qrString) return;
+
+    this.isGeneratingDeeplink.set(true);
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:4200';
+
+    this.paymentService.generateDeeplink({
+      qrString,
+      sourceInfo: {
+        appIconUrl: `${origin}/assets/logo.png`,
+        appName: 'CLH168 Store',
+        appDeepLinkCallback: `${origin}/orders`
+      }
+    }).subscribe({
+      next: (res: KhqrDeeplinkResponse) => {
+        this.isGeneratingDeeplink.set(false);
+        if (res && res.data) {
+          this.deeplinkData.set(res.data);
+          const redirectUrl = res.data.bakongAppDeepLink || res.data.shortLink;
+          if (redirectUrl && typeof window !== 'undefined') {
+            window.location.href = redirectUrl;
+          }
+        }
+      },
+      error: (err) => {
+        console.warn('Deeplink generation warning:', err);
+        this.isGeneratingDeeplink.set(false);
+      }
+    });
   }
 
   // SignalR OrderHub Integration
@@ -409,10 +764,14 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
       await this.orderHubConnection.start();
       console.log('📡 SignalR OrderHub connected successfully for Order:', orderId);
 
-      await this.orderHubConnection.invoke('JoinOrderGroup', orderId);
+      // Join both order_{orderId} and raw orderId to ensure compatibility across backend specs
+      await this.orderHubConnection.invoke('JoinOrderGroup', `order_${orderId}`);
+      try {
+        await this.orderHubConnection.invoke('JoinOrderGroup', orderId);
+      } catch (e) { }
 
       this.orderHubConnection.on('ReceivePaymentSuccess', (data: any) => {
-        console.log('🎉 Payment Confirmed via SignalR:', data);
+        console.log('🎉 Instant Payment Confirmed via SignalR!', data);
         this.handlePaymentConfirmed(data);
       });
     } catch (err) {
@@ -425,7 +784,7 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
       const currentOrderId = this.khqrData()?.orderId;
       try {
         if (currentOrderId && this.orderHubConnection.state === signalR.HubConnectionState.Connected) {
-          await this.orderHubConnection.invoke('LeaveOrderGroup', currentOrderId);
+          await this.orderHubConnection.invoke('LeaveOrderGroup', `order_${currentOrderId}`);
         }
         await this.orderHubConnection.stop();
       } catch (e) {
@@ -443,14 +802,14 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.paymentNotice.set('');
 
     this.paymentService.simulateSuccess(orderId).subscribe({
-      next: (res) => {
+      next: (res: PaymentSimulateSuccessResponse) => {
         this.isSimulatingPayment.set(false);
-        if (res.success) {
+        if (res && (res.success === true || res.paid === true || res.status === 'Paid' || res.status === 'PAID')) {
           this.handlePaymentConfirmed({
-            orderId: res.orderId,
-            status: 'Paid',
-            transactionRef: res.transactionRef,
-            message: res.message
+            orderId: res.orderId || res.order_id || orderId,
+            status: res.status || 'PAID',
+            transactionRef: res.transactionRef || 'SIMULATED-SUCCESS',
+            message: res.message || 'Simulated payment success executed.'
           });
         } else {
           this.paymentNotice.set(res.message || 'Simulation failed.');
@@ -465,25 +824,36 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   checkBakongStatus(): void {
-    const orderId = this.khqrData()?.orderId;
-    const qrMd5 = this.khqrData()?.qrMd5;
-    if (!orderId || !qrMd5) return;
+    const data = this.khqrData();
+    const targetIdentifier = data?.invoice || data?.qrMd5 || data?.orderId;
+    if (!targetIdentifier) return;
 
     this.isCheckingStatus.set(true);
     this.paymentNotice.set('');
 
-    this.paymentService.checkStatus(orderId, qrMd5).subscribe({
-      next: (res) => {
+    this.paymentService.checkPaymentStatus(targetIdentifier).subscribe({
+      next: (res: CheckPaymentStatusResponse) => {
         this.isCheckingStatus.set(false);
-        if (res.success) {
+        const isPaid = res && (
+          res.paid === true ||
+          res.status === 'PAID' ||
+          res.status === 'Paid' ||
+          res.success === true
+        );
+
+        if (isPaid) {
           this.handlePaymentConfirmed({
-            orderId: res.orderId || orderId,
-            status: 'Paid',
-            transactionRef: res.transactionRef || 'BAKONG-CONFIRMED',
-            message: res.message
+            orderId: res.orderId || res.order_id || data?.orderId,
+            invoice: res.invoice || data?.invoice,
+            status: 'PAID',
+            amount: res.amount || data?.totalAmount,
+            currency: res.currency || data?.currency,
+            paidAt: res.paid_at,
+            transactionRef: res.transactionRef || res.invoice || 'BAKONG-CONFIRMED',
+            message: res.message || 'Payment confirmed on NBC Bakong network.'
           });
         } else {
-          this.paymentNotice.set(res.message || 'Payment not detected yet on Bakong ledger. Please scan and complete payment in your banking app.');
+          this.paymentNotice.set(res.message || 'Payment status is PENDING. Please scan and complete payment in your banking app.');
         }
       },
       error: (err) => {
@@ -498,11 +868,13 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isPaymentSuccess.set(true);
     this.paymentSuccessData.set(data);
     this.stopCountdown();
+    this.stopPolling();
+    this.cartService.clearCartLocal();
     this.cartService.loadCart().subscribe();
   }
 
   copyMd5(): void {
-    const md5 = this.khqrData()?.qrMd5;
+    const md5 = this.khqrData()?.qrMd5 || this.khqrData()?.invoice;
     if (md5 && typeof navigator !== 'undefined') {
       navigator.clipboard.writeText(md5).then(() => {
         this.copiedMd5.set(true);
@@ -513,6 +885,7 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
 
   finishPayment(): void {
     const orderId = this.khqrData()?.orderId;
+    this.stopPolling();
     this.stopOrderHub();
     this.showKhqrModal.set(false);
     if (orderId) {
@@ -523,6 +896,8 @@ export class CheckoutComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   closeModal(): void {
+    this.stopCountdown();
+    this.stopPolling();
     this.stopOrderHub();
     this.showKhqrModal.set(false);
   }

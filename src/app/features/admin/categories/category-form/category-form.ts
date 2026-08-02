@@ -33,6 +33,20 @@ export class CategoryFormComponent implements OnInit {
   imagePreviewUrl = signal<string | null>(null);
   existingImageUrl = signal<string | null>(null);
 
+  // Query all categories for Parent Category selection dropdown
+  allCategoriesQuery = injectQuery(() => ({
+    queryKey: ['categories'],
+    queryFn: () => lastValueFrom(this.categoryService.getCategories())
+  }));
+
+  // Parent Category options (excluding current category in edit mode)
+  parentCategoryOptions = () => {
+    const list = this.allCategoriesQuery.data() || [];
+    const currentId = this.categoryId();
+    if (!currentId) return list;
+    return list.filter((c) => c.id !== currentId);
+  };
+
   // TanStack Query to fetch category details (in edit mode)
   categoryQuery = injectQuery(() => {
     const id = this.categoryId();
@@ -48,36 +62,44 @@ export class CategoryFormComponent implements OnInit {
 
   // Create Mutation
   createMutation = injectMutation(() => ({
-    mutationFn: (data: { name: string; image: File }) => 
+    mutationFn: (data: { name: string; parentCategoryId?: string | null; image?: File }) => 
       lastValueFrom(this.categoryService.createCategory(data)),
-    onSuccess: () => {
+    onSuccess: async () => {
       this.successMessage.set('Category created successfully!');
       this.queryClient.invalidateQueries({ queryKey: ['categories'] });
+      this.queryClient.invalidateQueries({ queryKey: ['category-tree'] });
+      await this.queryClient.refetchQueries({ queryKey: ['categories'] });
+      await this.queryClient.refetchQueries({ queryKey: ['category-tree'] });
       setTimeout(() => {
         this.router.navigate(['/admin/categories']);
-      }, 1500);
+      }, 1000);
     },
-    onError: (err) => {
+    onError: (err: any) => {
       console.error('CategoryFormComponent - Failed to create category:', err);
-      this.errorMessage.set('Failed to create category. Please try again.');
+      const msg = err?.error || 'Failed to create category. Please try again.';
+      this.errorMessage.set(msg);
     }
   }));
 
   // Update Mutation
   updateMutation = injectMutation(() => ({
-    mutationFn: ({ id, data }: { id: string; data: { name: string; image?: File } }) => 
+    mutationFn: ({ id, data }: { id: string; data: { name: string; parentCategoryId?: string | null; image?: File } }) => 
       lastValueFrom(this.categoryService.updateCategory(id, data)),
-    onSuccess: () => {
+    onSuccess: async () => {
       this.successMessage.set('Category updated successfully!');
       this.queryClient.invalidateQueries({ queryKey: ['categories'] });
+      this.queryClient.invalidateQueries({ queryKey: ['category-tree'] });
       this.queryClient.invalidateQueries({ queryKey: ['category', this.categoryId()] });
+      await this.queryClient.refetchQueries({ queryKey: ['categories'] });
+      await this.queryClient.refetchQueries({ queryKey: ['category-tree'] });
       setTimeout(() => {
         this.router.navigate(['/admin/categories']);
-      }, 1500);
+      }, 1000);
     },
-    onError: (err) => {
+    onError: (err: any) => {
       console.error('CategoryFormComponent - Failed to update category:', err);
-      this.errorMessage.set('Failed to update category. Please verify the fields and try again.');
+      const msg = err?.error || 'Failed to update category. Please verify the fields and try again.';
+      this.errorMessage.set(msg);
     }
   }));
 
@@ -85,16 +107,25 @@ export class CategoryFormComponent implements OnInit {
   isSaving = () => this.createMutation.isPending() || this.updateMutation.isPending();
 
   constructor() {
-    // Reactively populate the form once category query yields data
+    // Reactively populate the form once category query yields data in edit mode
     effect(() => {
       const category = this.categoryQuery.data();
-      if (category) {
+      if (category && this.isEditMode()) {
         this.categoryForm.patchValue({
-          name: category.name
+          name: category.name,
+          parentCategoryId: category.parentCategoryId || ''
         });
         if (category.imageUrl) {
           this.existingImageUrl.set(category.imageUrl);
         }
+      }
+    });
+
+    // Handle pre-selecting parent category from queryParam in create mode
+    effect(() => {
+      const parentIdFromUrl = this.route.snapshot.queryParamMap.get('parentCategoryId');
+      if (parentIdFromUrl && !this.isEditMode() && this.allCategoriesQuery.data()) {
+        this.categoryForm.patchValue({ parentCategoryId: parentIdFromUrl });
       }
     });
   }
@@ -112,11 +143,20 @@ export class CategoryFormComponent implements OnInit {
         this.categoryId.set(null);
       }
     });
+
+    this.route.queryParamMap.subscribe(queryParams => {
+      const parentId = queryParams.get('parentCategoryId');
+      if (parentId && !this.isEditMode()) {
+        this.categoryForm.patchValue({ parentCategoryId: parentId });
+      }
+    });
   }
 
   private initForm(): void {
+    const parentIdFromUrl = this.route.snapshot.queryParamMap.get('parentCategoryId') || '';
     this.categoryForm = this.fb.group({
-      name: ['', [Validators.required, Validators.maxLength(100)]]
+      name: ['', [Validators.required, Validators.maxLength(100)]],
+      parentCategoryId: [parentIdFromUrl]
     });
   }
 
@@ -150,16 +190,18 @@ export class CategoryFormComponent implements OnInit {
       return;
     }
 
-    const name = this.categoryForm.get('name')?.value;
-
-    // In create mode, image is required
-    if (!this.isEditMode() && !this.selectedImageFile()) {
-      this.errorMessage.set('Please select an image for the category.');
-      return;
-    }
+    const formVals = this.categoryForm.value;
+    const name = formVals.name;
+    const parentCategoryId = formVals.parentCategoryId || null;
 
     this.errorMessage.set(null);
     this.successMessage.set(null);
+
+    const dataPayload = {
+      name,
+      parentCategoryId,
+      image: this.selectedImageFile() || undefined
+    };
 
     if (this.isEditMode()) {
       const id = this.categoryId();
@@ -167,16 +209,10 @@ export class CategoryFormComponent implements OnInit {
 
       this.updateMutation.mutate({
         id,
-        data: {
-          name,
-          image: this.selectedImageFile() || undefined
-        }
+        data: dataPayload
       });
     } else {
-      this.createMutation.mutate({
-        name,
-        image: this.selectedImageFile()!
-      });
+      this.createMutation.mutate(dataPayload);
     }
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, of } from 'rxjs';
 import { Brand, BrandCreateDto, BrandUpdateDto } from '../models/brand.model';
 import { environment } from '../../../environments/environment';
 
@@ -12,7 +12,12 @@ export class BrandService {
   private apiUrl = `${environment.apiUrl}/api/brands`;
 
   getBrands(): Observable<Brand[]> {
-    return this.http.get<Brand[]>(this.apiUrl);
+    return this.http.get<Brand[]>(this.apiUrl).pipe(
+      catchError((err) => {
+        console.warn('Could not fetch brands:', err);
+        return of([]);
+      })
+    );
   }
 
   getBrandById(id: string): Observable<Brand> {

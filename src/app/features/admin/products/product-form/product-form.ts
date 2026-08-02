@@ -189,13 +189,29 @@ export class ProductFormComponent implements OnInit {
     }
   }));
 
+  // Delete Image Mutation
+  deleteImageMutation = injectMutation(() => ({
+    mutationFn: (imageId: string) => lastValueFrom(this.productService.deleteProductImage(imageId)),
+    onSuccess: (res) => {
+      this.showSuccess(res?.message || 'Product image deleted successfully.');
+      this.queryClient.invalidateQueries({ queryKey: ['product', this.productId()] });
+      this.queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+    onError: (err: any) => {
+      console.error('Failed to delete image:', err);
+      const msg = err?.error?.message || err?.error || 'Failed to delete product image.';
+      this.errorMessage.set(typeof msg === 'string' ? msg : 'Failed to delete product image.');
+    }
+  }));
+
   // Derived saving state
   isSaving = () =>
     this.createProductMutation.isPending() ||
     this.updateProductMutation.isPending() ||
     this.deleteVariantMutation.isPending() ||
     this.uploadImageMutation.isPending() ||
-    this.setPrimaryImageMutation.isPending();
+    this.setPrimaryImageMutation.isPending() ||
+    this.deleteImageMutation.isPending();
 
   constructor() {
     // Populate form data once productQuery data is available
@@ -461,6 +477,12 @@ export class ProductFormComponent implements OnInit {
     if (!productId) return;
 
     this.setPrimaryImageMutation.mutate(imageId);
+  }
+
+  onDeleteImageEdit(imageId: string): void {
+    if (confirm('Are you sure you want to delete this product image?')) {
+      this.deleteImageMutation.mutate(imageId);
+    }
   }
 
   onSubmit(): void {

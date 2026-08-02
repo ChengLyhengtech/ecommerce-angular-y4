@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, of } from 'rxjs';
 import { Banner, BannerCreateDto, BannerUpdateDto } from '../models/banner.model';
 import { environment } from '../../../environments/environment';
 
@@ -19,7 +19,12 @@ export class BannerService {
     if (position !== undefined) {
       params = params.set('position', position.toString());
     }
-    return this.http.get<Banner[]>(this.apiUrl, { params });
+    return this.http.get<Banner[]>(this.apiUrl, { params }).pipe(
+      catchError((err) => {
+        console.warn('Could not fetch banners:', err);
+        return of([]);
+      })
+    );
   }
 
   getBannerById(id: string): Observable<Banner> {

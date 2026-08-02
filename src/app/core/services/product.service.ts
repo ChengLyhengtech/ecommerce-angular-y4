@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, of } from 'rxjs';
 import { Product, ProductCreateDto, ProductUpdateDto, ProductVariantUpdateDto, VariantCreateDto, PaginatedResponse } from '../models/product.model';
 import { environment } from '../../../environments/environment';
 
@@ -50,7 +50,21 @@ export class ProductService {
     if (filters?.pageSize !== undefined) {
       params = params.set('pageSize', filters.pageSize.toString());
     }
-    return this.http.get<PaginatedResponse<Product>>(this.apiUrl, { params });
+
+    const fallback: PaginatedResponse<Product> = {
+      items: [],
+      pageNumber: filters?.pageNumber || 1,
+      pageSize: filters?.pageSize || 10,
+      totalCount: 0,
+      totalPages: 0
+    };
+
+    return this.http.get<PaginatedResponse<Product>>(this.apiUrl, { params }).pipe(
+      catchError((err) => {
+        console.warn('Could not fetch products:', err);
+        return of(fallback);
+      })
+    );
   }
 
   getProductsUnderPrice(price: number = 20, pageNumber: number = 1, pageSize: number = 10): Observable<PaginatedResponse<Product>> {
@@ -58,12 +72,31 @@ export class ProductService {
       .set('price', price.toString())
       .set('pageNumber', pageNumber.toString())
       .set('pageSize', pageSize.toString());
-    return this.http.get<PaginatedResponse<Product>>(`${this.apiUrl}/under-price`, { params });
+
+    const fallback: PaginatedResponse<Product> = {
+      items: [],
+      pageNumber,
+      pageSize,
+      totalCount: 0,
+      totalPages: 0
+    };
+
+    return this.http.get<PaginatedResponse<Product>>(`${this.apiUrl}/under-price`, { params }).pipe(
+      catchError((err) => {
+        console.warn('Could not fetch under-price products:', err);
+        return of(fallback);
+      })
+    );
   }
 
   getTopSellingProducts(count: number = 10): Observable<Product[]> {
     let params = new HttpParams().set('count', count.toString());
-    return this.http.get<Product[]>(`${this.apiUrl}/top-selling`, { params });
+    return this.http.get<Product[]>(`${this.apiUrl}/top-selling`, { params }).pipe(
+      catchError((err) => {
+        console.warn('Could not fetch top selling products:', err);
+        return of([]);
+      })
+    );
   }
 
   getProductById(id: string): Observable<Product> {
@@ -84,13 +117,11 @@ export class ProductService {
       formData.append('TargetGender', data.targetGender.toString());
     }
     
-    // Support ColorGroups payload
     if (data.colorGroupsJson) {
       formData.append('ColorGroups', data.colorGroupsJson);
     } else if (data.colorGroups) {
       formData.append('ColorGroups', JSON.stringify(data.colorGroups));
     } else if (data.variants) {
-      // Fallback: group flat variants by color if colorGroups is not provided directly
       const groupsMap = new Map<string, any[]>();
       data.variants.forEach(v => {
         const c = v.color || 'Default';
@@ -168,4 +199,9 @@ export class ProductService {
   setProductImagePrimary(imageId: string): Observable<{ message: string }> {
     return this.http.put<{ message: string }>(`${this.apiUrl}/images/${imageId}/set-primary`, {});
   }
+
+  deleteProductImage(imageId: string): Observable<{ message: string; imageId: string }> {
+    return this.http.delete<{ message: string; imageId: string }>(`${this.apiUrl}/images/${imageId}`);
+  }
 }
+

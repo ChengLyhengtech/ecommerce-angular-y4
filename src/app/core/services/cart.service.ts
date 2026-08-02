@@ -106,4 +106,13 @@ export class CartService {
   closeDrawer(): void {
     this.isDrawerOpen.set(false);
   }
+
+  clearCartLocal(): void {
+    this.cart.set({
+      id: '',
+      userId: this.getUserId(),
+      updatedAt: new Date().toISOString(),
+      items: []
+    });
+  }
 }

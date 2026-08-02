@@ -101,6 +101,8 @@ export class NotificationService implements OnDestroy {
     this.hubConnection.on('ReceiveNotification', (notification: NotificationItem) => {
       console.log('📡 SignalR Real-time Notification Received:', notification);
 
+      this.playNotificationChime();
+
       this.notifications.update((current) => {
         const exists = current.some((n) => n.id === notification.id);
         if (exists) {
@@ -132,6 +134,7 @@ export class NotificationService implements OnDestroy {
     // Event 2: ReceiveNewOrder (Broadcasted when new order is placed)
     this.hubConnection.on('ReceiveNewOrder', (data: any) => {
       console.log('📡 SignalR Real-time ReceiveNewOrder Event:', data);
+      this.playNotificationChime();
       this.fetchUnreadNotifications().subscribe();
       this.queryClient.invalidateQueries({ queryKey: ['orders'] });
       this.queryClient.invalidateQueries({ queryKey: ['inventory'] });
@@ -153,6 +156,44 @@ export class NotificationService implements OnDestroy {
     this.hubConnection.onreconnecting(() => this.isConnected.set(false));
     this.hubConnection.onreconnected(() => this.isConnected.set(true));
     this.hubConnection.onclose(() => this.isConnected.set(false));
+  }
+
+  /**
+   * Plays a crisp, pleasant 2-note chime sound using Web Audio API
+   */
+  playNotificationChime(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+
+      // Note 1 (D5 - 587.33Hz)
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(587.33, ctx.currentTime);
+      gain1.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(ctx.currentTime);
+      osc1.stop(ctx.currentTime + 0.3);
+
+      // Note 2 (A5 - 880Hz)
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(880, ctx.currentTime + 0.12);
+      gain2.gain.setValueAtTime(0.2, ctx.currentTime + 0.12);
+      gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(ctx.currentTime + 0.12);
+      osc2.stop(ctx.currentTime + 0.5);
+    } catch (e) {
+      console.warn('Audio chime playback omitted or blocked by browser policy:', e);
+    }
   }
 
   dismissToast(): void {

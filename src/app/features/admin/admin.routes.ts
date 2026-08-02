@@ -74,7 +74,12 @@ export const routes: Routes = [
       {
         path: 'returns',
         loadComponent: () => import('./returns/return-list').then(m => m.ReturnListComponent)
+      },
+      {
+        path: 'shop-settings',
+        loadComponent: () => import('./shop-settings/shop-settings').then(m => m.ShopSettingsComponent)
       }
     ]
   }
 ];
+
