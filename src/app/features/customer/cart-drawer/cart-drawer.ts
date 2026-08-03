@@ -1,9 +1,10 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../../core/services/cart.service';
 import { WishlistService } from '../../../core/services/wishlist.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { WishlistItem } from '../../../core/models/wishlist.model';
 import { ProductVariant } from '../../../core/models/product.model';
 import { environment } from '../../../../environments/environment';
@@ -18,6 +19,8 @@ import { environment } from '../../../../environments/environment';
 export class CartDrawerComponent implements OnInit {
   cartService = inject(CartService);
   wishlistService = inject(WishlistService);
+  authService = inject(AuthService);
+  private router = inject(Router);
   apiUrl = environment.apiUrl;
 
   // Active drawer tab: 'bag' or 'wishlist'
@@ -131,5 +134,14 @@ export class CartDrawerComponent implements OnInit {
 
   close(): void {
     this.cartService.closeDrawer();
+  }
+
+  proceedToCheckout(): void {
+    this.close();
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/checkout' } });
+    } else {
+      this.router.navigate(['/checkout']);
+    }
   }
 }

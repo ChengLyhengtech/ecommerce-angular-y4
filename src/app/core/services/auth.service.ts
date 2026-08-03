@@ -12,6 +12,8 @@ import {
   RefreshTokenRequestDto 
 } from '../models/auth.model';
 import { environment } from '../../../environments/environment';
+import { WishlistService } from './wishlist.service';
+import { CartService } from './cart.service';
 
 const ACCESS_TOKEN_KEY = 'token';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -24,6 +26,8 @@ const USER_ID_KEY = 'userId';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private wishlistService = inject(WishlistService);
+  private cartService = inject(CartService);
   private apiUrl = `${environment.apiUrl}/api/auth`;
 
   // Reactive state
@@ -75,6 +79,14 @@ export class AuthService {
         localStorage.setItem(USER_ID_KEY, res.user.id);
         this.currentUser.set(res.user);
       }
+
+      // Sync guest items post-login
+      this.wishlistService.syncGuestWishlist().subscribe({
+        error: (err) => console.warn('Wishlist post-login sync warning:', err)
+      });
+      this.cartService.syncGuestCart().subscribe({
+        error: (err) => console.warn('Cart post-login sync warning:', err)
+      });
     }
     return res;
   }

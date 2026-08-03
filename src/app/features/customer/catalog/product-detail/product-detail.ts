@@ -6,6 +6,7 @@ import { lastValueFrom } from 'rxjs';
 import { ProductService } from '../../../../core/services/product.service';
 import { CartService } from '../../../../core/services/cart.service';
 import { ProductVariant, ProductImage } from '../../../../core/models/product.model';
+import { AuthService } from '../../../../core/services/auth.service';
 import { environment } from '../../../../../environments/environment';
 
 @Component({
@@ -19,6 +20,7 @@ export class ProductDetailComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private productService = inject(ProductService);
+  private authService = inject(AuthService);
   cartService = inject(CartService);
 
   apiUrl = environment.apiUrl;
@@ -257,7 +259,11 @@ export class ProductDetailComponent {
 
     this.cartService.addToCart(variant.id, this.quantity()).subscribe({
       next: () => {
-        this.router.navigate(['/checkout']);
+        if (!this.authService.isLoggedIn()) {
+          this.router.navigate(['/login'], { queryParams: { returnUrl: '/checkout' } });
+        } else {
+          this.router.navigate(['/checkout']);
+        }
       }
     });
   }

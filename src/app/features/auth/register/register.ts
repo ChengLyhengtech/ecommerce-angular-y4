@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { RegisterRequestDto } from '../../../core/models/auth.model';
@@ -15,6 +15,7 @@ import { RegisterRequestDto } from '../../../core/models/auth.model';
 export class RegisterComponent implements OnInit {
   authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   @ViewChild('telegramContainer') telegramContainer?: ElementRef;
 
@@ -25,7 +26,16 @@ export class RegisterComponent implements OnInit {
 
   isSubmitting = signal<boolean>(false);
   errorMessage = signal<string>('');
+  returnUrl = signal<string>('');
   showTelegramModal = signal<boolean>(false);
+
+  constructor() {
+    this.route.queryParams.subscribe((params) => {
+      if (params['returnUrl']) {
+        this.returnUrl.set(params['returnUrl']);
+      }
+    });
+  }
 
   ngOnInit(): void {
     // Initialize Google Identity Services SDK
@@ -60,7 +70,7 @@ export class RegisterComponent implements OnInit {
       next: (res) => {
         this.isSubmitting.set(false);
         if (res.success || res.accessToken) {
-          this.router.navigate(['/']);
+          this.navigateAfterAuth(res.user);
         }
       },
       error: (err) => {
@@ -83,7 +93,7 @@ export class RegisterComponent implements OnInit {
       next: (res) => {
         this.isSubmitting.set(false);
         if (res.success || res.accessToken) {
-          this.router.navigate(['/']);
+          this.navigateAfterAuth(res.user);
         }
       },
       error: (err) => {
@@ -119,7 +129,7 @@ export class RegisterComponent implements OnInit {
       next: (res) => {
         this.isSubmitting.set(false);
         if (res.success || res.accessToken) {
-          this.router.navigate(['/']);
+          this.navigateAfterAuth(res.user);
         }
       },
       error: (err) => {
@@ -129,5 +139,12 @@ export class RegisterComponent implements OnInit {
       }
     });
   }
-}
 
+  private navigateAfterAuth(user: any): void {
+    if (this.returnUrl()) {
+      this.router.navigateByUrl(this.returnUrl());
+    } else {
+      this.router.navigate(['/']);
+    }
+  }
+}

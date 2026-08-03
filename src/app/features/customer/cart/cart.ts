@@ -1,7 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { CartService } from '../../../core/services/cart.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -13,6 +14,8 @@ import { environment } from '../../../../environments/environment';
 })
 export class CartComponent {
   cartService = inject(CartService);
+  authService = inject(AuthService);
+  private router = inject(Router);
   apiUrl = environment.apiUrl;
 
   getImageUrl(url?: string): string {
@@ -53,4 +56,13 @@ export class CartComponent {
   removeItem(cartItemId: string): void {
     this.cartService.removeFromCart(cartItemId).subscribe();
   }
+
+  proceedToCheckout(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/checkout' } });
+    } else {
+      this.router.navigate(['/checkout']);
+    }
+  }
 }
+
